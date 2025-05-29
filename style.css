@@ -1,91 +1,58 @@
+/* Colores tierra */
+:root {
+  --color-fondo: #f4ede1;
+  --color-principal: #8b6b4a;
+  --color-secundario: #c6a974;
+  --color-texto: #5a4d3a;
+  --color-boton-fondo: #a4845f;
+  --color-boton-texto: #fff8e7;
+  --color-boton-hover: #7c5d3c;
+  --color-borde: #b9a377;
+}
+
+/* Fondo general */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  padding: 1em;
-  background: #f4f9f4;
-  color: #2c3e50;
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 1em;
-}
-
+/* Botones principales */
 button {
+  background-color: var(--color-boton-fondo);
+  color: var(--color-boton-texto);
+  border: 2px solid var(--color-borde);
+  padding: 10px 20px;
+  border-radius: 8px;
   cursor: pointer;
-  background-color: #27ae60;
-  border: none;
-  color: white;
-  padding: 0.5em 1em;
-  margin: 0.3em 0;
-  border-radius: 5px;
   font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background-color: #219150;
+  background-color: var(--color-boton-hover);
 }
 
-.species-container {
-  border: 1px solid #2ecc71;
-  border-radius: 8px;
-  padding: 1em;
-  margin-bottom: 1em;
-  background: #eaf7ea;
+/* Listas y contenedores */
+.lista-especies, .lista-plantas {
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #eae1d7;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(101, 86, 60, 0.3);
 }
 
-.species-name {
-  font-weight: 700;
-  font-size: 1.2em;
-  margin-bottom: 0.5em;
-  width: 100%;
-  padding: 0.3em;
-  border-radius: 4px;
-  border: 1px solid #2ecc71;
-}
-
-.care-info input {
-  width: 150px;
-  margin-right: 1em;
-  padding: 0.3em;
-  border: 1px solid #a3d2a1;
-  border-radius: 4px;
-}
-
-.plants-container {
-  margin-top: 1em;
-  padding-left: 1em;
-  border-left: 3px solid #27ae60;
-}
-
-.plant-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.7em;
-  gap: 0.5em;
-}
-
-.plant-item input[type="text"] {
-  flex-grow: 1;
-  padding: 0.3em;
-  border-radius: 4px;
-  border: 1px solid #a3d2a1;
-}
-
-.plant-photo {
-  width: 50px;
-  height: 50px;
+/* Miniaturas */
+.thumbnail {
+  width: 40px;
+  height: 40px;
   border-radius: 6px;
   object-fit: cover;
-  border: 1px solid #7ec17e;
+  margin-right: 10px;
+  vertical-align: middle;
 }
 
-.plant-item button {
-  padding: 0.3em 0.6em;
-  background-color: #2ecc71;
-  font-size: 0.9em;
-}
+/* Modales y desplegables se agregarán después */
 
-.plant-item button:hover {
-  background-color: #27ae60;
-}
