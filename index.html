@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mis Sucus</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 15px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #speciesList {
+      margin-top: 15px;
+    }
+    .species-item, .plant-item {
+      background: white;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 6px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    }
+    .plant-list {
+      margin-left: 15px;
+      margin-top: 8px;
+    }
+    input, textarea {
+      width: 100%;
+      margin: 5px 0;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+    /* Modal */
+    .modal {
+      position: fixed;
+      z-index: 9999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      overflow: auto;
+    }
+    .modal-content {
+      background: #fff;
+      margin: 10% auto;
+      padding: 15px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.25);
+    }
+    .modal-content h2 {
+      margin-top: 0;
+    }
+    .calendar-date {
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+</head>
+<body>
+
+  <h1>Mis Sucus</h1>
+
+  <button id="addSpecies">Agregar Especie</button>
+  <button id="openCalendar">Abrir Calendario</button>
+  <button id="openQRScanner">Escanear QR</button>
+
+  <div id="speciesList"></div>
+
+  <!-- Modal eventos -->
+  <div id="eventsModal" class="modal">
+    <div class="modal-content">
+      <h2>Eventos planta</h2>
+      <div id="eventsList" style="max-height: 200px; overflow-y: auto;"></div>
+      <form id="addEventForm">
+        <input id="eventType" placeholder="Tipo de evento (riego, trasplante...)" required />
+        <input id="eventDate" type="date" />
+        <textarea id="eventNote" placeholder="Nota"></textarea>
+        <input type="file" id="eventPhotoInput" accept="image/*" />
+        <button type="submit">Agregar evento</button>
+      </form>
+      <button id="closeEvents">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Modal calendario -->
+  <div id="calendarModal" class="modal">
+    <div class="modal-content">
+      <h2>Calendario de eventos</h2>
+      <div id="calendarContent" style="max-height: 300px; overflow-y: auto;"></div>
+      <button id="closeCalendar">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Modal QR -->
+  <div id="qrModal" class="modal">
+    <div class="modal-content">
+      <h2>Escanear QR</h2>
+      <video id="qrVideo" width="300" height="200" style="border:1px solid black;"></video>
+      <p id="qrResult">Buscando QR...</p>
+      <button id="qrCloseBtn">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Modal mostrar QR -->
+  <div id="showQRModal" class="modal">
+    <div class="modal-content">
+      <h2>QR de planta</h2>
+      <div id="qrCodeContainer" style="text-align:center;"></div>
+      <button id="closeShowQR">Cerrar</button>
+    </div>
+  </div>
+
+  <script>
+    // Datos en localStorage
+    let data = [];
+    let currentSpeciesIndex = null;
+    let currentPlantIndex = null;
+
+    const speciesListEl = document.getElementById("speciesList");
+    const addSpeciesBtn = document.getElementById("addSpecies");
+    const openCalendarBtn = document.getElementById("openCalendar");
+    const qrScannerBtn = document.getElementById("openQRScanner");
+
+    const eventsModal = document.getElementById("eventsModal");
+    const eventsList = document.getElementById("eventsList");
+    const addEventForm = document.getElementById("addEventForm");
+    const eventType = document.getElementById("eventType");
+    const eventDate = document.getElementById("eventDate");
+    const eventNote = document.getElementById("eventNote");
+    const eventPhotoInput = document.getElementById("eventPhotoInput");
+    const closeEventsBtn = document.getElementById("closeEvents");
+
+    const calendarModal = document.getElementById("calendarModal");
+    const calendarContent = document.getElementById("calendarContent");
+    const closeCalendarBtn = document.getElementById("closeCalendar");
+
+    const qrModal = document.getElementById("qrModal");
+    const qrVideo = document.getElementById("qrVideo");
+    const qrResult = document.getElementById("qrResult");
+    const qrCloseBtn = document.getElementById("qrCloseBtn");
+
+    const showQRModal = document.getElementById("showQRModal");
+    const qrCodeContainer = document.getElementById("qrCodeContainer");
+    const closeShowQRBtn = document.getElementById("closeShowQR");
+
+    // Funciones guardado y carga
+
+    function saveData() {
+      localStorage.setItem("misSucuData", JSON.stringify(data));
+    }
+
+    function loadData() {
+      const stored = localStorage.getItem("misSucuData");
+      if (stored) {
+        data = JSON.parse(stored);
+      } else {
+        data = [];
+      }
+    }
+
+    // Renderizar lista especies y plantas
+
+    function render() {
+      speciesListEl.innerHTML = "";
+
+      data.forEach((species, i) => {
+        const speciesDiv = document.createElement("div");
+        speciesDiv.className = "species-item";
+
+        const speciesTitle = document.createElement("h3");
+        speciesTitle.textContent = species.species;
+        speciesDiv.appendChild(speciesTitle);
+
+        // Botón para mostrar QR de especie (opcional)
+        // const speciesQRBtn = document.createElement("button");
+        // speciesQRBtn.textContent = "Mostrar QR especie";
+        // speciesDiv.appendChild(speciesQRBtn);
+
+        // Lista de plantas
+        const plantsDiv = document.createElement("div");
+        plantsDiv.className = "plant-list";
+
+        species.plants.forEach((plant, j) => {
+          const plantDiv = document.createElement("div");
+          plantDiv.className = "plant-item";
+
+          const plantNameInput = document.createElement("input");
+          plantNameInput.value = plant.name || "Nueva planta";
+          plantNameInput.addEventListener("change", () => {
+            plant.name = plantNameInput.value;
+            saveData();
+          });
+          plantDiv.appendChild(plantNameInput);
+
+          const openEventsBtn = document.createElement("button");
+          openEventsBtn.textContent = "Eventos";
+          openEventsBtn.onclick = () => {
+            currentSpeciesIndex = i;
+            currentPlantIndex = j;
+            openEventsModal();
+          };
+          plantDiv.appendChild(openEventsBtn);
+
+          const showQRBtn = document.createElement("button");
+          showQRBtn.textContent = "Mostrar QR";
+          showQRBtn.onclick = () => {
+            showQR(plant.id);
+          };
+          plantDiv.appendChild(showQRBtn);
+
+          plantsDiv.appendChild(plantDiv);
+        });
+
+        // Botón agregar planta
+        const addPlantBtn = document.createElement("button");
+        addPlantBtn.textContent = "Agregar Planta";
+        addPlantBtn.onclick = () => {
+          const newPlant = {
+            id: "plant-" + Date.now(),
+            name: "Nueva planta",
+            events: [],
+          };
+          species.plants.push(newPlant);
+          saveData();
+          render();
+        };
+        plantsDiv.appendChild(addPlantBtn);
+
+        speciesDiv.appendChild(plantsDiv);
+
+        // Cuidados
+        const careDiv = document.createElement("div");
+        careDiv.innerHTML = `
+          <h4>Cuidados específicos</h4>
+          <label>Luz: <input type="text" value="${species.care?.light || ''}" data-care="light"></label><br>
+          <label>Riego: <input type="text" value="${species.care?.water || ''}" data-care="water"></label><br>
+          <label>Humedad: <input type="text" value="${species.care?.humidity || ''}" data-care="humidity"></label>
+        `;
+        speciesDiv.appendChild(careDiv);
+
+        // Guardar cuidados al cambiar
+        careDiv.querySelectorAll("input").forEach(input => {
+          input.addEventListener("change", () => {
+            const careType = input.getAttribute("data-care");
+            species.care = species.care || {};
+            species.care[careType] = input.value;
+            saveData();
+          });
+        });
+
+        // Botón eliminar especie
+        const delSpeciesBtn = document.createElement("button");
+        delSpeciesBtn.textContent = "Eliminar especie";
+        delSpeciesBtn.onclick = () => {
+          if(confirm(`¿Eliminar la especie "${species.species}"?`)) {
+            data.splice(i,1);
+            saveData();
+            render();
+          }
+        };
+        speciesDiv.appendChild(delSpeciesBtn);
+
+        speciesListEl.appendChild(speciesDiv);
+      });
+    }
+
+    // Modal eventos planta
+
+    function openEventsModal() {
+      eventsList.innerHTML = "";
+      const plant = data[currentSpeciesIndex].plants[currentPlantIndex];
+
+      if (!plant.events.length) {
+        eventsList.textContent = "No hay eventos registrados.";
+      } else {
+        plant.events.forEach(event => {
+          const evDiv = document.createElement("div");
+          evDiv.style.borderBottom = "1px solid #ddd";
+          evDiv.style.marginBottom = "5px";
+          evDiv.style.paddingBottom = "3px";
+          evDiv.innerHTML = `
+            <strong>${event.tipo}</strong> - ${event.fecha}<br>
+            Nota: ${event.nota || "-"}<br>
+            ${event.foto ? `<img src="${event.foto}" alt="Foto evento" style="max-width:100%; max-height:120px;">` : ""}
+          `;
+          eventsList.appendChild(evDiv);
+        });
+      }
+      eventsModal.style.display = "block";
+    }
+
+    closeEventsBtn.onclick = () => {
+      eventsModal.style.display = "none";
+      eventType.value = "";
+      eventDate.value = "";
+      eventNote.value = "";
+      eventPhotoInput.value = "";
+    };
+
+    addEventForm.onsubmit = e => {
+      e.preventDefault();
+      const plant = data[currentSpeciesIndex].plants[currentPlantIndex];
+      const newEvent = {
+        tipo: eventType.value,
+        fecha: eventDate.value || new Date().toISOString().slice(0,10),
+        nota: eventNote.value,
+        foto: ""
+      };
+
+      const file = eventPhotoInput.files[0];
+      if(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          newEvent.foto = reader.result;
+          plant.events.push(newEvent);
+          saveData();
+          render();
+          openEventsModal();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        plant.events.push(newEvent);
+        saveData();
+        render();
+        openEventsModal();
+      }
+    };
+
+    // Modal calendario
+
+    openCalendarBtn.onclick = () => {
+      renderCalendar();
+      calendarModal.style.display = "block";
+    };
+    closeCalendarBtn.onclick = () => calendarModal.style.display = "none";
+
+    function renderCalendar() {
+      calendarContent.innerHTML = "";
+      let allEvents = [];
+
+      data.forEach(species => {
+        species.plants.forEach(plant => {
+          plant.events.forEach(event => {
+            allEvents.push({
+              species: species.species,
+              plantName: plant.name,
+              ...event
+            });
+          });
+        });
+      });
+
+      if(!allEvents.length) {
+        calendarContent.textContent = "No hay eventos registrados.";
+        return;
+      }
+
+      // Agrupar por fecha
+      const grouped = allEvents.reduce((acc, ev) => {
+        acc[ev.fecha] = acc[ev.fecha] || [];
+        acc[ev.fecha].push(ev);
+        return acc;
+      }, {});
+
+      for(const fecha in grouped) {
+        const dateDiv = document.createElement("div");
+        dateDiv.className = "calendar-date";
+        dateDiv.innerHTML = `<strong>${fecha}</strong>`;
+
+        grouped[fecha].forEach(ev => {
+          const evDiv = document.createElement("div");
+          evDiv.innerHTML = `${ev.tipo} - ${ev.species} / ${ev.plantName} <br> Nota: ${ev.nota || "-"}`;
+          dateDiv.appendChild(evDiv);
+        });
+
+        calendarContent.appendChild(dateDiv);
+      }
+    }
+
+    // Modal QR
+
+    qrScannerBtn.onclick = () => {
+      openQRModal();
+    };
+
+    qrCloseBtn.onclick = () => {
+      qrModal.style.display = "none";
+      stopQRStream();
+      qrResult.textContent = "Buscando QR...";
+    };
+
+    let qrStream;
+
+    function openQRModal() {
+      qrModal.style.display = "block";
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
+        qrStream = stream;
+        qrVideo.srcObject = stream;
+        qrVideo.setAttribute("playsinline", true);
+        qrVideo.play();
+        requestAnimationFrame(scanQR);
+      }).catch(err => {
+        qrResult.textContent = "Error accediendo a cámara: " + err;
+      });
+    }
+
+    function stopQRStream() {
+      if(qrStream) {
+        qrStream.getTracks().forEach(track => track.stop());
+      }
+    }
+
+    function scanQR() {
+      if(qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+        const canvas = document.createElement("canvas");
+        canvas.width = qrVideo.videoWidth;
+        canvas.height = qrVideo.videoHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(qrVideo, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if(code) {
+          qrResult.textContent = "QR detectado: " + code.data;
+          // Buscar planta por ID en data y abrir modal eventos o lo que sea
+          const plantId = code.data;
+          openPlantByQR(plantId);
+          stopQRStream();
+          qrModal.style.display = "none";
+          return;
+        } else {
+          qrResult.textContent = "Buscando QR...";
+        }
+      }
+      if(qrModal.style.display === "block") {
+        requestAnimationFrame(scanQR);
+      }
+    }
+
+    function openPlantByQR(id) {
+      for(let i=0; i<data.length; i++) {
+        for(let j=0; j<data[i].plants.length; j++) {
+          if(data[i].plants[j].id === id) {
+            currentSpeciesIndex = i;
+            currentPlantIndex = j;
+            openEventsModal();
+            return;
+          }
+        }
+      }
+      alert("Planta no encontrada para el QR escaneado.");
+    }
+
+    // Modal mostrar QR
+
+    closeShowQRBtn.onclick = () => {
+      showQRModal.style.display = "none";
+      qrCodeContainer.innerHTML = "";
+    };
+
+    function showQR(id) {
+      showQRModal.style.display = "block";
+      QRCode.toCanvas(document.createElement('canvas'), id, {width: 200}, function (error, canvas) {
+        if(error) {
+          qrCodeContainer.textContent = "Error generando QR";
+          return;
+        }
+        qrCodeContainer.innerHTML = "";
+        qrCodeContainer.appendChild(canvas);
+      });
+    }
+
+    // Agregar especie
+
+    addSpeciesBtn.onclick = () => {
+      const speciesName = prompt("Nombre de la especie:");
+      if(speciesName) {
+        data.push({
+          species: speciesName,
+          plants: [],
+          care: {light:"", water:"", humidity:""}
+        });
+        saveData();
+        render();
+      }
+    };
+
+    // Carga inicial
+
+    loadData();
+    render();
+
+  </script>
+
+</body>
+</html>
