@@ -1,168 +1,166 @@
-let especies = JSON.parse(localStorage.getItem("especies")) || [];
-let eventos = JSON.parse(localStorage.getItem("eventos")) || [];
+// app.js para Mis Sucus versión completa con QR y carga por URL
 
-function guardarDatos() {
-  localStorage.setItem("especies", JSON.stringify(especies));
-  localStorage.setItem("eventos", JSON.stringify(eventos));
-  renderizarLista();
-  llenarSelectPlantas();
+const baseUrl = "https://milo455.github.io/mis-sucus/";
+
+let sucurs = JSON.parse(localStorage.getItem("misSucus")) || [];
+
+// Utilidad para generar ID única (simplificada)
+function generateId() {
+  return "id-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
 }
 
-function mostrarFormularioEspecie() {
-  document.getElementById("formulario-especie").classList.toggle("oculto");
+// Guardar en localStorage
+function saveData() {
+  localStorage.setItem("misSucus", JSON.stringify(sucurs));
 }
 
-function mostrarFormularioEvento() {
-  llenarSelectPlantas();
-  document.getElementById("formulario-evento").classList.toggle("oculto");
+// Cargar planta por ID desde URL (?planta=ID)
+function getPlantaFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("planta");
 }
 
-function mostrarCalendario() {
-  document.getElementById("calendario").classList.toggle("oculto");
-  renderizarCalendario("mes");
-}
+// Mostrar lista de especies y plantas
+function renderList() {
+  const container = document.getElementById("lista-suculentas");
+  container.innerHTML = "";
 
-function agregarEspecie() {
-  const nombre = document.getElementById("nombre-especie").value;
-  const cuidados = document.getElementById("cuidados-especie").value;
-  if (!nombre) return;
-
-  especies.push({ nombre, cuidados, plantas: [] });
-  guardarDatos();
-  document.getElementById("nombre-especie").value = "";
-  document.getElementById("cuidados-especie").value = "";
-  mostrarFormularioEspecie();
-}
-
-function agregarPlanta(indexEspecie) {
-  const nombre = prompt("Nombre personalizado de la planta:");
-  if (!nombre) return;
-
-  const nueva = {
-    nombre,
-    fecha: new Date().toISOString().split("T")[0],
-    eventos: [],
-    fotos: []
-  };
-
-  especies[indexEspecie].plantas.push(nueva);
-  guardarDatos();
-}
-
-function eliminarPlanta(i, j) {
-  if (confirm("¿Eliminar esta planta?")) {
-    especies[i].plantas.splice(j, 1);
-    guardarDatos();
+  if (sucurs.length === 0) {
+    container.innerHTML = "<p>No tienes suculentas agregadas.</p>";
+    return;
   }
-}
 
-function eliminarEspecie(index) {
-  if (confirm("¿Eliminar toda la especie?")) {
-    especies.splice(index, 1);
-    guardarDatos();
-  }
-}
-
-function renderizarLista() {
-  const contenedor = document.getElementById("lista-suculentas");
-  contenedor.innerHTML = "";
-
-  especies.forEach((especie, i) => {
+  sucurs.forEach(especie => {
     const div = document.createElement("div");
     div.className = "especie";
 
-    const header = document.createElement("div");
-    header.innerHTML = `
-      <h3>${especie.nombre}</h3>
-      <button onclick="eliminarEspecie(${i})">🗑️</button>
-      <button onclick="toggleCuidados(${i})">ℹ️</button>
-      <button onclick="agregarPlanta(${i})">➕ Planta</button>
-    `;
+    // Miniatura si existe
+    const thumb = especie.thumbnail ? `<img src="${especie.thumbnail}" alt="${especie.nombre}" style="width:40px; height:40px; object-fit:cover; border-radius:6px; margin-right:8px;">` : "";
 
-    const cuidados = document.createElement("div");
-    cuidados.className = "cuidados oculto";
-    cuidados.innerHTML = `<p>${especie.cuidados}</p>`;
+    const h3 = document.createElement("h3");
+    h3.innerHTML = thumb + especie.nombre;
 
+    div.appendChild(h3);
+
+    // Botón eliminar especie
+    const btnDelEsp = document.createElement("button");
+    btnDelEsp.textContent = "Eliminar especie";
+    btnDelEsp.onclick = () => {
+      if (confirm(`¿Eliminar toda la especie "${especie.nombre}" y todas sus plantas?`)) {
+        sucurs = sucurs.filter(s => s.id !== especie.id);
+        saveData();
+        renderList();
+      }
+    };
+    div.appendChild(btnDelEsp);
+
+    // Mostrar cuidados en ventana desplegable
+    const btnMostrarCuidados = document.createElement("button");
+    btnMostrarCuidados.textContent = "Cuidados";
+    btnMostrarCuidados.onclick = () => {
+      alert(`Cuidados para ${especie.nombre}:\n- Luz: ${especie.cuidados.luz}\n- Riego: ${especie.cuidados.riego}\n- Humedad: ${especie.cuidados.humedad}`);
+    };
+    div.appendChild(btnMostrarCuidados);
+
+    // Lista de plantas
     const ul = document.createElement("ul");
-    especie.plantas.forEach((planta, j) => {
+    especie.plantas.forEach(planta => {
       const li = document.createElement("li");
-      li.innerHTML = `
-        ${planta.nombre} - Plantada el ${planta.fecha}
-        <button onclick="eliminarPlanta(${i},${j})">❌</button>
-        <button onclick="generarQR('${especie.nombre}','${planta.nombre}')">📎 QR</button>
-      `;
+      li.textContent = planta.nombre;
+
+      // Mostrar miniatura si tiene foto
+      if (planta.thumbnail) {
+        const img = document.createElement("img");
+        img.src = planta.thumbnail;
+        img.alt = planta.nombre;
+        img.style.width = "30px";
+        img.style.height = "30px";
+        img.style.objectFit = "cover";
+        img.style.borderRadius = "5px";
+        img.style.marginLeft = "6px";
+        li.prepend(img);
+      }
+
+      // Botón para abrir detalles de planta
+      const btnDetalle = document.createElement("button");
+      btnDetalle.textContent = "Detalles";
+      btnDetalle.onclick = () => {
+        mostrarDetallesPlanta(especie.id, planta.id);
+      };
+      li.appendChild(btnDetalle);
+
+      // Botón para descargar QR
+      const btnQr = document.createElement("button");
+      btnQr.textContent = "Descargar QR";
+      btnQr.onclick = () => {
+        generarQrDescarga(planta.id, planta.nombre);
+      };
+      li.appendChild(btnQr);
+
       ul.appendChild(li);
     });
 
-    div.appendChild(header);
-    div.appendChild(cuidados);
     div.appendChild(ul);
-    contenedor.appendChild(div);
+    container.appendChild(div);
   });
 }
 
-function toggleCuidados(index) {
-  const especie = document.querySelectorAll(".cuidados")[index];
-  especie.classList.toggle("oculto");
-}
+// Mostrar detalles y eventos de planta
+function mostrarDetallesPlanta(idEspecie, idPlanta) {
+  const especie = sucurs.find(s => s.id === idEspecie);
+  if (!especie) return alert("Especie no encontrada");
+  const planta = especie.plantas.find(p => p.id === idPlanta);
+  if (!planta) return alert("Planta no encontrada");
 
-function llenarSelectPlantas() {
-  const select = document.getElementById("select-planta-evento");
-  select.innerHTML = "";
-
-  especies.forEach((especie, i) => {
-    especie.plantas.forEach((planta, j) => {
-      const option = document.createElement("option");
-      option.value = `${i}-${j}`;
-      option.textContent = `${especie.nombre} - ${planta.nombre}`;
-      select.appendChild(option);
+  // Mostrar datos y eventos (puedes hacer un modal o alert simple)
+  let info = `Planta: ${planta.nombre}\nFecha plantado: ${planta.fechaPlantado || "N/A"}\nComprada: ${planta.comprada ? "Sí" : "No"}\nEventos:\n`;
+  if (planta.eventos && planta.eventos.length > 0) {
+    planta.eventos.forEach(ev => {
+      info += `- ${ev.tipo} el ${ev.fecha}\n`;
     });
-  });
+  } else {
+    info += "Sin eventos registrados.";
+  }
+  alert(info);
 }
 
-function guardarEvento() {
-  const valor = document.getElementById("select-planta-evento").value;
-  const [i, j] = valor.split("-").map(Number);
-  const fecha = document.getElementById("fecha-evento").value;
-  const descripcion = document.getElementById("descripcion-evento").value;
+// Generar y descargar QR para planta con URL
+function generarQrDescarga(idPlanta, nombre) {
+  const qrText = `${baseUrl}?planta=${encodeURIComponent(idPlanta)}`;
 
-  if (!fecha || !descripcion) return;
+  // Usamos QRCode library o simple canvas
+  // Para simplificar, generamos QR con API externa o biblioteca si tienes
 
-  especies[i].plantas[j].eventos.push({ fecha, descripcion });
-  eventos.push({ especie: especies[i].nombre, planta: especies[i].plantas[j].nombre, fecha, descripcion });
+  // Ejemplo básico con API gratuita QR Code (solo para demo)
+  const urlQr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrText)}`;
 
-  guardarDatos();
-  document.getElementById("formulario-evento").classList.add("oculto");
-  document.getElementById("fecha-evento").value = "";
-  document.getElementById("descripcion-evento").value = "";
-}
-
-function renderizarCalendario(vista = "mes") {
-  const contenedor = document.getElementById("vista-calendario");
-  contenedor.innerHTML = "";
-
-  const eventosOrdenados = [...eventos].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-
-  eventosOrdenados.forEach(ev => {
-    const div = document.createElement("div");
-    div.className = "evento";
-    div.innerHTML = `<strong>${ev.fecha}</strong> - ${ev.planta}: ${ev.descripcion}`;
-    contenedor.appendChild(div);
-  });
-}
-
-function cambiarVistaCalendario(vista) {
-  renderizarCalendario(vista);
-}
-
-function generarQR(especie, planta) {
-  const data = `Especie: ${especie}, Planta: ${planta}`;
-  const url = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(data)}`;
+  // Crear enlace para descarga
   const a = document.createElement("a");
-  a.href = url;
-  a.download = `${planta}.png`;
+  a.href = urlQr;
+  a.download = `QR_${nombre}.png`;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
 }
 
-// Iniciar
-renderizarLista();
+// Cargar planta específica si viene en URL
+function cargarDesdeUrl() {
+  const idPlanta = getPlantaFromUrl();
+  if (!idPlanta) return;
+  // Buscar planta
+  for (const especie of sucurs) {
+    const planta = especie.plantas.find(p => p.id === idPlanta);
+    if (planta) {
+      mostrarDetallesPlanta(especie.id, planta.id);
+      break;
+    }
+  }
+}
+
+// Inicializar app
+function init() {
+  renderList();
+  cargarDesdeUrl();
+}
+
+init();
