@@ -1,192 +1,168 @@
-let data = JSON.parse(localStorage.getItem('misSucus')) || {};
-const especiesList = document.getElementById('especiesList');
-const eventosCalendario = document.getElementById('eventosCalendario');
-const selectEspecie = document.getElementById('selectEspecie');
-const calendarioVista = document.getElementById('calendarioVista');
-const eventosPorVista = document.getElementById('eventosPorVista');
+let especies = JSON.parse(localStorage.getItem("especies")) || [];
+let eventos = JSON.parse(localStorage.getItem("eventos")) || [];
 
-// Inicialización
-document.addEventListener('DOMContentLoaded', () => {
-  renderEspecies();
-  renderSelectorEspecie();
-  renderEventos();
-});
+function guardarDatos() {
+  localStorage.setItem("especies", JSON.stringify(especies));
+  localStorage.setItem("eventos", JSON.stringify(eventos));
+  renderizarLista();
+  llenarSelectPlantas();
+}
 
-// Agregar especie
+function mostrarFormularioEspecie() {
+  document.getElementById("formulario-especie").classList.toggle("oculto");
+}
+
+function mostrarFormularioEvento() {
+  llenarSelectPlantas();
+  document.getElementById("formulario-evento").classList.toggle("oculto");
+}
+
+function mostrarCalendario() {
+  document.getElementById("calendario").classList.toggle("oculto");
+  renderizarCalendario("mes");
+}
+
 function agregarEspecie() {
-  const especie = prompt('Nombre de la especie');
-  if (especie && !data[especie]) {
-    data[especie] = {
-      cuidados: { luz: '', riego: '', humedad: '' },
-      plantas: []
-    };
-    guardar();
-    renderEspecies();
-    renderSelectorEspecie();
+  const nombre = document.getElementById("nombre-especie").value;
+  const cuidados = document.getElementById("cuidados-especie").value;
+  if (!nombre) return;
+
+  especies.push({ nombre, cuidados, plantas: [] });
+  guardarDatos();
+  document.getElementById("nombre-especie").value = "";
+  document.getElementById("cuidados-especie").value = "";
+  mostrarFormularioEspecie();
+}
+
+function agregarPlanta(indexEspecie) {
+  const nombre = prompt("Nombre personalizado de la planta:");
+  if (!nombre) return;
+
+  const nueva = {
+    nombre,
+    fecha: new Date().toISOString().split("T")[0],
+    eventos: [],
+    fotos: []
+  };
+
+  especies[indexEspecie].plantas.push(nueva);
+  guardarDatos();
+}
+
+function eliminarPlanta(i, j) {
+  if (confirm("¿Eliminar esta planta?")) {
+    especies[i].plantas.splice(j, 1);
+    guardarDatos();
   }
 }
 
-// Agregar planta
-function agregarPlanta(especie) {
-  const nombre = prompt('Nombre de la planta');
-  const foto = prompt('URL de imagen miniatura');
-  if (nombre) {
-    const nueva = {
-      nombre,
-      foto,
-      eventos: [],
-      id: Date.now()
-    };
-    data[especie].plantas.push(nueva);
-    guardar();
-    renderEspecies();
-    renderSelectorEspecie();
+function eliminarEspecie(index) {
+  if (confirm("¿Eliminar toda la especie?")) {
+    especies.splice(index, 1);
+    guardarDatos();
   }
 }
 
-// Eliminar especie o planta
-function eliminarEspecie(especie) {
-  if (confirm('¿Eliminar esta especie?')) {
-    delete data[especie];
-    guardar();
-    renderEspecies();
-    renderSelectorEspecie();
-  }
-}
+function renderizarLista() {
+  const contenedor = document.getElementById("lista-suculentas");
+  contenedor.innerHTML = "";
 
-function eliminarPlanta(especie, id) {
-  data[especie].plantas = data[especie].plantas.filter(p => p.id !== id);
-  guardar();
-  renderEspecies();
-  renderSelectorEspecie();
-}
+  especies.forEach((especie, i) => {
+    const div = document.createElement("div");
+    div.className = "especie";
 
-// Editar cuidados
-function editarCuidados(especie) {
-  const luz = prompt('Luz requerida', data[especie].cuidados.luz);
-  const riego = prompt('Frecuencia de riego', data[especie].cuidados.riego);
-  const humedad = prompt('Humedad ideal', data[especie].cuidados.humedad);
-  data[especie].cuidados = { luz, riego, humedad };
-  guardar();
-  renderEspecies();
-}
-
-// Agregar evento
-function agregarEvento() {
-  const especie = selectEspecie.value;
-  if (!especie) return alert('Selecciona una especie');
-  const plantas = data[especie].plantas;
-  const planta = prompt(`¿A cuál planta quieres agregarle el evento?\n${plantas.map(p => p.nombre).join(', ')}`);
-  const tipo = prompt('Tipo de evento (riego, limpieza, transplante, reproducción...)');
-  const fecha = prompt('Fecha del evento (YYYY-MM-DD)', new Date().toISOString().slice(0, 10));
-  const detalle = prompt('Detalles del evento');
-
-  const p = plantas.find(p => p.nombre === planta);
-  if (p) {
-    p.eventos.push({ tipo, fecha, detalle, id: Date.now() });
-    guardar();
-    renderEventos();
-  }
-}
-
-// Editar evento
-function editarEvento(especie, plantaId, eventoId) {
-  const planta = data[especie].plantas.find(p => p.id === plantaId);
-  const evento = planta.eventos.find(e => e.id === eventoId);
-  const tipo = prompt('Editar tipo', evento.tipo);
-  const fecha = prompt('Editar fecha', evento.fecha);
-  const detalle = prompt('Editar detalle', evento.detalle);
-  evento.tipo = tipo;
-  evento.fecha = fecha;
-  evento.detalle = detalle;
-  guardar();
-  renderEventos();
-}
-
-// Descargar QR
-function descargarQR(nombre, especie) {
-  const url = `${location.href}?especie=${encodeURIComponent(especie)}&planta=${encodeURIComponent(nombre)}`;
-  const canvas = document.createElement('canvas');
-  new QRCode(canvas, url);
-  setTimeout(() => {
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL();
-    link.download = `${nombre}.png`;
-    link.click();
-  }, 1000);
-}
-
-// Guardar en localStorage
-function guardar() {
-  localStorage.setItem('misSucus', JSON.stringify(data));
-}
-
-// Render especie y plantas
-function renderEspecies() {
-  especiesList.innerHTML = '';
-  Object.keys(data).forEach(especie => {
-    const div = document.createElement('div');
-    div.className = 'especie';
-    div.innerHTML = `
-      <h3>${especie}
-        <button onclick="editarCuidados('${especie}')">📝</button>
-        <button onclick="agregarPlanta('${especie}')">➕</button>
-        <button onclick="eliminarEspecie('${especie}')">🗑️</button>
-      </h3>
-      <details><summary>Ver cuidados</summary>
-        ☀️ Luz: ${data[especie].cuidados.luz || 'N/A'}<br>
-        💧 Riego: ${data[especie].cuidados.riego || 'N/A'}<br>
-        🌫️ Humedad: ${data[especie].cuidados.humedad || 'N/A'}
-      </details>
+    const header = document.createElement("div");
+    header.innerHTML = `
+      <h3>${especie.nombre}</h3>
+      <button onclick="eliminarEspecie(${i})">🗑️</button>
+      <button onclick="toggleCuidados(${i})">ℹ️</button>
+      <button onclick="agregarPlanta(${i})">➕ Planta</button>
     `;
-    data[especie].plantas.forEach(p => {
-      const item = document.createElement('div');
-      item.className = 'planta';
-      item.innerHTML = `
-        ${p.foto ? `<img src="${p.foto}" width="40">` : ''}
-        <b>${p.nombre}</b>
-        <button onclick="eliminarPlanta('${especie}', ${p.id})">❌</button>
-        <button onclick="descargarQR('${p.nombre}', '${especie}')">📎</button>
+
+    const cuidados = document.createElement("div");
+    cuidados.className = "cuidados oculto";
+    cuidados.innerHTML = `<p>${especie.cuidados}</p>`;
+
+    const ul = document.createElement("ul");
+    especie.plantas.forEach((planta, j) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        ${planta.nombre} - Plantada el ${planta.fecha}
+        <button onclick="eliminarPlanta(${i},${j})">❌</button>
+        <button onclick="generarQR('${especie.nombre}','${planta.nombre}')">📎 QR</button>
       `;
-      div.appendChild(item);
+      ul.appendChild(li);
     });
-    especiesList.appendChild(div);
+
+    div.appendChild(header);
+    div.appendChild(cuidados);
+    div.appendChild(ul);
+    contenedor.appendChild(div);
   });
 }
 
-// Render selector
-function renderSelectorEspecie() {
-  selectEspecie.innerHTML = `<option value="">--</option>`;
-  Object.keys(data).forEach(e => {
-    const option = document.createElement('option');
-    option.value = e;
-    option.textContent = e;
-    selectEspecie.appendChild(option);
-  });
+function toggleCuidados(index) {
+  const especie = document.querySelectorAll(".cuidados")[index];
+  especie.classList.toggle("oculto");
 }
 
-// Render eventos
-function renderEventos() {
-  eventosPorVista.innerHTML = '';
-  const vista = calendarioVista.value;
-  const hoy = new Date().toISOString().slice(0, 10);
-  Object.keys(data).forEach(especie => {
-    data[especie].plantas.forEach(p => {
-      p.eventos.forEach(e => {
-        const mostrar =
-          (vista === 'dia' && e.fecha === hoy) ||
-          (vista === 'semana') || // Lógica de semana opcional
-          (vista === 'mes') || vista === 'todo';
+function llenarSelectPlantas() {
+  const select = document.getElementById("select-planta-evento");
+  select.innerHTML = "";
 
-        if (mostrar) {
-          const li = document.createElement('li');
-          li.innerHTML = `
-            <b>${p.nombre}</b> (${especie}): ${e.tipo} - ${e.fecha}
-            <button onclick="editarEvento('${especie}', ${p.id}, ${e.id})">✏️</button>
-          `;
-          eventosPorVista.appendChild(li);
-        }
-      });
+  especies.forEach((especie, i) => {
+    especie.plantas.forEach((planta, j) => {
+      const option = document.createElement("option");
+      option.value = `${i}-${j}`;
+      option.textContent = `${especie.nombre} - ${planta.nombre}`;
+      select.appendChild(option);
     });
   });
 }
+
+function guardarEvento() {
+  const valor = document.getElementById("select-planta-evento").value;
+  const [i, j] = valor.split("-").map(Number);
+  const fecha = document.getElementById("fecha-evento").value;
+  const descripcion = document.getElementById("descripcion-evento").value;
+
+  if (!fecha || !descripcion) return;
+
+  especies[i].plantas[j].eventos.push({ fecha, descripcion });
+  eventos.push({ especie: especies[i].nombre, planta: especies[i].plantas[j].nombre, fecha, descripcion });
+
+  guardarDatos();
+  document.getElementById("formulario-evento").classList.add("oculto");
+  document.getElementById("fecha-evento").value = "";
+  document.getElementById("descripcion-evento").value = "";
+}
+
+function renderizarCalendario(vista = "mes") {
+  const contenedor = document.getElementById("vista-calendario");
+  contenedor.innerHTML = "";
+
+  const eventosOrdenados = [...eventos].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+  eventosOrdenados.forEach(ev => {
+    const div = document.createElement("div");
+    div.className = "evento";
+    div.innerHTML = `<strong>${ev.fecha}</strong> - ${ev.planta}: ${ev.descripcion}`;
+    contenedor.appendChild(div);
+  });
+}
+
+function cambiarVistaCalendario(vista) {
+  renderizarCalendario(vista);
+}
+
+function generarQR(especie, planta) {
+  const data = `Especie: ${especie}, Planta: ${planta}`;
+  const url = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(data)}`;
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${planta}.png`;
+  a.click();
+}
+
+// Iniciar
+renderizarLista();
