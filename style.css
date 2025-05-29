@@ -1,58 +1,132 @@
-/* Colores tierra */
-:root {
-  --color-fondo: #f4ede1;
-  --color-principal: #8b6b4a;
-  --color-secundario: #c6a974;
-  --color-texto: #5a4d3a;
-  --color-boton-fondo: #a4845f;
-  --color-boton-texto: #fff8e7;
-  --color-boton-hover: #7c5d3c;
-  --color-borde: #b9a377;
-}
-
-/* Fondo general */
 body {
-  background-color: var(--color-fondo);
-  color: var(--color-texto);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f6f1e7;
   margin: 0;
   padding: 0;
+  color: #3e2f1c;
 }
 
-/* Botones principales */
+h1 {
+  text-align: center;
+  background-color: #d9b382;
+  padding: 1rem;
+  margin: 0;
+  color: #3e2f1c;
+  font-size: 1.8rem;
+}
+
+.botones-principales {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
 button {
-  background-color: var(--color-boton-fondo);
-  color: var(--color-boton-texto);
-  border: 2px solid var(--color-borde);
-  padding: 10px 20px;
+  background-color: #a97451;
+  border: none;
+  color: white;
+  padding: 0.6rem 1rem;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.3s ease;
+  font-size: 0.95rem;
+  transition: background-color 0.3s;
 }
 
 button:hover {
-  background-color: var(--color-boton-hover);
+  background-color: #865a39;
 }
 
-/* Listas y contenedores */
-.lista-especies, .lista-plantas {
-  padding: 10px;
-  margin: 10px 0;
-  background-color: #eae1d7;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(101, 86, 60, 0.3);
-}
-
-/* Miniaturas */
-.thumbnail {
-  width: 40px;
-  height: 40px;
+input, textarea, select {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.5rem;
   border-radius: 6px;
-  object-fit: cover;
-  margin-right: 10px;
-  vertical-align: middle;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  box-sizing: border-box;
 }
 
-/* Modales y desplegables se agregarán después */
+form {
+  background-color: #fff6e9;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem auto;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
+#lista-suculentas {
+  margin: 1rem;
+}
+
+.especie {
+  background-color: #fefaf4;
+  border-left: 5px solid #c69c6d;
+  margin-bottom: 1.5rem;
+  padding: 0.8rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.especie h3 {
+  margin: 0;
+  display: inline;
+}
+
+.especie button {
+  margin-left: 0.3rem;
+}
+
+ul {
+  padding-left: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+li {
+  margin-bottom: 0.5rem;
+}
+
+.cuidados {
+  background-color: #fff1d6;
+  padding: 0.6rem;
+  margin-top: 0.5rem;
+  border-radius: 4px;
+}
+
+.oculto {
+  display: none;
+}
+
+.evento {
+  background-color: #fff;
+  padding: 0.6rem;
+  margin-bottom: 0.5rem;
+  border-left: 4px solid #c69c6d;
+  border-radius: 5px;
+}
+
+#vista-calendario {
+  margin: 1rem;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: #777;
+}
+
+@media (max-width: 600px) {
+  .botones-principales {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  button {
+    width: 90%;
+    max-width: 300px;
+  }
+}
