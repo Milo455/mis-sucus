@@ -1,191 +1,61 @@
-// app.js - Lógica principal para Mis Sucus
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mis Sucus</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="favicon.ico" />
+</head>
+<body>
+  <header>
+    <h1>🌵 Mis Sucus</h1>
+    <div class="botones-principales">
+      <button onclick="mostrarFormularioEspecie()">Agregar especie</button>
+      <button onclick="mostrarCalendario()">Calendario</button>
+      <button onclick="mostrarFormularioEvento()">Agregar evento</button>
+    </div>
+  </header>
 
-// LocalStorage helpers
-function saveData(data) {
-  localStorage.setItem('misSucusData', JSON.stringify(data));
-}
+  <main>
+    <section id="formulario-especie" class="modal oculto">
+      <h2>Agregar nueva especie</h2>
+      <input type="text" id="nombre-especie" placeholder="Nombre de la especie">
+      <textarea id="cuidados-especie" placeholder="Cuidados (riego, luz, humedad)"></textarea>
+      <button onclick="agregarEspecie()">Guardar especie</button>
+    </section>
 
-function loadData() {
-  return JSON.parse(localStorage.getItem('misSucusData')) || [];
-}
+    <section id="formulario-evento" class="modal oculto">
+      <h2>Agregar evento</h2>
+      <select id="select-planta-evento"></select>
+      <input type="date" id="fecha-evento">
+      <input type="text" id="descripcion-evento" placeholder="Descripción del evento">
+      <button onclick="guardarEvento()">Guardar</button>
+    </section>
 
-let speciesData = loadData();
+    <section id="calendario" class="oculto">
+      <h2>Calendario</h2>
+      <div>
+        <button onclick="cambiarVistaCalendario('dia')">Día</button>
+        <button onclick="cambiarVistaCalendario('semana')">Semana</button>
+        <button onclick="cambiarVistaCalendario('mes')">Mes</button>
+      </div>
+      <div id="vista-calendario"></div>
+    </section>
 
-const speciesList = document.getElementById('species-list');
-const addSpeciesBtn = document.getElementById('add-species');
-const calendarBtn = document.getElementById('calendar-button');
-const addEventBtn = document.getElementById('add-event');
-const plantSelector = document.getElementById('plant-selector');
-const eventModal = document.getElementById('event-modal');
-const eventDescription = document.getElementById('event-description');
-const eventDate = document.getElementById('event-date');
-const saveEventBtn = document.getElementById('save-event');
-const calendarView = document.getElementById('calendar-view');
-const calendarContainer = document.getElementById('calendar-container');
-const calendarViewButtons = document.querySelectorAll('.calendar-view-btn');
+    <section id="lista-suculentas"></section>
+  </main>
 
-function render() {
-  speciesList.innerHTML = '';
-  plantSelector.innerHTML = '';
-  speciesData.forEach((specie, sIdx) => {
-    const speciesTemplate = document.getElementById('species-template').content.cloneNode(true);
-    speciesTemplate.querySelector('.species-name').textContent = specie.name;
-    speciesTemplate.querySelector('.light-info').textContent = specie.light;
-    speciesTemplate.querySelector('.water-info').textContent = specie.water;
-    speciesTemplate.querySelector('.humidity-info').textContent = specie.humidity;
+  <footer>
+    <p>Mis Sucus - Gestión de suculentas 🌱</p>
+  </footer>
 
-    const deleteBtn = speciesTemplate.querySelector('.delete-species');
-    deleteBtn.onclick = () => {
-      if (confirm('¿Eliminar esta especie?')) {
-        speciesData.splice(sIdx, 1);
-        saveData(speciesData);
-        render();
-      }
-    };
-
-    const thumb = speciesTemplate.querySelector('.species-thumbnail');
-    if (specie.thumbnail) thumb.src = specie.thumbnail;
-
-    const plantsList = speciesTemplate.querySelector('.plants-list');
-    specie.plants.forEach((plant, pIdx) => {
-      const plantTemplate = document.getElementById('plant-template').content.cloneNode(true);
-      const nameEl = plantTemplate.querySelector('.plant-name');
-      nameEl.textContent = plant.name;
-
-      const photoInput = plantTemplate.querySelector('.photo-upload');
-      const photo = plantTemplate.querySelector('.plant-photo');
-      if (plant.photo) {
-        photo.src = plant.photo;
-        photo.classList.remove('hidden');
-      }
-
-      photoInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            plant.photo = reader.result;
-            saveData(speciesData);
-            render();
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-
-      const qrBtn = plantTemplate.querySelector('.qr-button');
-      qrBtn.onclick = () => {
-        const qrUrl = location.href + `#plant-${sIdx}-${pIdx}`;
-        const qrWindow = window.open();
-        qrWindow.document.write(`<img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qrUrl)}&size=200x200" /><p>${plant.name}</p>`);
-        qrWindow.print();
-      };
-
-      const deletePlant = plantTemplate.querySelector('.delete-plant');
-      deletePlant.onclick = () => {
-        if (confirm('¿Eliminar esta planta?')) {
-          specie.plants.splice(pIdx, 1);
-          saveData(speciesData);
-          render();
-        }
-      };
-
-      const eventsList = plantTemplate.querySelector('.events-list');
-      plant.events.forEach((evt, eIdx) => {
-        const eventTemplate = document.getElementById('event-template').content.cloneNode(true);
-        eventTemplate.querySelector('.event-date').textContent = evt.date;
-        eventTemplate.querySelector('.event-desc').textContent = evt.desc;
-
-        eventTemplate.querySelector('.delete-event').onclick = () => {
-          plant.events.splice(eIdx, 1);
-          saveData(speciesData);
-          render();
-        };
-
-        eventTemplate.querySelector('.edit-event').onclick = () => {
-          const newDesc = prompt('Editar descripción', evt.desc);
-          if (newDesc) {
-            evt.desc = newDesc;
-            saveData(speciesData);
-            render();
-          }
-        };
-
-        eventsList.appendChild(eventTemplate);
-      });
-
-      plantsList.appendChild(plantTemplate);
-
-      plantSelector.innerHTML += `<option value="${sIdx}-${pIdx}">${plant.name}</option>`;
-    });
-
-    const addPlantBtn = speciesTemplate.querySelector('.add-plant');
-    addPlantBtn.onclick = () => {
-      const name = prompt('Nombre de la planta:');
-      if (name) {
-        specie.plants.push({ name, events: [] });
-        saveData(speciesData);
-        render();
-      }
-    };
-
-    speciesList.appendChild(speciesTemplate);
-  });
-}
-
-addSpeciesBtn.onclick = () => {
-  const name = prompt('Nombre de la especie:');
-  if (name) {
-    const light = prompt('Luz requerida:');
-    const water = prompt('Frecuencia de riego:');
-    const humidity = prompt('Nivel de humedad:');
-    speciesData.push({ name, light, water, humidity, plants: [] });
-    saveData(speciesData);
-    render();
-  }
-};
-
-addEventBtn.onclick = () => {
-  eventModal.classList.remove('hidden');
-};
-
-document.querySelector('.close-modal').onclick = () => {
-  eventModal.classList.add('hidden');
-};
-
-saveEventBtn.onclick = () => {
-  const val = plantSelector.value.split('-');
-  const desc = eventDescription.value;
-  const date = eventDate.value;
-  if (desc && date && val.length === 2) {
-    speciesData[+val[0]].plants[+val[1]].events.push({ date, desc });
-    saveData(speciesData);
-    render();
-    eventModal.classList.add('hidden');
-  }
-};
-
-calendarBtn.onclick = () => {
-  calendarView.classList.toggle('hidden');
-  renderCalendar();
-};
-
-calendarViewButtons.forEach(btn => {
-  btn.onclick = () => {
-    renderCalendar(btn.dataset.view);
-  };
-});
-
-function renderCalendar(view = 'month') {
-  calendarContainer.innerHTML = `<p>Vista actual: ${view}</p>`;
-  speciesData.forEach(specie => {
-    specie.plants.forEach(plant => {
-      plant.events.forEach(evt => {
-        const div = document.createElement('div');
-        div.textContent = `${evt.date} - ${plant.name}: ${evt.desc}`;
-        calendarContainer.appendChild(div);
-      });
-    });
-  });
-}
-
-render();
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+</body>
+</html>
