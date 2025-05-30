@@ -1,79 +1,107 @@
-// plant.js
-import { db } from "./firebase-init.js";
-import { collection, doc, getDoc, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { db } from './firebase-init.js';
+import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { generateQRCode } from './qr-generator.js'; // Asumiendo que tienes un módulo para generar QR
 
-// Obtener parámetros de la URL
 const params = new URLSearchParams(window.location.search);
-const plantId = params.get("id");
+const plantId = params.get('id');
 
-const plantNameEl = document.getElementById("plantName");
-const lastPhotoEl = document.getElementById("lastPhoto");
-const lastWateringEl = document.getElementById("lastWatering");
-const albumEl = document.getElementById("album");
+const plantNameElem = document.getElementById('plant-name');
+const lastPhotoElem = document.getElementById('last-photo');
+const addEventBtn = document.getElementById('add-event-btn');
+const addPhotoBtn = document.getElementById('add-photo-btn');
+const showHistoryBtn = document.getElementById('show-history-btn');
+const showAlbumBtn = document.getElementById('show-album-btn');
+const deletePlantBtn = document.getElementById('delete-plant-btn');
+const printQRBtn = document.getElementById('print-qr-btn');
+const backBtn = document.getElementById('back-btn');
 
-async function loadPlantData() {
+let plantData = null;
+let eventsUnsub = null;
+let photosUnsub = null;
+
+async function loadPlant() {
   if (!plantId) {
-    alert("ID de planta no encontrado.");
+    alert('ID de planta no encontrado');
+    window.location.href = 'index.html';
     return;
   }
-
-  // Obtener el documento de la planta
-  const plantRef = doc(db, "plants", plantId);
-  const plantSnap = await getDoc(plantRef);
-
-  if (!plantSnap.exists()) {
-    alert("Planta no encontrada.");
+  
+  const plantRef = doc(db, 'plants', plantId);
+  const docSnap = await getDoc(plantRef);
+  
+  if (!docSnap.exists()) {
+    alert('Planta no encontrada');
+    window.location.href = 'index.html';
     return;
   }
-
-  const plantData = plantSnap.data();
-  plantNameEl.textContent = plantData.name || "Sin nombre";
-
-  // Obtener últimas fotos
-  const photosQuery = query(
-    collection(db, `plants/${plantId}/photos`),
-    orderBy("timestamp", "desc")
-  );
-  const photoSnaps = await getDocs(photosQuery);
-
-  if (!photoSnaps.empty) {
-    const firstPhoto = photoSnaps.docs[0].data();
-    lastPhotoEl.src = firstPhoto.url;
-  }
-
-  // Obtener últimos eventos para saber el último riego
-  const eventsQuery = query(
-    collection(db, `plants/${plantId}/events`),
-    orderBy("timestamp", "desc")
-  );
-  const eventSnaps = await getDocs(eventsQuery);
-
-  const lastWater = eventSnaps.docs.find(doc => doc.data().type === "Riego");
-  if (lastWater) {
-    const date = new Date(lastWater.data().timestamp?.toDate?.() || lastWater.data().timestamp);
-    lastWateringEl.textContent = `Último riego: ${date.toLocaleDateString()}`;
+  
+  plantData = docSnap.data();
+  plantNameElem.textContent = plantData.customName || plantData.speciesName || 'Planta sin nombre';
+  
+  // Mostrar última foto si existe
+  const photosRef = collection(plantRef, 'photos');
+  const q = query(photosRef, orderBy('timestamp', 'desc'), );
+  const photosSnap = await getDocs(q);
+  
+  if (!photosSnap.empty) {
+    const lastPhoto = photosSnap.docs[0].data();
+    lastPhotoElem.src = lastPhoto.url;
+    lastPhotoElem.alt = `Última foto de ${plantNameElem.textContent}`;
   } else {
-    lastWateringEl.textContent = "Sin registros de riego.";
+    lastPhotoElem.alt = 'No hay fotos registradas';
   }
 
-  // Cargar álbum de fotos
-  albumEl.innerHTML = "";
-  photoSnaps.forEach(photoDoc => {
-    const photo = photoDoc.data();
-    const div = document.createElement("div");
-    div.className = "photo-card";
-    div.innerHTML = `
-      <img src="${photo.url}" alt="foto planta" />
-      <p>${photo.comment || ""}</p>
-    `;
-    albumEl.appendChild(div);
+  // Escuchar eventos en tiempo real
+  const eventsRef = collection(plantRef, 'events');
+  const eventsQuery = query(eventsRef, orderBy('timestamp', 'desc'));
+  eventsUnsub = onSnapshot(eventsQuery, (snapshot) => {
+    // Aquí puedes actualizar la vista con eventos o lista si haces una
+    console.log('Eventos actualizados:', snapshot.docs.map(d => d.data()));
+  });
+
+  // Escuchar fotos en tiempo real
+  photosUnsub = onSnapshot(q, (snapshot) => {
+    // Actualizar vista de álbum si lo implementas
+    console.log('Fotos actualizadas:', snapshot.docs.map(d => d.data()));
   });
 }
 
-loadPlantData();
-
-// Volver a inicio
-document.getElementById("goBack").addEventListener("click", () => {
-  window.location.href = "index.html";
+addEventBtn.addEventListener('click', () => {
+  // Abrir modal para agregar evento (debes implementar modal)
+  alert('Funcionalidad para agregar evento no implementada aún');
 });
 
+addPhotoBtn.addEventListener('click', () => {
+  // Abrir cámara o selector para agregar foto (debes implementar)
+  alert('Funcionalidad para agregar foto no implementada aún');
+});
+
+showHistoryBtn.addEventListener('click', () => {
+  // Mostrar lista de eventos (puedes implementar modal o sección)
+  alert('Funcionalidad para mostrar historial no implementada aún');
+});
+
+showAlbumBtn.addEventListener('click', () => {
+  // Mostrar álbum de fotos
+  alert('Funcionalidad para mostrar álbum no implementada aún');
+});
+
+deletePlantBtn.addEventListener('click', async () => {
+  if (confirm(`¿Seguro que quieres eliminar la planta "${plantNameElem.textContent}"? Esta acción no se puede deshacer.`)) {
+    await deleteDoc(doc(db, 'plants', plantId));
+    alert('Planta eliminada');
+    window.location.href = 'index.html';
+  }
+});
+
+printQRBtn.addEventListener('click', () => {
+  // Generar QR y mostrar para impresión
+  generateQRCode(plantId, plantNameElem.textContent);
+});
+
+backBtn.addEventListener('click', () => {
+  window.location.href = 'index.html';
+});
+
+// Carga inicial
+loadPlant();
