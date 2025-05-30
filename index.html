@@ -1,67 +1,8 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mis Sucus</title>
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-
-  <script>
-    // Configuración de Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyBFpO3mzD94Wa_oCywdzHUaWJONtHugTuE",
-      authDomain: "mis-sucus.firebaseapp.com",
-      projectId: "mis-sucus",
-      storageBucket: "mis-sucus.appspot.com",
-      messagingSenderId: "535386004336",
-      appId: "1:535386004336:web:4701b88dc0ed7f75164db5"
-    };
-
-    // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
-    window.db = firebase.firestore();
-    window.storage = firebase.storage();
-  </script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f2ede3;
-      color: #4a3c31;
-      padding: 20px;
-    }
-    button {
-      background-color: #a17f59;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      margin: 5px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #7c6443;
-    }
-    #listaPlantas div {
-      margin-top: 10px;
-    }
-  </style>
-</head>
+<title>Mis Sucus</title>
+<!-- Firebase, estilos, metas, etc. --></head>
 <body>
-  <h1>Mis Sucus</h1>
-
-  <div id="botones-principales">
-    <button id="btnAgregarEspecie">Agregar Especie</button>
-    <button id="btnMostrarCalendario">Ver Calendario</button>
-    <button id="btnSubirFoto">Subir Foto a Planta</button>
-  </div>
-
-  <div id="listaPlantas"></div>
-
-  <script src="app.js"></script>
-</body>
+<!-- Contenido principal --></body>
 </html>
