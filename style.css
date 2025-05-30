@@ -120,3 +120,29 @@ ul#lista-especies li:hover {
 button {
   transition: background-color 0.3s;
 }
+/* Caledario */
+#calendar-container table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+#calendar-container th,
+#calendar-container td {
+  width: 14.28%;
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 0.5rem;
+}
+#calendar-container td.has-event {
+  background-color: var(--accent-color);
+  color: #fff;
+  cursor: pointer;
+}
+#events-list ul {
+  list-style: none;
+  padding: 0;
+}
+#events-list li {
+  margin: 0.5rem 0;
+}
+
