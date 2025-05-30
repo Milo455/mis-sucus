@@ -33,7 +33,18 @@
       <button id="save-species">Guardar</button>
     </div>
   </div>
-
+    <!-- Modal Calendario -->
+  <div id="calendar-modal" class="modal hidden">
+    <div class="modal-content">
+      <span id="close-calendar-modal" class="close">&times;</span>
+      <h2>Calendario</h2>
+      <div id="calendar-container"></div>
+      <div id="events-list">
+        <!-- Aquí se mostrarán los eventos al hacer clic en un día -->
+      </div>
+    </div>
+  </div>
+  
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="app.js"></script>
 </body>
