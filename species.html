@@ -1,1 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Especie - Mis Sucus</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="firebase-init.js"></script>
+  <script type="module" src="species.js" defer></script>
+</head>
+<body>
+  <header>
+    <button onclick="window.location.href='index.html'">⬅ Volver</button>
+    <h1 id="species-name">Especie</h1>
+  </header>
+
+  <section id="species-details">
+    <img id="species-thumbnail" alt="Miniatura" class="thumbnail">
+    <p id="species-info"></p>
+    <p id="plant-count"></p>
+    <button id="add-plant-btn">Agregar Planta</button>
+    <button id="delete-species-btn">Eliminar Especie</button>
+  </section>
+
+  <section id="plants-list">
+    <h2>Plantas Registradas</h2>
+    <ul id="plants-ul"></ul>
+  </section>
+</body>
+</html>
 
