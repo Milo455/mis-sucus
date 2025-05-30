@@ -115,9 +115,7 @@ ul#lista-especies li:hover {
   border: none;
 }
 
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
 
 button {
   transition: background-color 0.3s;
