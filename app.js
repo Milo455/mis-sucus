@@ -90,6 +90,104 @@ document.addEventListener('DOMContentLoaded', () => {
   // Botones Calendario y Escanear QR (solo log por ahora)
   btnCalendar.addEventListener('click', () => console.log('Calendario clic'));
   btnScanQR.addEventListener('click', () => console.log('Escanear QR clic'));
+    // --- CALENDARIO ---
+  // Referencias para calendario
+  const btnOpenCalendar       = document.getElementById('open-calendar');
+  const modalCalendar         = document.getElementById('calendar-modal');
+  const btnCloseCalendar      = document.getElementById('close-calendar-modal');
+  const calendarContainer     = document.getElementById('calendar-container');
+  const eventsListContainer   = document.getElementById('events-list');
+  let eventsData = [];  // guardará todos los eventos
+
+  // Abrir modal Calendario
+  btnOpenCalendar.addEventListener('click', async () => {
+    // Carga eventos
+    const snapEv = await getDocs(collection(db, 'events'));
+    eventsData = snapEv.docs.map(d => ({ id:d.id, ...d.data() }));
+    renderCalendar();
+    modalCalendar.classList.remove('hidden');
+  });
+
+  // Cerrar modal Calendario
+  btnCloseCalendar.addEventListener('click', () => {
+    modalCalendar.classList.add('hidden');
+    calendarContainer.innerHTML = '';
+    eventsListContainer.innerHTML = '';
+  });
+
+  // Genera el calendario del mes actual
+  function renderCalendar() {
+    calendarContainer.innerHTML = '';
+    eventsListContainer.innerHTML = '';
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+
+    // Primer día y número de días
+    const firstDay = new Date(year, month, 1).getDay(); // 0=domingo
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+
+    // Cabecera con días de la semana
+    const daysNames = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    const trHead = document.createElement('tr');
+    daysNames.forEach(d => {
+      const th = document.createElement('th');
+      th.textContent = d;
+      trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    table.appendChild(thead);
+
+    // Cuerpo del calendario
+    const tbody = document.createElement('tbody');
+    let tr = document.createElement('tr');
+    // Celdas vacías antes del primer día
+    for(let i=0;i<firstDay;i++){
+      tr.appendChild(document.createElement('td'));
+    }
+    // Celdas con días
+    for(let day=1; day<=daysInMonth; day++){
+      if(tr.children.length===7){
+        tbody.appendChild(tr);
+        tr = document.createElement('tr');
+      }
+      const td = document.createElement('td');
+      td.textContent = day;
+      // Fecha en formato YYYY-MM-DD
+      const dayStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+      // Si hay eventos en esa fecha, resaltar
+      const hasEvents = eventsData.some(e=> e.date===dayStr);
+      if(hasEvents){
+        td.classList.add('has-event');
+        td.addEventListener('click', () => showEventsForDay(dayStr));
+      }
+      tr.appendChild(td);
+    }
+    // Última fila
+    tbody.appendChild(tr);
+    table.appendChild(tbody);
+    calendarContainer.appendChild(table);
+  }
+
+  // Muestra la lista de eventos de un día seleccionado
+  function showEventsForDay(dateStr) {
+    eventsListContainer.innerHTML = `<h3>Eventos ${dateStr}</h3>`;
+    const list = document.createElement('ul');
+    eventsData.filter(e=>e.date===dateStr).forEach(e=>{
+      const li = document.createElement('li');
+      // Enlace a la planta
+      const a = document.createElement('a');
+      a.textContent = `${e.type} de Planta ${e.plantId}`;
+      a.href = `plant.html?id=${e.plantId}`;
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+    eventsListContainer.appendChild(list);
+  }
+
 
   // Carga inicial
   loadSpecies();
