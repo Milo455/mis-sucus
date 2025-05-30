@@ -45,21 +45,31 @@ main {
   padding: 1rem;
 }
 
-.species-list {
+/* Lista de especies */
+ul#lista-especies {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 auto;
+  max-width: 600px;
 }
 
-.species-item {
+ul#lista-especies li {
   background-color: var(--white);
   margin-bottom: 0.5rem;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   border-left: 5px solid var(--primary-color);
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
 }
 
+ul#lista-especies li:hover {
+  background-color: var(--accent-color);
+  color: var(--white);
+}
+
+/* Modal */
 .modal {
   position: fixed;
   top: 0;
@@ -80,6 +90,7 @@ main {
   width: 90%;
   max-width: 500px;
   position: relative;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 .modal-content input,
@@ -89,6 +100,8 @@ main {
   margin: 0.5rem 0;
   border: 1px solid #ccc;
   border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
 }
 
 .modal-content .close {
@@ -98,46 +111,14 @@ main {
   font-size: 1.5rem;
   cursor: pointer;
   color: var(--danger-color);
+  background: none;
+  border: none;
+}
+
+.hidden {
+  display: none !important;
 }
 
 button {
   transition: background-color 0.3s;
-}
-
-.card {
-  background-color: var(--white);
-  padding: 1rem;
-  border-radius: 10px;
-  margin: 1rem 0;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-.card h2 {
-  margin-top: 0;
-}
-
-.back-button {
-  background-color: var(--primary-color);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  margin-bottom: 1rem;
-}
-
-.back-button:hover {
-  background-color: var(--accent-color);
-}
-
-.qr-code {
-  text-align: center;
-  margin-top: 1rem;
-}
-
-#calendar {
-  background: var(--white);
-  border-radius: 10px;
-  padding: 1rem;
-  margin-top: 1rem;
 }
