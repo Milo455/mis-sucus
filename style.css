@@ -134,10 +134,17 @@ button {
   padding: 0.5rem;
 }
 #calendar-container td.has-event {
-  background-color: var(--accent-color);
-  color: #fff;
+  background-color: #d1fae5; /* verde claro */
+  border-radius: 6px;
+  font-weight: bold;
+  color: #065f46;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
+#calendar-container td.has-event:hover {
+  background-color: #a7f3d0;
+}
+
 #events-list ul {
   list-style: none;
   padding: 0;
