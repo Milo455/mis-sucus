@@ -39,6 +39,26 @@
       <span id="close-calendar-modal" class="close">&times;</span>
       <h2>Calendario</h2>
       <div id="calendar-container"></div>
+      <div id="add-event-form" class="mt-4">
+  <h3>Agregar evento</h3>
+  
+  <label for="event-date">Fecha:</label>
+  <input type="date" id="event-date" required><br>
+
+  <label for="event-type">Tipo de evento:</label>
+  <select id="event-type">
+    <option value="Riego">Riego</option>
+    <option value="Trasplante">Trasplante</option>
+    <option value="Fertilización">Fertilización</option>
+    <option value="Revisión">Revisión</option>
+  </select><br>
+
+  <label for="event-plant">Planta:</label>
+  <select id="event-plant"></select><br>
+
+  <button id="save-event" class="mt-2">Guardar evento</button>
+</div>
+
       <div id="events-list">
         <!-- Aquí se mostrarán los eventos al hacer clic en un día -->
       </div>
