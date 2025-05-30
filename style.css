@@ -167,4 +167,24 @@ button {
 #calendar-container button:hover {
   background-color: var(--secondary-color);
 }
+#add-event-form {
+  padding: 1rem;
+  background: #f0f0f0;
+  border-radius: 10px;
+  margin-top: 1rem;
+}
+
+#add-event-form label {
+  display: block;
+  margin-top: 0.5rem;
+}
+
+#add-event-form input,
+#add-event-form select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
 
