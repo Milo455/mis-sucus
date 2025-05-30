@@ -102,15 +102,91 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // — Modal Calendario —
-  btnCalendar.addEventListener('click', () => {
+  let eventsData = [];
+
+  btnCalendar.addEventListener('click', async () => {
     modalCalendar.classList.remove('hidden');
-    // renderCalendar();   // lo implementamos en el siguiente paso
+    try {
+      const snapEv = await getDocs(collection(db, 'events'));
+      eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderCalendar();
+    } catch (err) {
+      console.error('Error cargando eventos:', err);
+      calendarContainer.innerHTML = '<p>Error al cargar el calendario.</p>';
+    }
   });
+
+  // Cerrar modal Calendario
   btnCloseCalendar.addEventListener('click', () => {
     modalCalendar.classList.add('hidden');
     calendarContainer.innerHTML = '';
     eventsList.innerHTML = '';
   });
+
+  // 🔽 Aquí empieza la función fuera del addEventListener
+  function renderCalendar() {
+    calendarContainer.innerHTML = '';
+    eventsList.innerHTML = '';
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const daysNames = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    const trHead = document.createElement('tr');
+    daysNames.forEach(d => {
+      const th = document.createElement('th');
+      th.textContent = d;
+      trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    let tr = document.createElement('tr');
+    for (let i = 0; i < firstDay; i++) {
+      tr.appendChild(document.createElement('td'));
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      if (tr.children.length === 7) {
+        tbody.appendChild(tr);
+        tr = document.createElement('tr');
+      }
+      const td = document.createElement('td');
+      td.textContent = day;
+      const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+      const hasEvents = eventsData.some(e => e.date === dayStr);
+      if (hasEvents) {
+        td.classList.add('has-event');
+        td.addEventListener('click', () => mostrarEventosPorDia(dayStr));
+      }
+
+      tr.appendChild(td);
+    }
+
+    tbody.appendChild(tr);
+    table.appendChild(tbody);
+    calendarContainer.appendChild(table);
+  }
+
+  function mostrarEventosPorDia(dateStr) {
+    eventsList.innerHTML = `<h3>Eventos para ${dateStr}</h3>`;
+    const list = document.createElement('ul');
+    eventsData
+      .filter(e => e.date === dateStr)
+      .forEach(e => {
+        const li = document.createElement('li');
+        li.textContent = `${e.type} de Planta ${e.plantId}`;
+        list.appendChild(li);
+      });
+    eventsList.appendChild(list);
+  }
 
   // carga inicial
   cargarEspecies();
