@@ -7,9 +7,17 @@ import {
   query,
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const plantsMap = new Map();
+
 
 document.addEventListener('DOMContentLoaded', () => {
   // — Referencias del DOM —
+  document.addEventListener('DOMContentLoaded', () => {
+
+  // luego todas las demás funciones, incluida cargarEspecies(), pueden usar plantsMap
+  ...
+});
+
   const btnAddSpecies    = document.getElementById('btnAddSpecies');
   const btnCalendar      = document.getElementById('open-calendar');
   const btnScanQR        = document.getElementById('scan-qr');
@@ -112,24 +120,29 @@ const saveEventBtn = document.getElementById('save-event');
 
   // — Modal Calendario —
   let eventsData = [];
-let plantsMap = new Map(); // id -> {name, ...}
 
-  btnCalendar.addEventListener('click', async () => {
-    modalCalendar.classList.remove('hidden');
-    try {
-      const snapEv = await getDocs(collection(db, 'events'));
-      eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderCalendar();
-// Poblar selector de plantas en el formulario de eventos
-const plantSelect = document.getElementById('event-plant');
-plantSelect.innerHTML = ''; // Limpiar opciones anteriores
-plantsMap.forEach((data, id) => {
-  const option = document.createElement('option');
-  option.value = id;
-  option.textContent = data.name;
-  plantSelect.appendChild(option);
-});
+btnCalendar.addEventListener('click', async () => {
+  // Verificar si plantsMap está vacío
+  if (plantsMap.size === 0) {
+    await cargarEspecies(); // Carga las especies y llena plantsMap
+  }
 
+  modalCalendar.classList.remove('hidden');
+
+  try {
+    const snapEv = await getDocs(collection(db, 'events'));
+    eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCalendar();
+
+    // Poblar selector de plantas en el formulario de eventos
+    const plantSelect = document.getElementById('event-plant');
+    plantSelect.innerHTML = ''; // Limpiar opciones anteriores
+    plantsMap.forEach((data, id) => {
+      const option = document.createElement('option');
+      option.value = id;
+      option.textContent = data.name;
+      plantSelect.appendChild(option);
+    });
 // Guardar evento
 document.getElementById('save-event').addEventListener('click', async () => {
   const date = document.getElementById('event-date').value;
