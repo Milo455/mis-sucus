@@ -125,60 +125,92 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 🔽 Aquí empieza la función fuera del addEventListener
   function renderCalendar() {
-    calendarContainer.innerHTML = '';
-    eventsList.innerHTML = '';
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
-    const mesNombre = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(today);
-const tituloMes = document.createElement('h2');
-tituloMes.textContent = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1);
-calendarContainer.appendChild(tituloMes);
+  calendarContainer.innerHTML = '';
+  eventsList.innerHTML = '';
 
+  let currentDate = new Date();
+  if (renderCalendar.current) currentDate = renderCalendar.current;
 
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
 
-    const daysNames = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
-    const table = document.createElement('table');
-    const thead = document.createElement('thead');
-    const trHead = document.createElement('tr');
-    daysNames.forEach(d => {
-      const th = document.createElement('th');
-      th.textContent = d;
-      trHead.appendChild(th);
-    });
-    thead.appendChild(trHead);
-    table.appendChild(thead);
+  // Encabezado con nombre del mes
+  const mesNombre = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(currentDate);
+  const tituloMes = document.createElement('h2');
+  tituloMes.textContent = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1);
+  tituloMes.style.textAlign = 'center';
+  calendarContainer.appendChild(tituloMes);
 
-    const tbody = document.createElement('tbody');
-    let tr = document.createElement('tr');
-    for (let i = 0; i < firstDay; i++) {
-      tr.appendChild(document.createElement('td'));
-    }
+  // Botones anterior y siguiente
+  const nav = document.createElement('div');
+  nav.style.display = 'flex';
+  nav.style.justifyContent = 'space-between';
+  nav.style.margin = '0.5rem 0';
 
-    for (let day = 1; day <= daysInMonth; day++) {
-      if (tr.children.length === 7) {
-        tbody.appendChild(tr);
-        tr = document.createElement('tr');
-      }
-      const td = document.createElement('td');
-      td.textContent = day;
-      const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const btnPrev = document.createElement('button');
+  btnPrev.textContent = '← Mes anterior';
+  btnPrev.onclick = () => {
+    renderCalendar.current = new Date(year, month - 1, 1);
+    renderCalendar();
+  };
 
-      const hasEvents = eventsData.some(e => e.date === dayStr);
-      if (hasEvents) {
-        td.classList.add('has-event');
-        td.addEventListener('click', () => mostrarEventosPorDia(dayStr));
-      }
+  const btnNext = document.createElement('button');
+  btnNext.textContent = 'Mes siguiente →';
+  btnNext.onclick = () => {
+    renderCalendar.current = new Date(year, month + 1, 1);
+    renderCalendar();
+  };
 
-      tr.appendChild(td);
-    }
+  nav.appendChild(btnPrev);
+  nav.appendChild(btnNext);
+  calendarContainer.appendChild(nav);
 
-    tbody.appendChild(tr);
-    table.appendChild(tbody);
-    calendarContainer.appendChild(table);
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysNames = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
+
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const trHead = document.createElement('tr');
+  daysNames.forEach(d => {
+    const th = document.createElement('th');
+    th.textContent = d;
+    trHead.appendChild(th);
+  });
+  thead.appendChild(trHead);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  let tr = document.createElement('tr');
+  for (let i = 0; i < firstDay; i++) {
+    tr.appendChild(document.createElement('td'));
   }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    if (tr.children.length === 7) {
+      tbody.appendChild(tr);
+      tr = document.createElement('tr');
+    }
+
+    const td = document.createElement('td');
+    td.textContent = day;
+
+    const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const hasEvents = eventsData.some(e => e.date === dayStr);
+
+    if (hasEvents) {
+      td.classList.add('has-event');
+      td.addEventListener('click', () => mostrarEventosPorDia(dayStr));
+    }
+
+    tr.appendChild(td);
+  }
+
+  tbody.appendChild(tr);
+  table.appendChild(tbody);
+  calendarContainer.appendChild(table);
+}
+
 
   function mostrarEventosPorDia(dateStr) {
   eventsList.innerHTML = `<h3>Eventos para ${dateStr}</h3>`;
