@@ -1,11 +1,8 @@
 // firebase-init.js
 
-// Importa las funciones necesarias de los SDKs de Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore }    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// Configuración de tu aplicación Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBFpO3mzD94Wa_oCywdzHUaWJONtHugTuE",
   authDomain: "mis-sucus.firebaseapp.com",
@@ -17,16 +14,4 @@ const firebaseConfig = {
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// Autenticación anónima para asegurar acceso
-signInAnonymously(auth)
-  .then(() => {
-    console.log("Autenticación anónima exitosa");
-  })
-  .catch((error) => {
-    console.error("Error en autenticación anónima:", error);
-  });
-
-export { db };
+export const db = getFirestore(app);
