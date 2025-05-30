@@ -5,29 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mis Sucus - Planta</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
 </head>
 <body>
-  <div class="plant-container">
-    <button id="back-button">⬅️ Volver</button>
+  <header>
+    <button onclick="goBack()">⬅️ Volver</button>
     <h1 id="plant-name">Nombre de la Planta</h1>
-    <img id="plant-last-photo" class="plant-photo" src="" alt="Última foto" />
+  </header>
+  <main>
+    <section id="plant-main-info">
+      <img id="latest-photo" src="" alt="Última foto" />
+      <p><strong>Último riego:</strong> <span id="last-watering">---</span></p>
+      <button onclick="openEventModal()">Agregar Evento</button>
+      <button onclick="openPhotoModal()">Foto</button>
+      <button onclick="viewAlbum()">Álbum</button>
+      <button onclick="viewHistory()">Historia</button>
+      <button onclick="printQR()">Imprimir QR</button>
+      <button onclick="deletePlant()" class="danger">Eliminar Planta</button>
+    </section>
 
-    <div class="plant-actions">
-      <button id="add-event">Agregar Evento</button>
-      <button id="add-photo">Foto</button>
-      <button id="view-history">Historia</button>
-      <button id="view-album">Álbum</button>
-      <button id="delete-plant">Eliminar Planta</button>
-      <button id="print-qr">Imprimir QR</button>
-    </div>
+    <section id="event-modal" class="modal hidden">
+      <h2>Registrar Evento</h2>
+      <select id="event-type">
+        <option value="Riego">Riego</option>
+        <option value="Trasplante">Trasplante</option>
+        <option value="Limpieza">Limpieza</option>
+        <option value="Chequeo de humedad">Chequeo de humedad</option>
+        <option value="Otro">Otro</option>
+      </select>
+      <button onclick="saveEvent()">Guardar Evento</button>
+      <button onclick="closeEventModal()">Cancelar</button>
+    </section>
 
-    <p id="last-watering">Último riego: --</p>
+    <section id="photo-modal" class="modal hidden">
+      <h2>Tomar Foto</h2>
+      <input type="file" accept="image/*" capture="environment" id="photo-input" />
+      <textarea id="photo-comment" placeholder="Comentario..."></textarea>
+      <button onclick="savePhoto()">Guardar Foto</button>
+      <button onclick="closePhotoModal()">Cancelar</button>
+    </section>
 
-    <div id="history-list" class="plant-history hidden"></div>
-    <div id="photo-album" class="plant-album hidden"></div>
-  </div>
+    <section id="album-view" class="hidden">
+      <h2>Álbum de la Planta</h2>
+      <div id="photo-album"></div>
+    </section>
 
-  <script type="module" src="firebase-init.js"></script>
+    <section id="history-view" class="hidden">
+      <h2>Historia de la Planta</h2>
+      <ul id="event-history"></ul>
+    </section>
+  </main>
+
   <script type="module" src="plant.js"></script>
 </body>
 </html>
