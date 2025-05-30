@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mis Sucus</title>
 
-  <!-- PWA manifest -->
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase compat SDKs -->
+  <!-- Firebase SDKs (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
-  <!-- jsQR para escanear -->
+  <!-- jsQR y QRCode.js -->
   <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
-  <!-- QRCode.js para generar -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
-  <!-- Inicializar Firebase -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBFpO3mzD94Wa_oCywdzHUaWJONtHugTuE",
@@ -32,9 +30,6 @@
     window.db = firebase.firestore();
     window.storage = firebase.storage();
   </script>
-
-  <!-- Estilos completos -->
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
@@ -52,91 +47,77 @@
     <section id="speciesContainer"></section>
   </main>
 
-  <!-- Modales / secciones ocultas -->
+  <!-- Modales -->
 
-  <!-- 1. Modal Añadir Especie -->
-  <div class="modal" id="modalSpecies" style="display:none;">
+  <!-- Modal Especie -->
+  <div id="modalSpecies" class="modal" style="display:none;">
     <div class="modal-content">
       <span class="close" data-close="modalSpecies">&times;</span>
-      <h2>Añadir Especie</h2>
-      <input id="inputSpeciesName" type="text" placeholder="Nombre especie">
-      <textarea id="inputSpeciesCare" placeholder="Cuidados (luz, riego, humedad)"></textarea>
+      <h3>Agregar Especie</h3>
+      <input id="inputSpeciesName" placeholder="Nombre especie" />
+      <textarea id="inputSpeciesCare" placeholder="Cuidados"></textarea>
       <button id="saveSpecies">Guardar</button>
     </div>
   </div>
 
-  <!-- 2. Modal Añadir Planta -->
-  <div class="modal" id="modalPlant" style="display:none;">
+  <!-- Modal Planta -->
+  <div id="modalPlant" class="modal" style="display:none;">
     <div class="modal-content">
       <span class="close" data-close="modalPlant">&times;</span>
-      <h2>Añadir Planta</h2>
-      <select id="selectSpeciesForPlant"></select>
-      <input id="inputPlantName" type="text" placeholder="Nombre planta">
-      <input id="inputPlantDate" type="date" placeholder="Fecha plantado">
+      <h3>Agregar Planta</h3>
+      <input id="inputPlantName" placeholder="Nombre planta" />
+      <input type="file" id="inputPlantPhoto" accept="image/*" />
       <button id="savePlant">Guardar</button>
     </div>
   </div>
 
-  <!-- 3. Modal Añadir Evento -->
-  <div class="modal" id="modalEvent" style="display:none;">
+  <!-- Modal Evento -->
+  <div id="modalEvent" class="modal" style="display:none;">
     <div class="modal-content">
       <span class="close" data-close="modalEvent">&times;</span>
-      <h2>Añadir Evento</h2>
-      <select id="selectPlantForEvent"></select>
-      <input id="inputEventType" type="text" placeholder="Tipo evento">
-      <input id="inputEventDate" type="date">
-      <textarea id="inputEventNote" placeholder="Nota"></textarea>
+      <h3>Agregar Evento</h3>
+      <input type="date" id="inputEventDate" />
+      <textarea id="inputEventDescription" placeholder="Descripción"></textarea>
       <button id="saveEvent">Guardar</button>
     </div>
   </div>
 
-  <!-- 4. Calendario -->
-  <div class="modal" id="modalCalendar" style="display:none;">
-    <div class="modal-content">
-      <span class="close" data-close="modalCalendar">&times;</span>
-      <h2>Calendario</h2>
-      <div class="view-tabs">
-        <button data-view="day">Día</button>
-        <button data-view="week">Semana</button>
-        <button data-view="month">Mes</button>
-      </div>
-      <div id="calendarView"></div>
-    </div>
-  </div>
-
-  <!-- 5. Modal Escanear QR -->
-  <div class="modal" id="modalScanQR" style="display:none;">
-    <div class="modal-content">
-      <span class="close" data-close="modalScanQR">&times;</span>
-      <h2>Escanear QR</h2>
-      <video id="videoQR" width="300" height="200"></video>
-      <p id="qrStatus">Buscando QR...</p>
-    </div>
-  </div>
-
-  <!-- 6. Modal Mostrar QR -->
-  <div class="modal" id="modalShowQR" style="display:none;">
-    <div class="modal-content">
-      <span class="close" data-close="modalShowQR">&times;</span>
-      <h2>QR de Planta</h2>
-      <canvas id="qrCanvas"></canvas>
-      <a id="downloadQR" href="#" download>Descargar QR</a>
-    </div>
-  </div>
-
-  <!-- 7. Modal Detalle Planta -->
-  <div class="modal" id="modalDetail" style="display:none;">
+  <!-- Modal Detalle -->
+  <div id="modalDetail" class="modal" style="display:none;">
     <div class="modal-content">
       <span class="close" data-close="modalDetail">&times;</span>
-      <h2 id="detailPlantName"></h2>
-      <img id="detailPlantPhoto" src="" alt="" style="width:100%;border-radius:6px;">
-      <p id="detailSpeciesCare" class="detail-care"></p>
-      <h3>Eventos</h3>
-      <ul id="detailEventList"></ul>
+      <h3 id="detailTitle"></h3>
+      <p id="detailCare" class="detail-care"></p>
+      <img id="detailPhoto" src="" alt="Foto planta" style="max-width:100%; border-radius:6px;" />
+      <div id="detailEvents"></div>
     </div>
   </div>
 
-  <!-- tus scripts -->
+  <!-- Modal Calendario -->
+  <div id="modalCalendar" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" data-close="modalCalendar">&times;</span>
+      <h3>Calendario</h3>
+      <div class="view-tabs">
+        <button id="viewDay">Día</button>
+        <button id="viewWeek">Semana</button>
+        <button id="viewMonth">Mes</button>
+      </div>
+      <div id="calendarContent"></div>
+    </div>
+  </div>
+
+  <!-- Modal Escanear QR -->
+  <div id="modalScanQR" class="modal" style="display:none;">
+    <div class="modal-content" style="width: 320px; max-width: 90vw;">
+      <span class="close" data-close="modalScanQR">&times;</span>
+      <h3>Escanear QR</h3>
+      <video id="video" width="300" height="200" style="border-radius:6px;"></video>
+      <p id="scanResult"></p>
+    </div>
+  </div>
+
   <script src="app.js"></script>
+
 </body>
 </html>
