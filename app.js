@@ -5,6 +5,18 @@ import {
   collection, addDoc, getDocs, doc, getDoc, setDoc,
   updateDoc, deleteDoc, onSnapshot, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// === CONTROL DEL MODAL AGREGAR ESPECIE ===
+const btnAddSpecies     = document.getElementById('btn-agregar-especie');
+const modalSpecies      = document.getElementById('species-modal');
+const btnCloseSpecies   = document.getElementById('close-species-modal');
+
+btnAddSpecies.addEventListener('click', () => {
+  modalSpecies.classList.remove('hidden');
+});
+
+btnCloseSpecies.addEventListener('click', () => {
+  modalSpecies.classList.add('hidden');
+});
 
 // Elementos del DOM
 const addSpeciesBtn = document.getElementById("add-species-btn");
