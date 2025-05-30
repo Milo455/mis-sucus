@@ -71,25 +71,28 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // — Carga lista de Especies —
-  async function cargarEspecies() {
-    speciesList.innerHTML = '';
-    const q = query(collection(db, 'species'), orderBy('name', 'asc'));
-    try {
-      const snap = await getDocs(q);
-      if (snap.empty) {
-        speciesList.innerHTML = '<li>No hay especies registradas.</li>';
-        return;
-      }
-      snap.forEach(doc => {
-        const li = document.createElement('li');
-        li.textContent = doc.data().name;
-        speciesList.appendChild(li);
-      });
-    } catch (err) {
-      console.error('Error cargando especies:', err);
-      speciesList.innerHTML = '<li>Error al cargar especies.</li>';
+ async function cargarEspecies() {
+  speciesList.innerHTML = '';
+  plantsMap.clear(); // Limpia el mapa antes de recargar
+  const q = query(collection(db, 'species'), orderBy('name', 'asc'));
+  try {
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      speciesList.innerHTML = '<li>No hay especies registradas.</li>';
+      return;
     }
+    snap.forEach(doc => {
+      const data = doc.data();
+      plantsMap.set(doc.id, data); // Guardamos en el mapa
+      const li = document.createElement('li');
+      li.textContent = data.name;
+      speciesList.appendChild(li);
+    });
+  } catch (err) {
+    console.error('Error cargando especies:', err);
+    speciesList.innerHTML = '<li>Error al cargar especies.</li>';
   }
+}
 
   // — Mock botones Calendario y QR (se llenará luego) —
   btnCalendar.addEventListener('click', () => {
@@ -103,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // — Modal Calendario —
   let eventsData = [];
+let plantsMap = new Map(); // id -> {name, ...}
 
   btnCalendar.addEventListener('click', async () => {
     modalCalendar.classList.remove('hidden');
@@ -212,20 +216,23 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 
-  function mostrarEventosPorDia(dateStr) {
+ function mostrarEventosPorDia(dateStr) {
   eventsList.innerHTML = `<h3>Eventos para ${dateStr}</h3>`;
   const list = document.createElement('ul');
+
   eventsData
     .filter(e => e.date === dateStr)
     .forEach(e => {
       const li = document.createElement('li');
-      const tipo = e.type || 'Evento';
-      const planta = e.plantId || 'sin ID';
-      li.textContent = `${tipo} de Planta ${planta}`;
+      const planta = plantsMap.get(e.plantId);
+      const nombre = planta ? planta.name : `(ID: ${e.plantId})`;
+      li.textContent = `${e.type} de planta ${nombre}`;
       list.appendChild(li);
     });
+
   eventsList.appendChild(list);
 }
+
 
   // carga inicial
   cargarEspecies();
