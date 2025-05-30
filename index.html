@@ -11,26 +11,26 @@
   <header>
     <h1>🌵 Mis Sucus</h1>
     <div class="acciones">
-      <button id="btnAgregarEspecie">➕ Agregar Especie</button>
-      <button id="btnCalendario">📅 Calendario</button>
-      <button id="btnEscanearQR">📷 Escanear QR</button>
+      <button id="btnAddSpecies">➕ Agregar Especie</button>
+      <button id="open-calendar">📅 Calendario</button>
+      <button id="scan-qr">📷 Escanear QR</button>
     </div>
   </header>
 
   <main>
     <h2>Lista de Especies</h2>
-    <ul id="listaEspecies"></ul>
+    <ul id="species-list"></ul>
   </main>
 
   <!-- Modal Agregar Especie -->
-  <div id="modalAgregarEspecie" class="modal hidden">
+  <div id="species-modal" class="modal hidden">
     <div class="modal-content">
-      <button id="btnCerrarModalEspecie" class="close">&times;</button>
+      <span id="close-species-modal" class="close">&times;</span>
       <h2>Agregar Especie</h2>
-      <input type="text" id="inputNombreEspecie" placeholder="Nombre de la especie"/>
-      <textarea id="inputInfoEspecie" placeholder="Cuidados y características"></textarea>
-      <input type="file" id="inputFotoEspecie" accept="image/*"/>
-      <button id="btnGuardarEspecie">Guardar</button>
+      <input type="text" id="species-name" placeholder="Nombre de la especie"/>
+      <textarea id="species-info" placeholder="Cuidados y características"></textarea>
+      <input type="file" id="species-photo" accept="image/*"/>
+      <button id="save-species">Guardar</button>
     </div>
   </div>
 
