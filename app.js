@@ -6,6 +6,15 @@ import {
   updateDoc, deleteDoc, onSnapshot, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+// Elementos del DOM
+const addSpeciesBtn = document.getElementById("add-species-btn");
+const calendarBtn = document.getElementById("calendar-btn");
+const scanQRBtn = document.getElementById("scan-qr-btn");
+const speciesList = document.getElementById("species-list");
+const modal = document.getElementById("species-modal");
+const closeModalBtn = document.getElementById("close-modal");
+const saveSpeciesBtn = document.getElementById("save-species");
+
 // === CONTROL DEL MODAL AGREGAR ESPECIE ===
 document.addEventListener('DOMContentLoaded', () => {
   const btnAddSpecies   = document.getElementById('btnAddSpecies');
@@ -27,15 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
     modalSpecies.classList.add('hidden');
   });
 });
-
-// Elementos del DOM
-const addSpeciesBtn = document.getElementById("add-species-btn");
-const calendarBtn = document.getElementById("calendar-btn");
-const scanQRBtn = document.getElementById("scan-qr-btn");
-const speciesList = document.getElementById("species-list");
-const modal = document.getElementById("species-modal");
-const closeModalBtn = document.getElementById("close-modal");
-const saveSpeciesBtn = document.getElementById("save-species");
 
 // Abrir modal
 addSpeciesBtn.addEventListener("click", () => {
