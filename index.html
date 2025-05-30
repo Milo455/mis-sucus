@@ -4,38 +4,144 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mis Sucus</title>
+
+  <!-- Manifest PWA -->
   <link rel="manifest" href="manifest.json" />
+
+  <!-- Estilos -->
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Inicialización Firebase -->
   <script type="module" src="firebase-init.js"></script>
+
+  <!-- QR Scanner (html5-qrcode) -->
+  <script src="https://unpkg.com/html5-qrcode" defer></script>
+
+  <!-- Lógica principal -->
   <script defer src="app.js"></script>
 </head>
 <body>
   <header>
     <h1>🌵 Mis Sucus</h1>
     <div class="btns-principal">
-      <button id="btnAddSpecies">➕ Añadir especie</button>
+      <button id="btnAddSpecies">➕ Agregar Especie</button>
+      <button id="btnCalendar">📅 Calendario</button>
+      <button id="btnScanQR">📷 Escanear QR</button>
     </div>
   </header>
-  <main>
-    <div class="view-tabs">
-      <button onclick="setView('day')">Día</button>
-      <button onclick="setView('week')">Semana</button>
-      <button onclick="setView('month')">Mes</button>
-    </div>
-    <div id="speciesContainer"></div>
+
+  <main id="main-view">
+    <!-- Lista alfabética de especies -->
+    <ul id="speciesList" class="list"></ul>
   </main>
 
-  <!-- Modal Añadir especie -->
+  <!-- =======================
+       MODALES Y VISTAS
+  ======================= -->
+
+  <!-- Modal: Agregar Especie -->
   <div id="modalSpecies" class="modal" style="display:none;">
     <div class="modal-content">
       <span class="close" data-close="modalSpecies">✖</span>
-      <h2>Nueva especie</h2>
-      <input id="inputSpeciesName" placeholder="Nombre de la especie">
-      <textarea id="inputSpeciesCare" placeholder="Cuidados"></textarea>
-      <button id="saveSpecies">Guardar</button>
+      <h2>Agregar Nueva Especie</h2>
+      <input id="inputSpeciesName" type="text" placeholder="Nombre de la especie" />
+      <textarea id="inputSpeciesCare" placeholder="Características y cuidados"></textarea>
+      <input id="inputSpeciesThumb" type="file" accept="image/*" />
+      <button id="saveSpecies">Guardar Especie</button>
     </div>
   </div>
 
-  <!-- Otros modales se agregan según sea necesario -->
+  <!-- Modal: Calendario general -->
+  <div id="modalCalendar" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" data-close="modalCalendar">✖</span>
+      <h2>Calendario de Tareas</h2>
+      <div id="calendarContainer"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Escanear QR -->
+  <div id="modalScanQR" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" data-close="modalScanQR">✖</span>
+      <h2>Escanear QR de Planta</h2>
+      <div id="qr-reader" style="width:100%"></div>
+    </div>
+  </div>
+
+  <!-- Página: Detalle de Especie -->
+  <div id="viewSpeciesDetail" class="page" style="display:none;">
+    <header>
+      <button class="btn-back" id="backToList">← Volver</button>
+      <h2 id="speciesDetailName"></h2>
+    </header>
+    <section class="species-detail">
+      <img id="speciesDetailThumb" alt="Thumb" class="thumb" />
+      <p id="speciesDetailCare"></p>
+      <p>Cantidad de plantas: <span id="speciesPlantCount"></span></p>
+      <button id="btnAddPlant">➕ Agregar Planta</button>
+      <button id="btnDeleteSpecies">🗑️ Eliminar Especie</button>
+      <h3>Plantas</h3>
+      <ul id="plantList" class="list"></ul>
+    </section>
+  </div>
+
+  <!-- Modal: Agregar Planta -->
+  <div id="modalPlant" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" data-close="modalPlant">✖</span>
+      <h2>Agregar Nueva Planta</h2>
+      <input id="inputPlantName" type="text" placeholder="Nombre personalizado" />
+      <button id="savePlant">Guardar Planta</button>
+    </div>
+  </div>
+
+  <!-- Página: Detalle de Planta -->
+  <div id="viewPlantDetail" class="page" style="display:none;">
+    <header>
+      <button class="btn-back" id="backToSpecies">← Volver</button>
+      <h2 id="plantDetailName"></h2>
+    </header>
+    <section class="plant-detail">
+      <img id="plantDetailLastPhoto" alt="Última foto" class="thumb" />
+      <p>Último riego: <span id="plantDetailLastWater"></span></p>
+      <div class="plant-buttons">
+        <button id="btnAddEvent">➕ Evento</button>
+        <button id="btnHistory">📜 Historia</button>
+        <button id="btnPhoto">📸 Foto</button>
+        <button id="btnAlbum">🖼️ Álbum</button>
+        <button id="btnPrintQR">� QR</button>
+        <button id="btnDeletePlant">❌ Eliminar Planta</button>
+      </div>
+      <div id="plantContent"></div>
+    </section>
+  </div>
+
+  <!-- Modal: Agregar Evento -->
+  <div id="modalEvent" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" data-close="modalEvent">✖</span>
+      <h2>Registrar Evento</h2>
+      <select id="inputEventType">
+        <option value="Riego">Riego</option>
+        <option value="Trasplante">Trasplante</option>
+        <option value="Limpieza">Limpieza</option>
+        <option value="Chequeo Humedad">Chequeo Humedad</option>
+      </select>
+      <input id="inputEventDate" type="date" />
+      <textarea id="inputEventNote" placeholder="Notas adicionales"></textarea>
+      <button id="saveEvent">Guardar Evento</button>
+    </div>
+  </div>
+
+  <!-- Modal: Cámara para Foto Planta -->
+  <div id="modalPhoto" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" data-close="modalPhoto">✖</span>
+      <h2>Tomar Foto</h2>
+      <video id="videoPhoto" autoplay playsinline></video>
+      <button id="takePhoto">📸 Capturar</button>
+    </div>
+  </div>
 </body>
 </html>
