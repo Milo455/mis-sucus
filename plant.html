@@ -1,31 +1,33 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mis Sucus - Planta</title>
-  <link rel="stylesheet" href="style.css">
-  <script type="module" src="firebase-init.js"></script>
-  <script type="module" src="plant.js"></script>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <button id="backBtn">⬅️ Volver</button>
-    <h1 id="plantName"></h1>
-  </header>
+  <div class="plant-container">
+    <button id="back-button">⬅️ Volver</button>
+    <h1 id="plant-name">Nombre de la Planta</h1>
+    <img id="plant-last-photo" class="plant-photo" src="" alt="Última foto" />
 
-  <section id="plantInfo">
-    <img id="latestPhoto" src="" alt="Última foto de la planta">
-    <p>Último riego: <span id="lastWatering"></span></p>
-    <button id="addEventBtn">Agregar Evento</button>
-    <button id="historyBtn">Historia</button>
-    <button id="photoBtn">Foto</button>
-    <button id="albumBtn">Álbum</button>
-    <button id="printQRBtn">Imprimir QR</button>
-    <button id="deletePlantBtn">Eliminar Planta</button>
-  </section>
+    <div class="plant-actions">
+      <button id="add-event">Agregar Evento</button>
+      <button id="add-photo">Foto</button>
+      <button id="view-history">Historia</button>
+      <button id="view-album">Álbum</button>
+      <button id="delete-plant">Eliminar Planta</button>
+      <button id="print-qr">Imprimir QR</button>
+    </div>
 
-  <div id="modalContainer"></div>
+    <p id="last-watering">Último riego: --</p>
+
+    <div id="history-list" class="plant-history hidden"></div>
+    <div id="photo-album" class="plant-album hidden"></div>
+  </div>
+
+  <script type="module" src="firebase-init.js"></script>
+  <script type="module" src="plant.js"></script>
 </body>
 </html>
-
