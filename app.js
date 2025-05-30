@@ -5,6 +5,7 @@ import {
   collection, addDoc, getDocs, doc, getDoc, setDoc,
   updateDoc, deleteDoc, onSnapshot, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 // === CONTROL DEL MODAL AGREGAR ESPECIE ===
 const btnAddSpecies     = document.getElementById('btnAddSpecies');
 const modalSpecies      = document.getElementById('species-modal');
