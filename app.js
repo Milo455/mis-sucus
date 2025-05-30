@@ -130,6 +130,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth();
+    const mesNombre = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(today);
+const tituloMes = document.createElement('h2');
+tituloMes.textContent = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1);
+calendarContainer.appendChild(tituloMes);
+
 
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -176,17 +181,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function mostrarEventosPorDia(dateStr) {
-    eventsList.innerHTML = `<h3>Eventos para ${dateStr}</h3>`;
-    const list = document.createElement('ul');
-    eventsData
-      .filter(e => e.date === dateStr)
-      .forEach(e => {
-        const li = document.createElement('li');
-        li.textContent = `${e.type} de Planta ${e.plantId}`;
-        list.appendChild(li);
-      });
-    eventsList.appendChild(list);
-  }
+  eventsList.innerHTML = `<h3>Eventos para ${dateStr}</h3>`;
+  const list = document.createElement('ul');
+  eventsData
+    .filter(e => e.date === dateStr)
+    .forEach(e => {
+      const li = document.createElement('li');
+      const tipo = e.type || 'Evento';
+      const planta = e.plantId || 'sin ID';
+      li.textContent = `${tipo} de Planta ${planta}`;
+      list.appendChild(li);
+    });
+  eventsList.appendChild(list);
+}
 
   // carga inicial
   cargarEspecies();
