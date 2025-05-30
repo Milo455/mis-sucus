@@ -1,81 +1,154 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mis Sucus</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="favicon.ico" />
-  <!-- Firebase App (the core Firebase SDK) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<!-- Firebase Firestore -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<!-- Firebase Storage -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mis Sucus</title>
 
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+<!-- Tu configuración Firebase -->
 <script>
-  // Your web app's Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyBFpO3mzD94Wa_oCywdzHUaWJONtHugTuE",
     authDomain: "mis-sucus.firebaseapp.com",
     projectId: "mis-sucus",
-    storageBucket: "mis-sucus.firebasestorage.app",
+    storageBucket: "mis-sucus.appspot.com",
     messagingSenderId: "535386004336",
     appId: "1:535386004336:web:4701b88dc0ed7f75164db5"
   };
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
 </script>
+
+<link rel="manifest" href="manifest.json" />
+<link rel="stylesheet" href="style.css" />
+
+<style>
+  /* Colores tierra básicos */
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5efe6;
+    color: #4b3b2b;
+    margin: 0; padding: 0;
+  }
+  header {
+    background-color: #a87c4f;
+    padding: 10px;
+    color: white;
+    text-align: center;
+  }
+  button {
+    background-color: #a87c4f;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+  button:hover {
+    background-color: #c19a6b;
+  }
+  main {
+    max-width: 600px;
+    margin: auto;
+    padding: 10px;
+  }
+  #lista-plantas, #lista-eventos {
+    list-style: none;
+    padding-left: 0;
+    margin: 10px 0;
+  }
+  #lista-plantas li, #lista-eventos li {
+    background: #e9dcc0;
+    margin: 5px 0;
+    padding: 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #lista-plantas li img {
+    border-radius: 4px;
+    margin-right: 10px;
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    cursor: pointer;
+  }
+  .detalle-cuidado {
+    font-size: 0.9em;
+    color: #6b5e41;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-content {
+    background: #fefefe;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: #4b3b2b;
+  }
+  .close-btn {
+    float: right;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  input[type="text"], select, textarea {
+    width: 100%;
+    padding: 6px;
+    margin: 5px 0 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+</style>
 </head>
 <body>
-  <header>
-    <h1>🌵 Mis Sucus</h1>
-    <div class="botones-principales">
-      <button onclick="mostrarFormularioEspecie()">Agregar especie</button>
-      <button onclick="mostrarCalendario()">Calendario</button>
-      <button onclick="mostrarFormularioEvento()">Agregar evento</button>
-    </div>
-  </header>
 
-  <main>
-    <section id="formulario-especie" class="modal oculto">
-      <h2>Agregar nueva especie</h2>
-      <input type="text" id="nombre-especie" placeholder="Nombre de la especie">
-      <textarea id="cuidados-especie" placeholder="Cuidados (riego, luz, humedad)"></textarea>
-      <button onclick="agregarEspecie()">Guardar especie</button>
-    </section>
+<header>
+  <h1>Mis Sucus</h1>
+  <button id="btn-agregar-planta">Agregar Planta</button>
+  <button id="btn-agregar-evento">Agregar Evento</button>
+  <button id="btn-subir-foto">Subir Foto a Planta</button>
+  <input type="file" id="input-foto" accept="image/*" style="display:none;" />
+</header>
 
-    <section id="formulario-evento" class="modal oculto">
-      <h2>Agregar evento</h2>
-      <select id="select-planta-evento"></select>
-      <input type="date" id="fecha-evento">
-      <input type="text" id="descripcion-evento" placeholder="Descripción del evento">
-      <button onclick="guardarEvento()">Guardar</button>
-    </section>
+<main>
+  <h2>Lista de Plantas</h2>
+  <ul id="lista-plantas"></ul>
 
-    <section id="calendario" class="oculto">
-      <h2>Calendario</h2>
-      <div>
-        <button onclick="cambiarVistaCalendario('dia')">Día</button>
-        <button onclick="cambiarVistaCalendario('semana')">Semana</button>
-        <button onclick="cambiarVistaCalendario('mes')">Mes</button>
-      </div>
-      <div id="vista-calendario"></div>
-    </section>
+  <h2>Eventos</h2>
+  <ul id="lista-eventos"></ul>
+</main>
 
-    <section id="lista-suculentas"></section>
-  </main>
+<!-- Modal para detalles de planta -->
+<div id="modal-detalle" class="modal">
+  <div class="modal-content">
+    <span id="cerrar-modal" class="close-btn">&times;</span>
+    <h3 id="modal-nombre-planta"></h3>
+    <img id="modal-foto" src="" alt="Foto planta" style="width:100%; border-radius:6px; margin-bottom:10px;" />
+    <p class="detalle-cuidado" id="modal-cuidados"></p>
 
-  <footer>
-    <p>Mis Sucus - Gestión de suculentas 🌱</p>
-  </footer>
+    <h4>Eventos relacionados</h4>
+    <ul id="modal-lista-eventos"></ul>
+  </div>
+</div>
 
-  <script src="app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js');
-    }
-  </script>
+<script src="app.js"></script>
 </body>
 </html>
