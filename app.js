@@ -1,12 +1,13 @@
-// Importamos Firestore y Storage desde el window (cargados en index)
+// Acceso a Firestore y Storage desde Firebase
 const db = window.db;
 const storage = window.storage;
 
 console.log("App.js cargado");
 
-// Variables simulando plantas (localStorage por ahora)
+// Recuperar las plantas desde localStorage o inicializar un objeto vacío
 let plantas = JSON.parse(localStorage.getItem('plantas') || '{}');
 
+// Función para mostrar la lista de plantas en el DOM
 function mostrarListaPlantas() {
   const cont = document.getElementById('listaPlantas');
   cont.innerHTML = '';
@@ -23,6 +24,7 @@ function mostrarListaPlantas() {
   }
 }
 
+// Función para subir una foto asociada a una planta
 async function subirFotoPlanta() {
   const nombresPlantas = Object.keys(plantas);
   if (nombresPlantas.length === 0) {
@@ -30,7 +32,7 @@ async function subirFotoPlanta() {
     return;
   }
 
-  let seleccion = prompt("Elige una planta para subir la foto:\n" + nombresPlantas.map((p, i) => `${i+1}. ${p}`).join('\n'));
+  let seleccion = prompt("Elige una planta para subir la foto:\n" + nombresPlantas.map((p, i) => `${i + 1}. ${p}`).join('\n'));
   if (!seleccion) return;
 
   let index = parseInt(seleccion) - 1;
@@ -49,7 +51,7 @@ async function subirFotoPlanta() {
 
     alert(`Foto seleccionada para la planta: ${plantaSeleccionada}`);
 
-    // Aquí debería subir la foto a Firebase Storage (por ahora solo guardamos URL local)
+    // Guardar la foto en localStorage (simulación)
     if (!plantas[plantaSeleccionada].fotos) plantas[plantaSeleccionada].fotos = [];
     plantas[plantaSeleccionada].fotos.push(URL.createObjectURL(file));
 
@@ -61,8 +63,7 @@ async function subirFotoPlanta() {
   inputFile.click();
 }
 
-// Eventos botones
-
+// Asociar eventos a los botones
 document.getElementById('btnSubirFoto').addEventListener('click', subirFotoPlanta);
 
 document.getElementById('btnAgregarEspecie').addEventListener('click', () => {
@@ -78,5 +79,5 @@ document.getElementById('btnMostrarCalendario').addEventListener('click', () => 
   alert("Aquí debería ir la vista del calendario");
 });
 
-// Mostrar la lista al cargar la app
+// Mostrar la lista de plantas al cargar la aplicación
 mostrarListaPlantas();
