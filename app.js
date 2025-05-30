@@ -7,16 +7,25 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // === CONTROL DEL MODAL AGREGAR ESPECIE ===
-const btnAddSpecies     = document.getElementById('btnAddSpecies');
-const modalSpecies      = document.getElementById('species-modal');
-const btnCloseSpecies   = document.getElementById('close-species-modal');
+document.addEventListener('DOMContentLoaded', () => {
+  const btnAddSpecies   = document.getElementById('btnAddSpecies');
+  const modalSpecies    = document.getElementById('species-modal');
+  const btnCloseSpecies = document.getElementById('close-species-modal');
 
-btnAddSpecies.addEventListener('click', () => {
-  modalSpecies.classList.remove('hidden');
-});
+  if (!btnAddSpecies || !modalSpecies || !btnCloseSpecies) {
+    console.error('No se encontraron uno o varios elementos del modal Agregar Especie');
+    return;
+  }
 
-btnCloseSpecies.addEventListener('click', () => {
-  modalSpecies.classList.add('hidden');
+  btnAddSpecies.addEventListener('click', () => {
+    console.log('Clic en Agregar Especie');
+    modalSpecies.classList.remove('hidden');
+  });
+
+  btnCloseSpecies.addEventListener('click', () => {
+    console.log('Clic en cerrar modal');
+    modalSpecies.classList.add('hidden');
+  });
 });
 
 // Elementos del DOM
