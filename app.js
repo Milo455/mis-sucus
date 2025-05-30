@@ -24,6 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const calendarContainer= document.getElementById('calendar-container');
   const eventsList       = document.getElementById('events-list');
 
+  const eventDateInput = document.getElementById('event-date');
+const eventTypeSelect = document.getElementById('event-type');
+const eventPlantSelect = document.getElementById('event-plant');
+const saveEventBtn = document.getElementById('save-event');
+
+
   // Comprueba que todo exista
   if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
       !speciesList || !modalSpecies || !btnCloseSpecies ||
@@ -114,6 +120,46 @@ let plantsMap = new Map(); // id -> {name, ...}
       const snapEv = await getDocs(collection(db, 'events'));
       eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
       renderCalendar();
+// Poblar selector de plantas en el formulario de eventos
+const plantSelect = document.getElementById('event-plant');
+plantSelect.innerHTML = ''; // Limpiar opciones anteriores
+plantsMap.forEach((data, id) => {
+  const option = document.createElement('option');
+  option.value = id;
+  option.textContent = data.name;
+  plantSelect.appendChild(option);
+});
+
+// Guardar evento
+document.getElementById('save-event').addEventListener('click', async () => {
+  const date = document.getElementById('event-date').value;
+  const type = document.getElementById('event-type').value;
+  const plantId = document.getElementById('event-plant').value;
+
+  if (!date || !type || !plantId) {
+    alert('Completa todos los campos.');
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'events'), {
+      date,
+      type,
+      plantId,
+      createdAt: new Date()
+    });
+    alert('Evento guardado correctamente.');
+    document.getElementById('event-date').value = '';
+    renderCalendar.current = new Date(date);
+    const snapEv = await getDocs(collection(db, 'events'));
+    eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCalendar();
+  } catch (err) {
+    console.error('Error al guardar el evento:', err);
+    alert('Error al guardar el evento.');
+  }
+});
+
     } catch (err) {
       console.error('Error cargando eventos:', err);
       calendarContainer.innerHTML = '<p>Error al cargar el calendario.</p>';
