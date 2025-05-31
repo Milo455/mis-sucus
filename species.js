@@ -1,123 +1,144 @@
 // species.js
+
 import { db } from './firebase-init.js';
 import {
-  doc, getDoc, updateDoc, deleteDoc,
-  collection, getDocs, query, where, addDoc
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// Obtener ID de especie desde la URL
-const urlParams = new URLSearchParams(window.location.search);
-const speciesId = urlParams.get('id');
-if (!speciesId) {
-  alert('Especie no encontrada');
-  window.location.href = 'index.html';
-}
-
-// Referencias del DOM
-const speciesPhotoEl = document.getElementById('species-photo');
-const photoInput = document.getElementById('edit-species-photo');
-const nameInput = document.getElementById('edit-species-name');
-const saveBtn = document.getElementById('save-species-edit');
-const deleteBtn = document.getElementById('delete-species');
-const plantListEl = document.getElementById('plant-list');
-const addPlantBtn = document.getElementById('add-plant-btn');
-
-let speciesData = null;
-
-// Cargar datos de la especie
-async function cargarEspecie() {
-  const ref = doc(db, 'species', speciesId);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    alert('Especie no encontrada');
+document.addEventListener('DOMContentLoaded', async () => {
+  const params = new URLSearchParams(window.location.search);
+  const speciesId = params.get('id');
+  if (!speciesId) {
+    alert('ID de especie no encontrado.');
     window.location.href = 'index.html';
+    return;
   }
-  speciesData = snap.data();
-  speciesPhotoEl.src = speciesData.photo;
-  nameInput.value = speciesData.name;
-}
-await cargarEspecie();
-await cargarPlantas();
 
-// Guardar cambios
-saveBtn.addEventListener('click', async () => {
-  const nuevoNombre = nameInput.value.trim();
-  if (!nuevoNombre) return alert('El nombre no puede estar vacío.');
+  // Elementos del DOM
+  const photoDisplay = document.getElementById('species-photo-display');
+  const nameDisplay = document.getElementById('species-name-display');
+  const editBtn = document.getElementById('edit-species-btn');
+  const editForm = document.getElementById('edit-species-form');
+  const inputName = document.getElementById('edit-species-name');
+  const inputPhoto = document.getElementById('edit-species-photo');
+  const saveBtn = document.getElementById('save-species-edit');
+  const deleteBtn = document.getElementById('delete-species');
+  const plantList = document.getElementById('plant-list');
+  const addPlantBtn = document.getElementById('add-plant-btn');
 
-  let nuevaFoto = speciesData.photo;
+  let speciesData = null;
 
-  if (photoInput.files.length > 0) {
-    const reader = new FileReader();
-    reader.onload = async e => {
-      nuevaFoto = e.target.result;
-      await updateDoc(doc(db, 'species', speciesId), {
-        name: nuevoNombre,
-        photo: nuevaFoto
-      });
-      alert('Especie actualizada');
-    };
-    reader.readAsDataURL(photoInput.files[0]);
-  } else {
+  // Cargar datos
+  async function cargarEspecie() {
+    const ref = doc(db, 'species', speciesId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      alert('Especie no encontrada.');
+      return;
+    }
+    speciesData = snap.data();
+    photoDisplay.src = speciesData.photo;
+    nameDisplay.textContent = speciesData.name;
+    inputName.value = speciesData.name;
+  }
+
+  // Mostrar formulario de edición
+  editBtn.addEventListener('click', () => {
+    editForm.classList.toggle('hidden');
+  });
+
+  // Guardar edición
+  saveBtn.addEventListener('click', async () => {
+    const nuevoNombre = inputName.value.trim();
+    let nuevaFoto = speciesData.photo;
+
+    if (inputPhoto.files.length > 0) {
+      const reader = new FileReader();
+      reader.onload = async e => {
+        nuevaFoto = e.target.result;
+        await guardarCambios(nuevoNombre, nuevaFoto);
+      };
+      reader.readAsDataURL(inputPhoto.files[0]);
+    } else {
+      await guardarCambios(nuevoNombre, nuevaFoto);
+    }
+  });
+
+  async function guardarCambios(nombre, foto) {
     await updateDoc(doc(db, 'species', speciesId), {
-      name: nuevoNombre,
-      photo: nuevaFoto
+      name: nombre,
+      photo: foto
     });
-    alert('Especie actualizada');
+    alert('Cambios guardados');
+    window.location.reload();
   }
-});
 
-// Eliminar especie
-deleteBtn.addEventListener('click', async () => {
-  if (!confirm('¿Estás seguro de eliminar esta especie? Esta acción no se puede deshacer.')) return;
-  await deleteDoc(doc(db, 'species', speciesId));
-  window.location.href = 'index.html';
-});
+  // Eliminar especie
+  deleteBtn.addEventListener('click', async () => {
+    if (!confirm('¿Estás seguro de eliminar esta especie y todas sus plantas?')) return;
 
-// Cargar plantas asociadas
-async function cargarPlantas() {
-  plantListEl.innerHTML = '';
-  const q = query(collection(db, 'plants'), where('speciesId', '==', speciesId));
-  const snap = await getDocs(q);
-  const docs = snap.docs.sort((a, b) => a.data().name.localeCompare(b.data().name));
-  docs.forEach(doc => {
-    const planta = doc.data();
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <span>${planta.name}</span>
-      <button data-id="${doc.id}" class="ver-planta">🔍</button>
-      <button data-id="${doc.id}" class="eliminar-planta" style="color:red;">❌</button>
-    `;
-    plantListEl.appendChild(li);
+    // Eliminar todas las plantas asociadas
+    const q = query(collection(db, 'plants'), where('speciesId', '==', speciesId));
+    const snap = await getDocs(q);
+    for (const d of snap.docs) {
+      await deleteDoc(doc(db, 'plants', d.id));
+    }
+
+    await deleteDoc(doc(db, 'species', speciesId));
+    alert('Especie eliminada');
+    window.location.href = 'index.html';
   });
 
-  // Ir a planta individual
-  document.querySelectorAll('.ver-planta').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const plantId = btn.dataset.id;
-      window.location.href = `plant.html?id=${plantId}`;
+  // Cargar plantas
+  async function cargarPlantas() {
+    plantList.innerHTML = '';
+    const q = query(collection(db, 'plants'), where('speciesId', '==', speciesId));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      plantList.innerHTML = '<li>No hay plantas registradas.</li>';
+      return;
+    }
+    snap.forEach(doc => {
+      const data = doc.data();
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <a href="plant.html?id=${doc.id}">${data.name}</a>
+        <button data-id="${doc.id}" class="delete-plant">❌</button>
+      `;
+      plantList.appendChild(li);
     });
-  });
 
-  // Eliminar planta
-  document.querySelectorAll('.eliminar-planta').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      if (confirm('¿Eliminar esta planta?')) {
-        await deleteDoc(doc(db, 'plants', btn.dataset.id));
-        await cargarPlantas();
-      }
+    document.querySelectorAll('.delete-plant').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        if (confirm('¿Eliminar esta planta?')) {
+          await deleteDoc(doc(db, 'plants', id));
+          cargarPlantas();
+        }
+      });
     });
-  });
-}
+  }
 
-// Agregar planta
-addPlantBtn.addEventListener('click', async () => {
-  const nombre = prompt('Nombre de la nueva planta:');
-  if (!nombre) return;
-
-  await addDoc(collection(db, 'plants'), {
-    name: nombre.trim(),
-    speciesId: speciesId,
-    createdAt: new Date()
+  // Agregar planta
+  addPlantBtn.addEventListener('click', async () => {
+    const nombre = prompt('Nombre de la nueva planta:');
+    if (!nombre) return;
+    await addDoc(collection(db, 'plants'), {
+      name: nombre,
+      speciesId,
+      createdAt: new Date()
+    });
+    cargarPlantas();
   });
+
+  await cargarEspecie();
   await cargarPlantas();
 });
