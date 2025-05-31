@@ -53,6 +53,7 @@ btnDelete.addEventListener('click', async () => {
 
 btnEdit.addEventListener('click', () => {
   modalEdit.classList.remove('hidden');
+  btnDelete.classList.remove('hidden');
 });
 
 formEdit.addEventListener('submit', async (e) => {
