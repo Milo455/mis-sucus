@@ -147,11 +147,6 @@ btnCalendar.addEventListener('click', async () => {
   }
 });
 
-    } catch (err) {
-      console.error('Error cargando eventos:', err);
-      calendarContainer.innerHTML = '<p>Error al cargar el calendario.</p>';
-    }
-  });
 
 // Abrir modal de agregar evento
 document.getElementById('open-event-modal').addEventListener('click', () => {
