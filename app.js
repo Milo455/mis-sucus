@@ -143,6 +143,11 @@ btnCalendar.addEventListener('click', async () => {
       option.textContent = data.name;
       plantSelect.appendChild(option);
     });
+// Mostrar modal al hacer clic en el botón flotante
+document.getElementById('open-event-modal').addEventListener('click', () => {
+  document.getElementById('event-modal').style.display = 'block';
+});
+
 // Guardar evento
 document.getElementById('save-event').addEventListener('click', async () => {
   const date = document.getElementById('event-date').value;
@@ -161,23 +166,65 @@ document.getElementById('save-event').addEventListener('click', async () => {
       plantId,
       createdAt: new Date()
     });
-    alert('Evento guardado correctamente.');
     document.getElementById('event-date').value = '';
-    renderCalendar.current = new Date(date);
-    const snapEv = await getDocs(collection(db, 'events'));
-    eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderCalendar();
+    document.getElementById('event-modal').style.display = 'none';
+    await cargarEventosYRenderizar();
   } catch (err) {
     console.error('Error al guardar el evento:', err);
     alert('Error al guardar el evento.');
   }
 });
 
-    } catch (err) {
-      console.error('Error cargando eventos:', err);
-      calendarContainer.innerHTML = '<p>Error al cargar el calendario.</p>';
-    }
+// Cargar eventos y renderizar lista
+async function cargarEventosYRenderizar() {
+  try {
+    const snapEv = await getDocs(collection(db, 'events'));
+    eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCalendar();
+  } catch (err) {
+    console.error('Error cargando eventos:', err);
+  }
+}
+
+// Renderizar calendario y eventos
+function renderCalendar() {
+  const calendarContainer = document.getElementById('calendar');
+  calendarContainer.innerHTML = '';
+
+  const today = new Date();
+  const upcomingEvents = eventsData
+    .filter(e => new Date(e.date) >= today)
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(0, 10);
+
+  if (upcomingEvents.length === 0) {
+    calendarContainer.innerHTML = '<p>No hay eventos próximos.</p>';
+    return;
+  }
+
+  upcomingEvents.forEach(ev => {
+    const plant = plantsData.find(p => p.id === ev.plantId);
+    const div = document.createElement('div');
+    div.classList.add('event-item');
+    div.innerHTML = `
+      <strong>${ev.type}</strong> - ${ev.date}<br>
+      Planta: <a href="#" class="plant-link" data-id="${ev.plantId}">${plant ? plant.name : 'Desconocida'}</a>
+      <button class="delete-event-btn" data-id="${ev.id}">🗑️</button>
+    `;
+    calendarContainer.appendChild(div);
   });
+
+  // Eliminar evento
+  document.querySelectorAll('.delete-event-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = e.target.dataset.id;
+      if (confirm('¿Eliminar este evento?')) {
+        await deleteDoc(doc(db, 'events', id));
+        await cargarEventosYRenderizar();
+      }
+    });
+  });
+}
 
 
   // Cerrar modal Calendario
