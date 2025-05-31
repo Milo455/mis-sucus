@@ -45,24 +45,28 @@
   </div>
 </div>
 
-  <h3>Agregar evento</h3>
-  
-  <label for="event-date">Fecha:</label>
-  <input type="date" id="event-date" required><br>
+<div id="add-event-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="close-add-event">&times;</span>
+    <h3>Agregar evento</h3>
+    <label for="event-date">Fecha:</label>
+    <input type="date" id="event-date" required><br>
 
-  <label for="event-type">Tipo de evento:</label>
-  <select id="event-type">
-    <option value="Riego">Riego</option>
-    <option value="Trasplante">Trasplante</option>
-    <option value="Fertilización">Fertilización</option>
-    <option value="Revisión">Revisión</option>
-  </select><br>
+    <label for="event-type">Tipo de evento:</label>
+    <select id="event-type">
+      <option value="Riego">Riego</option>
+      <option value="Trasplante">Trasplante</option>
+      <option value="Fertilización">Fertilización</option>
+      <option value="Revisión">Revisión</option>
+    </select><br>
 
-  <label for="event-plant">Planta:</label>
-  <select id="event-plant"></select><br>
+    <label for="event-plant">Planta:</label>
+    <select id="event-plant"></select><br>
 
-  <button id="save-event" class="mt-2">Guardar evento</button>
+    <button id="save-event" class="mt-2">Guardar evento</button>
+  </div>
 </div>
+
 
       <div id="events-list">
         <!-- Aquí se mostrarán los eventos al hacer clic en un día -->
