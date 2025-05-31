@@ -317,6 +317,7 @@ selectedCheckboxes.forEach(cb => cb.checked = false);
   calendarContainer.appendChild(table);
 }
 function renderEventList() {
+  if (modalCalendar.classList.contains('hidden')) return;
   eventsList.innerHTML = '<h3>Eventos</h3>';
   const list = document.createElement('ul');
 
