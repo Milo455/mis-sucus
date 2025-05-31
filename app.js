@@ -183,13 +183,13 @@ renderEventList();
 
 // Abrir modal de agregar evento
 document.getElementById('open-event-modal').addEventListener('click', () => {
-  document.getElementById('add-event-modal').style.display = 'block';
+  document.getElementById('add-event-modal').classList.remove('hidden');
 });
 
 
 // Cerrar modal de agregar evento
 document.getElementById('close-add-event').addEventListener('click', () => {
-  document.getElementById('add-event-modal').style.display = 'none';
+  document.getElementById('add-event-modal').classList.add('hidden');
 });
 
 
