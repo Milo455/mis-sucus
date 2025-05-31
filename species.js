@@ -109,7 +109,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     snap.forEach(doc => {
       const data = doc.data();
       const li = document.createElement('li');
-      li.innerHTML = `
+li.innerHTML = `
+  <a href="plant.html?id=${doc.id}">${doc.name}</a>
+  <button data-id="${doc.id}" class="delete-plant-btn">❌</button>
+`;
+
         <a href="plant.html?id=${doc.id}">${data.name}</a>
         <button data-id="${doc.id}" class="delete-plant">❌</button>
       `;
