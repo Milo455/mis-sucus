@@ -36,6 +36,7 @@ async function cargarPlanta() {
   }
 
   const data = snap.data();
+  const speciesId = data.speciesId;
   nameEl.textContent = data.name;
   dateEl.textContent = `Creada: ${new Date(data.createdAt.toDate()).toLocaleDateString()}`;
   photoEl.src = data.photo;
@@ -83,3 +84,14 @@ formEdit.addEventListener('submit', async (e) => {
 });
 
 cargarPlanta();
+document.getElementById('back-to-species').addEventListener('click', async () => {
+  const ref = doc(db, 'plants', plantId);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    const data = snap.data();
+    const speciesId = data.speciesId;
+    window.location.href = `species.html?id=${speciesId}`;
+  } else {
+    window.location.href = 'index.html';
+  }
+});
