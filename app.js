@@ -213,12 +213,14 @@ try {
   // Resetear formulario
   eventDateInput.value = new Date().toISOString().split('T')[0];
   eventTypeSelect.value = 'Riego';
-  [...eventPlantSelect.options].forEach(opt => opt.selected = false);
+  
 
   // Cerrar modal
-  document.getElementById('add-event-modal').classList.add('hidden');
+document.getElementById('add-event-modal').classList.add('hidden');
 
-  alert('Evento(s) guardado(s) correctamente.');
+// Limpiar los checkboxes seleccionados
+selectedCheckboxes.forEach(cb => cb.checked = false);
+
 } catch (err) {
   console.error('Error al guardar los eventos:', err);
   alert('Error al guardar los eventos.');
