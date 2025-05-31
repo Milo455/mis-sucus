@@ -15,8 +15,10 @@
   <main>
     <section id="species-info-section">
   <img id="species-photo-display" src="" alt="Foto especie" style="max-width: 300px; height: auto; border-radius: 10px;" />
-  <h2 id="species-name-display">Nombre especie</h2>
-  <button id="edit-species-btn">Editar</button>
+ <div style="display: flex; align-items: center; gap: 0.5rem;">
+  <h1 id="species-name-display" style="margin: 0;"></h1>
+  <button id="edit-species-btn" class="small-button">✏️</button>
+</div>
 
   <div id="edit-species-form" class="hidden">
     <input type="text" id="edit-species-name" placeholder="Nuevo nombre" />
