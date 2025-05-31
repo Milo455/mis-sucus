@@ -34,12 +34,17 @@
     </div>
   </div>
     <!-- Modal Calendario -->
-  <div id="calendar-modal" class="modal hidden">
-    <div class="modal-content">
-      <span id="close-calendar-modal" class="close">&times;</span>
-      <h2>Calendario</h2>
-      <div id="calendar-container"></div>
-      <div id="add-event-form" class="mt-4">
+<div id="calendar-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="close-calendar">&times;</span>
+    <h2>Calendario</h2>
+    <div id="calendar-container"></div>
+    <h3>Eventos</h3>
+    <ul id="event-list"></ul>
+    <button id="open-add-event-modal" class="btn">Agregar evento</button>
+  </div>
+</div>
+
   <h3>Agregar evento</h3>
   
   <label for="event-date">Fecha:</label>
