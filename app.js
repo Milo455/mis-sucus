@@ -180,6 +180,18 @@ document.getElementById('save-event').addEventListener('click', async () => {
     }
   });
 
+// Mostrar modal al hacer clic en el botón flotante
+document.getElementById('open-event-modal').addEventListener('click', () => {
+  document.getElementById('event-modal').style.display = 'block';
+});
+
+// Cerrar modal al hacer clic fuera del contenido
+window.addEventListener('click', (event) => {
+  const modal = document.getElementById('event-modal');
+  if (event.target === modal) {
+    modal.style.display = 'none';
+  }
+});
 
   // Cerrar modal Calendario
   btnCloseCalendar.addEventListener('click', () => {
