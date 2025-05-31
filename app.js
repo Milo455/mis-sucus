@@ -96,16 +96,22 @@ if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
       return;
     }
     snap.forEach(doc => {
-      const data = doc.data();
-      plantsMap.set(doc.id, data); // Guardamos en el mapa
-      const li = document.createElement('li');
-li.innerHTML = `
-  <span>${data.name}</span>
-  <button class="delete-species-btn" data-id="${doc.id}" style="margin-left: 10px;">❌</button>
-`;
-speciesList.appendChild(li);
+  const data = doc.data();
+  plantsMap.set(doc.id, data); // Guardamos en el mapa
 
-    });
+  const card = document.createElement('div');
+  card.className = 'species-card';
+  card.innerHTML = `
+    <img src="${data.photo}" alt="${data.name}">
+    <div class="species-card-name">${data.name}</div>
+  `;
+  card.addEventListener('click', () => {
+    window.location.href = `species.html?id=${doc.id}`;
+  });
+
+  speciesList.appendChild(card);
+});
+
     document.querySelectorAll('.delete-species-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
     const id = btn.getAttribute('data-id');
