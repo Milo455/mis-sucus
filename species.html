@@ -14,15 +14,21 @@
 
   <main>
     <section id="species-info-section">
-      <img id="species-photo" src="" alt="Foto especie" style="max-width: 100%; border-radius: 10px;"/>
-      <input type="file" id="edit-species-photo" accept="image/*" />
-      <input type="text" id="edit-species-name" />
-      <button id="save-species-edit">Guardar cambios</button>
-      <button id="delete-species" style="color: red;">Eliminar especie</button>
-    </section>
+  <img id="species-photo-display" src="" alt="Foto especie" style="max-width: 100%; border-radius: 10px;" />
+  <h2 id="species-name-display">Nombre especie</h2>
+  <button id="edit-species-btn">Editar</button>
+
+  <div id="edit-species-form" class="hidden">
+    <input type="text" id="edit-species-name" placeholder="Nuevo nombre" />
+    <input type="file" id="edit-species-photo" accept="image/*" />
+    <button id="save-species-edit">Guardar cambios</button>
+    <button id="delete-species" style="color: red;">Eliminar especie</button>
+  </div>
+</section>
+
 
     <section>
-      <h2>Plantas de esta especie</h2>
+      <h2>Plantas</h2>
       <ul id="plant-list"></ul>
       <button id="add-plant-btn">➕ Agregar Planta</button>
     </section>
