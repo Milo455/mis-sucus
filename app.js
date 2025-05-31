@@ -140,33 +140,6 @@ btnCalendar.addEventListener('click', async () => {
       option.textContent = data.name;
       plantSelect.appendChild(option);
     });
-// Guardar evento
-  const date = document.getElementById('event-date').value;
-  const type = document.getElementById('event-type').value;
-  const plantId = document.getElementById('event-plant').value;
-
-  if (!date || !type || !plantId) {
-    alert('Completa todos los campos.');
-    return;
-  }
-
-  try {
-await addDoc(collection(db, 'events'), {
-  date,
-  type,
-  plantId,
-  createdAt: new Date()
-});
-const snapEv = await getDocs(collection(db, 'events'));
-eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
-renderCalendar();
-renderEventList();
-  document.getElementById('event-date').value = '';
-  document.getElementById('event-type').value = 'Riego'; // o tu valor por defecto
-  document.getElementById('event-plant').selectedIndex = 0;
-
-    alert('Evento guardado correctamente.');
-    document.getElementById('event-date').value = '';
 
   } catch (err) {
     console.error('Error al guardar el evento:', err);
