@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('DOMContentLoaded', () => {
 
   // luego todas las demás funciones, incluida cargarEspecies(), pueden usar plantsMap
-  ...
 });
 
   const btnAddSpecies    = document.getElementById('btnAddSpecies');
