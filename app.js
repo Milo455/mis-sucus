@@ -206,7 +206,10 @@ try {
   const snapEv = await getDocs(collection(db, 'events'));
   eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
   renderCalendar();
+ if (!modalCalendar.classList.contains('hidden')) {
   renderEventList();
+}
+
 
   // Resetear formulario
   eventDateInput.value = new Date().toISOString().split('T')[0];
