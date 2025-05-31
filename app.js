@@ -184,22 +184,23 @@ document.getElementById('close-add-event').addEventListener('click', () => {
 saveEventBtn.addEventListener('click', async () => {
   const date = eventDateInput.value;
 const type = eventTypeSelect.value;
-const selectedOptions = [...eventPlantSelect.selectedOptions];
+const selectedCheckboxes = [...document.querySelectorAll('input[name="plant-checkbox"]:checked')];
 
-if (!date || !type || selectedOptions.length === 0) {
+if (!date || !type || selectedCheckboxes.length === 0) {
   alert('Completa todos los campos y selecciona al menos una planta.');
   return;
 }
 
 try {
-  for (const opt of selectedOptions) {
-    await addDoc(collection(db, 'events'), {
-      date,
-      type,
-      plantId: opt.value,
-      createdAt: new Date()
-    });
-  }
+  for (const chk of selectedCheckboxes) {
+  await addDoc(collection(db, 'events'), {
+    date,
+    type,
+    plantId: chk.value,
+    createdAt: new Date()
+  });
+}
+
 
   // Recargar eventos y calendario
   const snapEv = await getDocs(collection(db, 'events'));
