@@ -61,9 +61,11 @@
       <option value="Revisión">Revisión</option>
     </select><br>
 
-<label for="event-plant">Plantas:</label>
-<select id="event-plant" multiple size="4" style="max-height: 100px; overflow-y: auto;"></select><br>
-<small>Pulsa Ctrl (Windows) o Cmd (Mac) para seleccionar varias</small>
+<label>Selecciona plantas:</label>
+<div id="plant-checkboxes" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 0.5rem; border-radius: 5px;">
+  <!-- Aquí irán los checkboxes generados dinámicamente -->
+</div>
+
 
     <button id="save-event" class="mt-2">Guardar evento</button>
   </div>
