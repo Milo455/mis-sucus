@@ -119,9 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let eventsData = [];
 
 btnCalendar.addEventListener('click', async () => {
-  // Verificar si plantsMap está vacío
   if (plantsMap.size === 0) {
-    await cargarEspecies(); // Carga las especies y llena plantsMap
+    await cargarEspecies();
   }
 
   modalCalendar.classList.remove('hidden');
@@ -131,296 +130,73 @@ btnCalendar.addEventListener('click', async () => {
     eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
     renderCalendar();
 
-    // Poblar selector de plantas en el formulario de eventos
     const plantSelect = document.getElementById('event-plant');
-    plantSelect.innerHTML = ''; // Limpiar opciones anteriores
+    plantSelect.innerHTML = '';
     plantsMap.forEach((data, id) => {
       const option = document.createElement('option');
       option.value = id;
       option.textContent = data.name;
       plantSelect.appendChild(option);
     });
-// Guardar evento
-  const date = document.getElementById('event-date').value;
-  const type = document.getElementById('event-type').value;
-  const plantId = document.getElementById('event-plant').value;
-
-  if (!date || !type || !plantId) {
-    alert('Completa todos los campos.');
-    return;
-  }
-
-  try {
-await addDoc(collection(db, 'events'), {
-  date,
-  type,
-  plantId,
-  createdAt: new Date()
-});
-const snapEv = await getDocs(collection(db, 'events'));
-eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
-renderCalendar();
-renderEventList();
-  document.getElementById('event-date').value = '';
-  document.getElementById('event-type').value = 'Riego'; // o tu valor por defecto
-  document.getElementById('event-plant').selectedIndex = 0;
-
-    alert('Evento guardado correctamente.');
-    document.getElementById('event-date').value = '';
 
   } catch (err) {
-    console.error('Error al guardar el evento:', err);
-    alert('Error al guardar el evento.');
+    console.error('Error cargando eventos:', err);
+    calendarContainer.innerHTML = '<p>Error al cargar el calendario.</p>';
   }
 });
-
-    } catch (err) {
-      console.error('Error cargando eventos:', err);
-      calendarContainer.innerHTML = '<p>Error al cargar el calendario.</p>';
-    }
-  });
 
 // Abrir modal de agregar evento
 document.getElementById('open-event-modal').addEventListener('click', () => {
   document.getElementById('add-event-modal').classList.remove('hidden');
 });
 
-
 // Cerrar modal de agregar evento
 document.getElementById('close-add-event').addEventListener('click', () => {
   document.getElementById('add-event-modal').classList.add('hidden');
 });
 
+// Cerrar modal Calendario
+btnCloseCalendar.addEventListener('click', () => {
+  modalCalendar.classList.add('hidden');
+  calendarContainer.innerHTML = '';
+  eventsList.innerHTML = '';
+});
 
-  // Cerrar modal Calendario
-  btnCloseCalendar.addEventListener('click', () => {
-    modalCalendar.classList.add('hidden');
-    calendarContainer.innerHTML = '';
-    eventsList.innerHTML = '';
-  });
-// Guardar evento (solo una vez)
+// Guardar evento (solo una vez, corregido y con soporte para varias plantas)
 saveEventBtn.addEventListener('click', async () => {
   const date = eventDateInput.value;
   const type = eventTypeSelect.value;
-  const plantId = eventPlantSelect.value;
+  const selectedPlantIds = Array.from(eventPlantSelect.selectedOptions).map(opt => opt.value);
 
-  if (!date || !type || !plantId) {
+  if (!date || !type || selectedPlantIds.length === 0) {
     alert('Completa todos los campos.');
     return;
   }
 
   try {
-    await addDoc(collection(db, 'events'), {
-      date,
-      type,
-      plantId,
-      createdAt: new Date()
-    });
+    for (const plantId of selectedPlantIds) {
+      await addDoc(collection(db, 'events'), {
+        date,
+        type,
+        plantId,
+        createdAt: new Date()
+      });
+    }
 
-    // Recargar eventos y calendario
     const snapEv = await getDocs(collection(db, 'events'));
     eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
     renderCalendar();
     renderEventList();
 
-    // Resetear formulario
     eventDateInput.value = '';
     eventTypeSelect.value = 'Riego';
-    eventPlantSelect.selectedIndex = 0;
+    eventPlantSelect.selectedIndex = -1;
 
-    // Cerrar modal
     document.getElementById('add-event-modal').classList.add('hidden');
 
-    alert('Evento guardado correctamente.');
+    alert('Evento(s) guardado(s) correctamente.');
   } catch (err) {
     console.error('Error al guardar el evento:', err);
     alert('Error al guardar el evento.');
   }
 });
-
-  // 🔽 Aquí empieza la función fuera del addEventListener
-  function renderCalendar() {
-  calendarContainer.innerHTML = '';
-  eventsList.innerHTML = '';
-
-  let currentDate = new Date();
-  if (renderCalendar.current) currentDate = renderCalendar.current;
-
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-
-  // Encabezado con nombre del mes
-  const mesNombre = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(currentDate);
-  const tituloMes = document.createElement('h2');
-  tituloMes.textContent = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1);
-  tituloMes.style.textAlign = 'center';
-  calendarContainer.appendChild(tituloMes);
-
-  // Botones anterior y siguiente
-  const nav = document.createElement('div');
-  nav.style.display = 'flex';
-  nav.style.justifyContent = 'space-between';
-  nav.style.margin = '0.5rem 0';
-
-  const btnPrev = document.createElement('button');
-  btnPrev.textContent = '← Mes anterior';
-  btnPrev.onclick = () => {
-    renderCalendar.current = new Date(year, month - 1, 1);
-    renderCalendar();
-  };
-
-  const btnNext = document.createElement('button');
-  btnNext.textContent = 'Mes siguiente →';
-  btnNext.onclick = () => {
-    renderCalendar.current = new Date(year, month + 1, 1);
-    renderCalendar();
-  };
-
-  nav.appendChild(btnPrev);
-  nav.appendChild(btnNext);
-  calendarContainer.appendChild(nav);
-
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const daysNames = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
-
-  const table = document.createElement('table');
-  const thead = document.createElement('thead');
-  const trHead = document.createElement('tr');
-  daysNames.forEach(d => {
-    const th = document.createElement('th');
-    th.textContent = d;
-    trHead.appendChild(th);
-  });
-  thead.appendChild(trHead);
-  table.appendChild(thead);
-
-  const tbody = document.createElement('tbody');
-  let tr = document.createElement('tr');
-  for (let i = 0; i < firstDay; i++) {
-    tr.appendChild(document.createElement('td'));
-  }
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    if (tr.children.length === 7) {
-      tbody.appendChild(tr);
-      tr = document.createElement('tr');
-    }
-
-    const td = document.createElement('td');
-    td.textContent = day;
-
-    const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const hasEvents = eventsData.some(e => e.date === dayStr);
-
-    if (hasEvents) {
-      td.classList.add('has-event');
-      td.addEventListener('click', () => mostrarEventosPorDia(dayStr));
-    }
-
-    tr.appendChild(td);
-  }
-
-  tbody.appendChild(tr);
-  table.appendChild(tbody);
-  calendarContainer.appendChild(table);
-}
-function renderEventList() {
-  eventsList.innerHTML = '<h3>Eventos</h3>';
-  const list = document.createElement('ul');
-
-  eventsData.forEach(e => {
-    const li = document.createElement('li');
-    const planta = plantsMap.get(e.plantId);
-    const nombre = planta ? planta.name : `(ID: ${e.plantId})`;
-
-    li.innerHTML = `
-      <strong><a href="#" class="plant-link" data-id="${e.plantId}">${nombre}</a></strong>
-      - ${e.type} - ${e.date}
-      <button class="delete-event" data-id="${e.id}">❌</button>
-    `;
-    list.appendChild(li);
-  });
-
-  eventsList.appendChild(list);
-
-  document.querySelectorAll('.delete-event').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.getAttribute('data-id');
-      await deleteDoc(doc(db, 'events', id));
-      const snapEv = await getDocs(collection(db, 'events'));
-      eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderCalendar();
-      renderEventList();
-    });
-  });
-}
-
-
- function mostrarEventosPorDia(dateStr) {
-  const contenedor = document.getElementById('eventos-dia');
-if (!contenedor) {
-  console.error('No se encontró el contenedor #eventos-dia en el DOM.');
-  return;
-}
-
-  contenedor.innerHTML = ''; // limpia contenido anterior
-
-  const eventosFiltrados = eventsData.filter(ev => ev.date === dateStr);
-
-  if (eventosFiltrados.length === 0) {
-    contenedor.innerHTML = '<p>No hay eventos para este día.</p>';
-    return;
-  }
-
-  eventosFiltrados.forEach(ev => {
-    const div = document.createElement('div');
-    div.className = 'evento-dia';
-
-    // Obtener nombre de la planta desde plantsMap usando plantId
-    const planta = plantsMap.get(ev.plantId);
-    const nombrePlanta = planta ? planta.name : '(Planta no encontrada)';
-
-    const enlace = document.createElement('a');
-    enlace.href = '#';
-    enlace.textContent = nombrePlanta;
-    enlace.addEventListener('click', (e) => {
-      e.preventDefault();
-      mostrarCartaPlanta(ev.plantId); // Aquí pasamos el ID para mostrar info
-    });
-
-    const spanTipo = document.createElement('span');
-    spanTipo.textContent = ` - ${ev.type}`;
-
-    const btnEliminar = document.createElement('button');
-    btnEliminar.textContent = 'Eliminar';
-    btnEliminar.addEventListener('click', async () => {
-      if (confirm('¿Estás seguro de eliminar este evento?')) {
-        await eliminarEvento(ev.id);
-        // Recarga datos después de eliminar
-        const snapEv = await getDocs(collection(db, 'events'));
-        eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderCalendar();
-        mostrarEventosPorDia(dateStr); // actualizar vista del día
-      }
-    });
-
-    div.appendChild(enlace);
-    div.appendChild(spanTipo);
-    div.appendChild(btnEliminar);
-    contenedor.appendChild(div);
-  });
-}
-
-async function eliminarEvento(id) {
-  await deleteDoc(doc(db, 'events', id));
-}
-
-
-
-  // carga inicial
-  cargarEspecies();
-});
-
-
-
