@@ -33,6 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const eventTypeSelect  = document.getElementById('event-type');
   const eventPlantSelect = document.getElementById('event-plant');
   const saveEventBtn     = document.getElementById('save-event');
+  // Asignar fecha actual al campo de evento
+const hoy = new Date().toISOString().split('T')[0];
+eventDateInput.value = hoy;
 
   // Comprueba que todo exista
    if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
@@ -169,41 +172,44 @@ document.getElementById('close-add-event').addEventListener('click', () => {
 // Guardar evento (solo una vez)
 saveEventBtn.addEventListener('click', async () => {
   const date = eventDateInput.value;
-  const type = eventTypeSelect.value;
-  const plantId = eventPlantSelect.value;
+const type = eventTypeSelect.value;
+const selectedOptions = [...eventPlantSelect.selectedOptions];
 
-  if (!date || !type || !plantId) {
-    alert('Completa todos los campos.');
-    return;
-  }
+if (!date || !type || selectedOptions.length === 0) {
+  alert('Completa todos los campos y selecciona al menos una planta.');
+  return;
+}
 
-  try {
+try {
+  for (const opt of selectedOptions) {
     await addDoc(collection(db, 'events'), {
       date,
       type,
-      plantId,
+      plantId: opt.value,
       createdAt: new Date()
     });
-
-    // Recargar eventos y calendario
-    const snapEv = await getDocs(collection(db, 'events'));
-    eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderCalendar();
-    renderEventList();
-
-    // Resetear formulario
-    eventDateInput.value = '';
-    eventTypeSelect.value = 'Riego';
-    eventPlantSelect.selectedIndex = 0;
-
-    // Cerrar modal
-    document.getElementById('add-event-modal').classList.add('hidden');
-
-    alert('Evento guardado correctamente.');
-  } catch (err) {
-    console.error('Error al guardar el evento:', err);
-    alert('Error al guardar el evento.');
   }
+
+  // Recargar eventos y calendario
+  const snapEv = await getDocs(collection(db, 'events'));
+  eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderCalendar();
+  renderEventList();
+
+  // Resetear formulario
+  eventDateInput.value = new Date().toISOString().split('T')[0];
+  eventTypeSelect.value = 'Riego';
+  [...eventPlantSelect.options].forEach(opt => opt.selected = false);
+
+  // Cerrar modal
+  document.getElementById('add-event-modal').classList.add('hidden');
+
+  alert('Evento(s) guardado(s) correctamente.');
+} catch (err) {
+  console.error('Error al guardar los eventos:', err);
+  alert('Error al guardar los eventos.');
+}
+
 });
 
   // 🔽 Aquí empieza la función fuera del addEventListener
