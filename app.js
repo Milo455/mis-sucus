@@ -1,5 +1,5 @@
-
 // app.js
+
 import { db } from './firebase-init.js';
 import {
   collection,
@@ -12,14 +12,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const plantsMap = new Map();
-
-  // — Referencias del DOM —
-  document.addEventListener('DOMContentLoaded', () => {
-
-  // luego todas las demás funciones, incluida cargarEspecies(), pueden usar plantsMap
-    
-});
-
+// — ÚNICO document.addEventListener('DOMContentLoaded') que va a envolver TODO —
+document.addEventListener('DOMContentLoaded', () => {
+  // — Referencias del DOM (YA dentro de DOMContentLoaded) —
   const btnAddSpecies    = document.getElementById('btnAddSpecies');
   const btnCalendar      = document.getElementById('open-calendar');
   const btnScanQR        = document.getElementById('scan-qr');
@@ -34,17 +29,17 @@ const plantsMap = new Map();
   const calendarContainer= document.getElementById('calendar-container');
   const eventsList       = document.getElementById('events-list');
 
-  const eventDateInput = document.getElementById('event-date');
-const eventTypeSelect = document.getElementById('event-type');
-const eventPlantSelect = document.getElementById('event-plant');
-const saveEventBtn = document.getElementById('save-event');
-
+  const eventDateInput   = document.getElementById('event-date');
+  const eventTypeSelect  = document.getElementById('event-type');
+  const eventPlantSelect = document.getElementById('event-plant');
+  const saveEventBtn     = document.getElementById('save-event');
 
   // Comprueba que todo exista
-  if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
+   if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
       !speciesList || !modalSpecies || !btnCloseSpecies ||
       !btnSaveSpecies || !modalCalendar || !btnCloseCalendar ||
-      !calendarContainer || !eventsList) {
+      !calendarContainer || !eventsList || !eventDateInput ||
+      !eventTypeSelect || !eventPlantSelect || !saveEventBtn) {
     console.error('Faltan elementos en el DOM. Verifica tus IDs.');
     return;
   }
@@ -325,21 +320,59 @@ function renderEventList() {
 
 
  function mostrarEventosPorDia(dateStr) {
-  eventsList.innerHTML = `<h3>Eventos para ${dateStr}</h3>`;
-  const list = document.createElement('ul');
+  const contenedor = document.getElementById('eventos-dia');
+  contenedor.innerHTML = ''; // limpia contenido anterior
 
-  eventsData
-    .filter(e => e.date === dateStr)
-    .forEach(e => {
-      const li = document.createElement('li');
-      const planta = plantsMap.get(e.plantId);
-      const nombre = planta ? planta.name : `(ID: ${e.plantId})`;
-      li.textContent = `${e.type} de planta ${nombre}`;
-      list.appendChild(li);
+  const eventosFiltrados = eventsData.filter(ev => ev.date === dateStr);
+
+  if (eventosFiltrados.length === 0) {
+    contenedor.innerHTML = '<p>No hay eventos para este día.</p>';
+    return;
+  }
+
+  eventosFiltrados.forEach(ev => {
+    const div = document.createElement('div');
+    div.className = 'evento-dia';
+
+    // Obtener nombre de la planta desde plantsMap usando plantId
+    const planta = plantsMap.get(ev.plantId);
+    const nombrePlanta = planta ? planta.name : '(Planta no encontrada)';
+
+    const enlace = document.createElement('a');
+    enlace.href = '#';
+    enlace.textContent = nombrePlanta;
+    enlace.addEventListener('click', (e) => {
+      e.preventDefault();
+      mostrarCartaPlanta(ev.plantId); // Aquí pasamos el ID para mostrar info
     });
 
-  eventsList.appendChild(list);
+    const spanTipo = document.createElement('span');
+    spanTipo.textContent = ` - ${ev.type}`;
+
+    const btnEliminar = document.createElement('button');
+    btnEliminar.textContent = 'Eliminar';
+    btnEliminar.addEventListener('click', async () => {
+      if (confirm('¿Estás seguro de eliminar este evento?')) {
+        await eliminarEvento(ev.id);
+        // Recarga datos después de eliminar
+        const snapEv = await getDocs(collection(db, 'events'));
+        eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderCalendar();
+        mostrarEventosPorDia(dateStr); // actualizar vista del día
+      }
+    });
+
+    div.appendChild(enlace);
+    div.appendChild(spanTipo);
+    div.appendChild(btnEliminar);
+    contenedor.appendChild(div);
+  });
 }
+
+async function eliminarEvento(id) {
+  await deleteDoc(doc(db, 'events', id));
+}
+
 
 
   // carga inicial
