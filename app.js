@@ -99,9 +99,28 @@ if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
       const data = doc.data();
       plantsMap.set(doc.id, data); // Guardamos en el mapa
       const li = document.createElement('li');
-      li.textContent = data.name;
-      speciesList.appendChild(li);
+li.innerHTML = `
+  <span>${data.name}</span>
+  <button class="delete-species-btn" data-id="${doc.id}" style="margin-left: 10px;">❌</button>
+`;
+speciesList.appendChild(li);
+
     });
+    document.querySelectorAll('.delete-species-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.getAttribute('data-id');
+    if (confirm('¿Seguro que quieres eliminar esta especie?')) {
+      try {
+        await deleteDoc(doc(db, 'species', id));
+        cargarEspecies(); // Recarga la lista de especies después de eliminar
+      } catch (err) {
+        console.error('Error al eliminar especie:', err);
+        alert('No se pudo eliminar la especie.');
+      }
+    }
+  });
+});
+
   } catch (err) {
     console.error('Error cargando especies:', err);
     speciesList.innerHTML = '<li>Error al cargar especies.</li>';
