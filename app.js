@@ -38,14 +38,16 @@ const hoy = new Date().toISOString().split('T')[0];
 eventDateInput.value = hoy;
 
   // Comprueba que todo exista
-   if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
-      !speciesList || !modalSpecies || !btnCloseSpecies ||
-      !btnSaveSpecies || !modalCalendar || !btnCloseCalendar ||
-      !calendarContainer || !eventsList || !eventDateInput ||
-      !eventTypeSelect || !eventPlantSelect || !saveEventBtn) {
-    console.error('Faltan elementos en el DOM. Verifica tus IDs.');
-    return;
-  }
+if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
+    !speciesList || !modalSpecies || !btnCloseSpecies ||
+    !btnSaveSpecies || !modalCalendar || !btnCloseCalendar ||
+    !calendarContainer || !eventsList || !eventDateInput ||
+    !eventTypeSelect || !saveEventBtn ||
+    !document.getElementById('plant-checkboxes')) {
+  console.error('Faltan elementos en el DOM. Verifica tus IDs.');
+  return;
+}
+
 
   // — Modal Agregar Especie —
   btnAddSpecies.addEventListener('click', () => {
