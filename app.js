@@ -321,6 +321,11 @@ function renderEventList() {
 
  function mostrarEventosPorDia(dateStr) {
   const contenedor = document.getElementById('eventos-dia');
+if (!contenedor) {
+  console.error('No se encontró el contenedor #eventos-dia en el DOM.');
+  return;
+}
+
   contenedor.innerHTML = ''; // limpia contenido anterior
 
   const eventosFiltrados = eventsData.filter(ev => ev.date === dateStr);
