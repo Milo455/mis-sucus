@@ -28,10 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCloseCalendar = document.getElementById('close-calendar');
   const calendarContainer= document.getElementById('calendar-container');
   const eventsList       = document.getElementById('events-list');
-
   const eventDateInput   = document.getElementById('event-date');
   const eventTypeSelect  = document.getElementById('event-type');
-  const eventPlantSelect = document.getElementById('event-plant');
   const saveEventBtn     = document.getElementById('save-event');
   // Asignar fecha actual al campo de evento
 const hoy = new Date().toISOString().split('T')[0];
