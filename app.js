@@ -135,14 +135,25 @@ btnCalendar.addEventListener('click', async () => {
     renderCalendar();
 
     // Poblar selector de plantas en el formulario de eventos
-    const plantSelect = document.getElementById('event-plant');
-    plantSelect.innerHTML = ''; // Limpiar opciones anteriores
-    plantsMap.forEach((data, id) => {
-      const option = document.createElement('option');
-      option.value = id;
-      option.textContent = data.name;
-      plantSelect.appendChild(option);
-    });
+const checkboxContainer = document.getElementById('plant-checkboxes');
+checkboxContainer.innerHTML = ''; // Limpiar antes
+
+plantsMap.forEach((data, id) => {
+  const label = document.createElement('label');
+  label.style.display = 'block';
+  label.style.marginBottom = '4px';
+
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.value = id;
+  checkbox.name = 'plant-checkbox';
+
+  label.appendChild(checkbox);
+  label.appendChild(document.createTextNode(' ' + data.name));
+
+  checkboxContainer.appendChild(label);
+});
+
 
   } catch (err) {
     console.error('Error al guardar el evento:', err);
