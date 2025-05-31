@@ -141,7 +141,6 @@ btnCalendar.addEventListener('click', async () => {
       plantSelect.appendChild(option);
     });
 // Guardar evento
-document.getElementById('save-event').addEventListener('click', async () => {
   const date = document.getElementById('event-date').value;
   const type = document.getElementById('event-type').value;
   const plantId = document.getElementById('event-plant').value;
@@ -199,6 +198,45 @@ document.getElementById('close-add-event').addEventListener('click', () => {
     calendarContainer.innerHTML = '';
     eventsList.innerHTML = '';
   });
+// Guardar evento (solo una vez)
+saveEventBtn.addEventListener('click', async () => {
+  const date = eventDateInput.value;
+  const type = eventTypeSelect.value;
+  const plantId = eventPlantSelect.value;
+
+  if (!date || !type || !plantId) {
+    alert('Completa todos los campos.');
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'events'), {
+      date,
+      type,
+      plantId,
+      createdAt: new Date()
+    });
+
+    // Recargar eventos y calendario
+    const snapEv = await getDocs(collection(db, 'events'));
+    eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCalendar();
+    renderEventList();
+
+    // Resetear formulario
+    eventDateInput.value = '';
+    eventTypeSelect.value = 'Riego';
+    eventPlantSelect.selectedIndex = 0;
+
+    // Cerrar modal
+    document.getElementById('add-event-modal').classList.add('hidden');
+
+    alert('Evento guardado correctamente.');
+  } catch (err) {
+    console.error('Error al guardar el evento:', err);
+    alert('Error al guardar el evento.');
+  }
+});
 
   // 🔽 Aquí empieza la función fuera del addEventListener
   function renderCalendar() {
