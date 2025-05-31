@@ -2,57 +2,28 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mis Sucus - Planta</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Detalle de Planta</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="manifest" href="manifest.json" />
 </head>
 <body>
   <header>
-    <button onclick="goBack()">⬅️ Volver</button>
-    <h1 id="plant-name">Nombre de la Planta</h1>
+    <h1>🌱 Planta</h1>
+    <button onclick="window.history.back()">← Volver</button>
   </header>
+
   <main>
-    <section id="plant-main-info">
-      <img id="latest-photo" src="" alt="Última foto" />
-      <p><strong>Último riego:</strong> <span id="last-watering">---</span></p>
-      <button onclick="openEventModal()">Agregar Evento</button>
-      <button onclick="openPhotoModal()">Foto</button>
-      <button onclick="viewAlbum()">Álbum</button>
-      <button onclick="viewHistory()">Historia</button>
-      <button onclick="printQR()">Imprimir QR</button>
-      <button onclick="deletePlant()" class="danger">Eliminar Planta</button>
+    <section id="plant-info-section">
+      <input type="text" id="plant-name" placeholder="Nombre de la planta" />
+      <label for="plant-notes">Notas o detalles:</label>
+      <textarea id="plant-notes" placeholder="Notas adicionales..." rows="4"></textarea>
+      <button id="save-plant">Guardar</button>
     </section>
 
-    <section id="event-modal" class="modal hidden">
-      <h2>Registrar Evento</h2>
-      <select id="event-type">
-        <option value="Riego">Riego</option>
-        <option value="Trasplante">Trasplante</option>
-        <option value="Limpieza">Limpieza</option>
-        <option value="Chequeo de humedad">Chequeo de humedad</option>
-        <option value="Otro">Otro</option>
-      </select>
-      <button onclick="saveEvent()">Guardar Evento</button>
-      <button onclick="closeEventModal()">Cancelar</button>
-    </section>
-
-    <section id="photo-modal" class="modal hidden">
-      <h2>Tomar Foto</h2>
-      <input type="file" accept="image/*" capture="environment" id="photo-input" />
-      <textarea id="photo-comment" placeholder="Comentario..."></textarea>
-      <button onclick="savePhoto()">Guardar Foto</button>
-      <button onclick="closePhotoModal()">Cancelar</button>
-    </section>
-
-    <section id="album-view" class="hidden">
-      <h2>Álbum de la Planta</h2>
-      <div id="photo-album"></div>
-    </section>
-
-    <section id="history-view" class="hidden">
-      <h2>Historia de la Planta</h2>
-      <ul id="event-history"></ul>
+    <section>
+      <h2>Historial</h2>
+      <ul id="plant-history"></ul>
+      <button id="add-history-entry">➕ Agregar Evento</button>
     </section>
   </main>
 
