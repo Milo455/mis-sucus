@@ -6,12 +6,13 @@ import {
   addDoc,
   getDocs,
   query,
-  orderBy
+  orderBy,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 const plantsMap = new Map();
 
-
-document.addEventListener('DOMContentLoaded', () => {
   // — Referencias del DOM —
   document.addEventListener('DOMContentLoaded', () => {
 
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSaveSpecies   = document.getElementById('save-species');
 
   const modalCalendar    = document.getElementById('calendar-modal');
-  const btnCloseCalendar = document.getElementById('close-calendar-modal');
+  const btnCloseCalendar = document.getElementById('close-calendar');
   const calendarContainer= document.getElementById('calendar-container');
   const eventsList       = document.getElementById('events-list');
 
@@ -156,17 +157,20 @@ document.getElementById('save-event').addEventListener('click', async () => {
   }
 
   try {
-    await addDoc(collection(db, 'events'), {
-      const snapEv = await getDocs(collection(db, 'events'));
+await addDoc(collection(db, 'events'), {
+  date,
+  type,
+  plantId,
+  createdAt: new Date()
+});
+const snapEv = await getDocs(collection(db, 'events'));
 eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
 renderCalendar();
 renderEventList();
+  document.getElementById('event-date').value = '';
+  document.getElementById('event-type').value = 'Riego'; // o tu valor por defecto
+  document.getElementById('event-plant').selectedIndex = 0;
 
-      date,
-      type,
-      plantId,
-      createdAt: new Date()
-    });
     alert('Evento guardado correctamente.');
     document.getElementById('event-date').value = '';
 
@@ -183,9 +187,10 @@ renderEventList();
   });
 
 // Abrir modal de agregar evento
-document.getElementById('open-add-event-modal').addEventListener('click', () => {
+document.getElementById('open-event-modal').addEventListener('click', () => {
   document.getElementById('add-event-modal').style.display = 'block';
 });
+
 
 // Cerrar modal de agregar evento
 document.getElementById('close-add-event').addEventListener('click', () => {
