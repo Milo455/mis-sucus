@@ -157,6 +157,11 @@ document.getElementById('save-event').addEventListener('click', async () => {
 
   try {
     await addDoc(collection(db, 'events'), {
+      const snapEv = await getDocs(collection(db, 'events'));
+eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
+renderCalendar();
+renderEventList();
+
       date,
       type,
       plantId,
@@ -164,10 +169,7 @@ document.getElementById('save-event').addEventListener('click', async () => {
     });
     alert('Evento guardado correctamente.');
     document.getElementById('event-date').value = '';
-    renderCalendar.current = new Date(date);
-    const snapEv = await getDocs(collection(db, 'events'));
-    eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderCalendar();
+
   } catch (err) {
     console.error('Error al guardar el evento:', err);
     alert('Error al guardar el evento.');
@@ -284,6 +286,36 @@ document.getElementById('close-add-event').addEventListener('click', () => {
   tbody.appendChild(tr);
   table.appendChild(tbody);
   calendarContainer.appendChild(table);
+}
+function renderEventList() {
+  eventsList.innerHTML = '<h3>Eventos</h3>';
+  const list = document.createElement('ul');
+
+  eventsData.forEach(e => {
+    const li = document.createElement('li');
+    const planta = plantsMap.get(e.plantId);
+    const nombre = planta ? planta.name : `(ID: ${e.plantId})`;
+
+    li.innerHTML = `
+      <strong><a href="#" class="plant-link" data-id="${e.plantId}">${nombre}</a></strong>
+      - ${e.type} - ${e.date}
+      <button class="delete-event" data-id="${e.id}">❌</button>
+    `;
+    list.appendChild(li);
+  });
+
+  eventsList.appendChild(list);
+
+  document.querySelectorAll('.delete-event').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-id');
+      await deleteDoc(doc(db, 'events', id));
+      const snapEv = await getDocs(collection(db, 'events'));
+      eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderCalendar();
+      renderEventList();
+    });
+  });
 }
 
 
