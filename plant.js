@@ -74,12 +74,14 @@ formEdit.addEventListener('submit', async (e) => {
       updates.photo = e.target.result;
       await updateDoc(doc(db, 'plants', plantId), updates);
       modalEdit.classList.add('hidden');
+      btnDelete.classList.add('hidden');
       cargarPlanta();
     };
     reader.readAsDataURL(newPhotoFile);
   } else {
     await updateDoc(doc(db, 'plants', plantId), updates);
     modalEdit.classList.add('hidden');
+    btnDelete.classList.add('hidden');
     cargarPlanta();
   }
 });
