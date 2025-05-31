@@ -144,13 +144,18 @@ btnCalendar.addEventListener('click', async () => {
       plantSelect.appendChild(option);
     });
 // Guardar evento
-document.getElementById('save-event').addEventListener('click', async () => {
+const saveEventBtn = document.getElementById('save-event');
+
+saveEventBtn.onclick = async () => {
+  saveEventBtn.disabled = true; // Evita múltiples clics
+
   const date = document.getElementById('event-date').value;
   const type = document.getElementById('event-type').value;
   const plantId = document.getElementById('event-plant').value;
 
   if (!date || !type || !plantId) {
     alert('Completa todos los campos.');
+    saveEventBtn.disabled = false;
     return;
   }
 
@@ -161,23 +166,23 @@ document.getElementById('save-event').addEventListener('click', async () => {
       plantId,
       createdAt: new Date()
     });
+
     alert('Evento guardado correctamente.');
     document.getElementById('event-date').value = '';
-    renderCalendar.current = new Date(date);
+
+    renderCalendar.current = new Date(date); // Actualizar vista del calendario
+
     const snapEv = await getDocs(collection(db, 'events'));
     eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
     renderCalendar();
   } catch (err) {
     console.error('Error al guardar el evento:', err);
     alert('Error al guardar el evento.');
+  } finally {
+    saveEventBtn.disabled = false; // Rehabilitar el botón siempre
   }
-});
+};
 
-    } catch (err) {
-      console.error('Error cargando eventos:', err);
-      calendarContainer.innerHTML = '<p>Error al cargar el calendario.</p>';
-    }
-  });
 
   // Cerrar modal Calendario
   btnCloseCalendar.addEventListener('click', () => {
