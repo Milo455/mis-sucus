@@ -109,10 +109,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     snap.forEach(doc => {
   const data = doc.data();
   const li = document.createElement('li');
-  li.innerHTML = `
-    <a href="plant.html?id=${doc.id}">${data.name}</a>
-    <button data-id="${doc.id}" class="delete-plant-btn">❌</button>
-  `;
+li.innerHTML = `
+  <a href="plant.html?id=${doc.id}">${data.name}</a>
+  <button data-id="${doc.id}" class="delete-plant-btn" style="display: none; margin-left: 8px;">❌</button>
+`;
   plantList.appendChild(li);
 });
 
@@ -138,7 +138,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     cargarPlantas();
   });
+let modoEdicionPlantas = false;
 
+const toggleBtn = document.getElementById('toggle-edit-mode');
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', () => {
+    modoEdicionPlantas = !modoEdicionPlantas;
+
+    document.querySelectorAll('.delete-plant-btn').forEach(btn => {
+      btn.style.display = modoEdicionPlantas ? 'inline' : 'none';
+    });
+
+    toggleBtn.textContent = modoEdicionPlantas ? '✅ Terminar Edición' : '🛠️ Editar Plantas';
+  });
+}
   await cargarEspecie();
   await cargarPlantas();
 });
