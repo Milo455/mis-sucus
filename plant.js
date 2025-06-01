@@ -30,6 +30,14 @@ async function cargarPlanta() {
 
   const ref = doc(db, 'plants', plantId);
   const snap = await getDoc(ref);
+  const plantData = snap.data();
+const speciesRef = doc(db, 'species', plantData.speciesId);
+const speciesSnap = await getDoc(speciesRef);
+const speciesName = speciesSnap.exists() ? speciesSnap.data().name : 'Especie no encontrada';
+
+const speciesEl = document.getElementById('species-name');
+speciesEl.textContent = `Especie: ${speciesName}`;
+
 
   if (!snap.exists()) {
     alert('Planta no encontrada');
