@@ -13,8 +13,9 @@ const plantId = params.get('id');
 const photoEl = document.getElementById('plant-photo');
 const nameEl = document.getElementById('plant-name');
 const dateEl = document.getElementById('plant-date');
-const btnDelete = document.getElementById('delete-plant');
 const btnEdit = document.getElementById('edit-plant');
+const btnDeleteInside = document.getElementById('delete-plant-inside');
+const btnCancelEdit = document.getElementById('cancel-edit-plant');
 const modalEdit = document.getElementById('edit-plant-modal');
 const formEdit = document.getElementById('edit-plant-form');
 const inputName = document.getElementById('edit-plant-name');
@@ -44,11 +45,6 @@ async function cargarPlanta() {
   inputName.value = data.name;
 }
 
-btnDelete.addEventListener('click', async () => {
-  if (confirm('¿Eliminar esta planta?')) {
-    await deleteDoc(doc(db, 'plants', plantId));
-    window.location.href = 'index.html';
-  }
 });
 
 btnEdit.addEventListener('click', () => {
@@ -87,6 +83,17 @@ formEdit.addEventListener('submit', async (e) => {
 });
 
 cargarPlanta();
+btnCancelEdit.addEventListener('click', () => {
+  modalEdit.classList.add('hidden');
+});
+
+btnDeleteInside.addEventListener('click', async () => {
+  if (confirm('¿Eliminar esta planta?')) {
+    await deleteDoc(doc(db, 'plants', plantId));
+    window.history.back(); // Volver a la especie
+  }
+});
+
 document.getElementById('back-to-species').addEventListener('click', async () => {
   const ref = doc(db, 'plants', plantId);
   const snap = await getDoc(ref);
