@@ -119,7 +119,7 @@ li.innerHTML = `
   plantList.appendChild(li);
 });
 
-    document.querySelectorAll('.delete-plant').forEach(btn => {
+    document.querySelectorAll('.delete-plant-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-id');
         if (confirm('¿Eliminar esta planta?')) {
@@ -155,6 +155,12 @@ if (toggleBtn) {
     toggleBtn.textContent = modoEdicionPlantas ? '✅ Terminar Edición' : '🛠️ Editar Plantas';
   });
 }
+  function mostrarOcultarBotonesEliminar() {
+  document.querySelectorAll('.delete-plant-btn').forEach(btn => {
+    btn.style.display = modoEdicion ? 'inline' : 'none';
+  });
+}
+
   await cargarEspecie();
   await cargarPlantas();
 });
