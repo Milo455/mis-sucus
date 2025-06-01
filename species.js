@@ -52,8 +52,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Mostrar formulario de edición
   editBtn.addEventListener('click', () => {
-    editForm.classList.toggle('hidden');
-  });
+  editForm.classList.toggle('hidden');
+  modoEdicion = !modoEdicion;
+  mostrarOcultarBotonesEliminar();
+});
+
 
   // Guardar edición
   saveBtn.addEventListener('click', async () => {
