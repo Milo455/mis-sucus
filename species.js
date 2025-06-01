@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Mostrar formulario de edición
+  let modoEdicion = false;
   editBtn.addEventListener('click', () => {
   editForm.classList.toggle('hidden');
   modoEdicion = !modoEdicion;
