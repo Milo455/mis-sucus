@@ -45,7 +45,7 @@ async function cargarPlanta() {
   inputName.value = data.name;
 }
 
-);
+;
 
 btnEdit.addEventListener('click', () => {
   modalEdit.classList.remove('hidden');
