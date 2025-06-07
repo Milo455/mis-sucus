@@ -1,7 +1,7 @@
 // species.js
 
 import { db } from './firebase-init.js';
-import { resizeImage } from './app.js';
+import { resizeImage } from './resizeImage.js';
 import {
   doc,
   getDoc,
