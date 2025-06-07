@@ -120,7 +120,7 @@ ul#species-list li:hover {
 button {
   transition: background-color 0.3s;
 }
-/* Caledario */
+/* Calendario */
 #calendar-container table {
   border-collapse: collapse;
   width: 100%;
