@@ -1,6 +1,7 @@
 // species.js
 
 import { db } from './firebase-init.js';
+import { resizeImage } from './app.js';
 import {
   doc,
   getDoc,
@@ -33,6 +34,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const deleteBtn = document.getElementById('delete-species');
   const plantList = document.getElementById('plant-list');
   const addPlantBtn = document.getElementById('add-plant-btn');
+  const plantModal = document.getElementById('plant-modal');
+  const closePlantModal = document.getElementById('close-plant-modal');
+  const savePlantBtn = document.getElementById('save-plant');
+  const plantNameInput = document.getElementById('plant-name');
+  const plantNotesInput = document.getElementById('plant-notes');
+  const plantPhotoInput = document.getElementById('plant-photo');
 
   let speciesData = null;
 
@@ -132,15 +139,39 @@ li.innerHTML = `
   }
 
   // Agregar planta
-  addPlantBtn.addEventListener('click', async () => {
-    const nombre = prompt('Nombre de la nueva planta:');
-    if (!nombre) return;
-    await addDoc(collection(db, 'plants'), {
-      name: nombre,
-      speciesId,
-      createdAt: new Date()
-    });
-    cargarPlantas();
+  addPlantBtn.addEventListener('click', () => {
+    plantModal.classList.remove('hidden');
+  });
+
+  closePlantModal.addEventListener('click', () => {
+    plantModal.classList.add('hidden');
+  });
+
+  savePlantBtn.addEventListener('click', async () => {
+    const nombre = plantNameInput.value.trim();
+    const notas = plantNotesInput.value.trim();
+
+    if (!nombre || plantPhotoInput.files.length === 0) {
+      alert('Completa todos los campos y selecciona una foto.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async e => {
+      await addDoc(collection(db, 'plants'), {
+        name: nombre,
+        notes: notas,
+        speciesId,
+        photo: await resizeImage(e.target.result, 800),
+        createdAt: new Date()
+      });
+      plantModal.classList.add('hidden');
+      plantNameInput.value = '';
+      plantNotesInput.value = '';
+      plantPhotoInput.value = '';
+      cargarPlantas();
+    };
+    reader.readAsDataURL(plantPhotoInput.files[0]);
   });
   function mostrarOcultarBotonesEliminar() {
   document.querySelectorAll('.delete-plant-btn').forEach(btn => {
