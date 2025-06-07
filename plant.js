@@ -1,6 +1,6 @@
 import { db } from './firebase-init.js';
 // Utility to resize uploaded images
-import { resizeImage } from './app.js';
+import { resizeImage } from './resizeImage.js';
 import {
   doc,
   getDoc,
