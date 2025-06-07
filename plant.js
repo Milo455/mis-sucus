@@ -1,4 +1,5 @@
 import { db } from './firebase-init.js';
+import { resizeImage } from './app.js';
 import {
   doc,
   getDoc,
@@ -86,11 +87,11 @@ formEdit.addEventListener('submit', async (e) => {
   if (newPhotoFile) {
     const reader = new FileReader();
     reader.onload = async (e) => {
-      updates.photo = e.target.result;
+      updates.photo = await resizeImage(e.target.result, 800);
       await updateDoc(doc(db, 'plants', plantId), updates);
       nameEl.textContent = newName;
       notesEl.textContent = newNotes;
-      photoEl.src = e.target.result;
+      photoEl.src = updates.photo;
       inputPhoto.value = '';
       modalEdit.classList.add('hidden');
     };
