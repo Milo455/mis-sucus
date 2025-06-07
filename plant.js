@@ -87,20 +87,32 @@ formEdit.addEventListener('submit', async (e) => {
     const reader = new FileReader();
     reader.onload = async (e) => {
       updates.photo = e.target.result;
-      await updateDoc(doc(db, 'plants', plantId), updates);
-      nameEl.textContent = newName;
-      notesEl.textContent = newNotes;
-      photoEl.src = e.target.result;
-      inputPhoto.value = '';
-      modalEdit.classList.add('hidden');
+      try {
+        await updateDoc(doc(db, 'plants', plantId), updates);
+        nameEl.textContent = newName;
+        notesEl.textContent = newNotes;
+        photoEl.src = e.target.result;
+        inputPhoto.value = '';
+        modalEdit.classList.add('hidden');
+        alert('Planta actualizada con éxito');
+      } catch (error) {
+        console.error('Error al guardar la planta:', error);
+        alert('Error al guardar la planta. Inténtalo de nuevo.');
+      }
     };
     reader.readAsDataURL(newPhotoFile);
   } else {
-    await updateDoc(doc(db, 'plants', plantId), updates);
-    nameEl.textContent = newName;
-    notesEl.textContent = newNotes;
-    inputPhoto.value = '';
-    modalEdit.classList.add('hidden');
+    try {
+      await updateDoc(doc(db, 'plants', plantId), updates);
+      nameEl.textContent = newName;
+      notesEl.textContent = newNotes;
+      inputPhoto.value = '';
+      modalEdit.classList.add('hidden');
+      alert('Planta actualizada con éxito');
+    } catch (error) {
+      console.error('Error al guardar la planta:', error);
+      alert('Error al guardar la planta. Inténtalo de nuevo.');
+    }
   }
 });
 
