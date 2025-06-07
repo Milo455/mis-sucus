@@ -33,6 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const eventDateInput   = document.getElementById('event-date');
   const eventTypeSelect  = document.getElementById('event-type');
   const saveEventBtn     = document.getElementById('save-event');
+  const qrModal          = document.getElementById('qr-modal');
+  const closeQrModal     = document.getElementById('close-qr-modal');
+  let qrScanner;
   // Asignar fecha actual al campo de evento
 const hoy = new Date().toISOString().split('T')[0];
 eventDateInput.value = hoy;
@@ -43,6 +46,7 @@ if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
     !btnSaveSpecies || !modalCalendar || !btnCloseCalendar ||
     !calendarContainer || !eventsList || !eventDateInput ||
     !eventTypeSelect || !saveEventBtn ||
+    !qrModal || !closeQrModal ||
     !document.getElementById('plant-checkboxes')) {
   console.error('Faltan elementos en el DOM. Verifica tus IDs.');
   return;
@@ -141,8 +145,26 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
     // Aquí llamaremos a abrir calendario
   });
   btnScanQR.addEventListener('click', () => {
-    console.log('Clic en Escanear QR');
-    // Aquí llamaremos a escanear QR
+    qrModal.classList.remove('hidden');
+    if (!qrScanner) {
+      qrScanner = new Html5Qrcode('qr-reader');
+    }
+    qrScanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 250 },
+      (text) => {
+        qrScanner.stop().then(() => {
+          qrModal.classList.add('hidden');
+          window.location.href = `plant.html?id=${text}`;
+        }).catch(err => console.error('Error al detener scanner', err));
+      },
+      () => {}
+    ).catch(err => console.error('Error iniciando scanner', err));
+  });
+
+  closeQrModal.addEventListener('click', () => {
+    if (qrScanner) {
+      qrScanner.stop().catch(err => console.error('Error al detener scanner', err));
+    }
+    qrModal.classList.add('hidden');
   });
 
   // — Modal Calendario —
