@@ -22,6 +22,8 @@ const inputName = document.getElementById('edit-plant-name');
 const inputPhoto = document.getElementById('edit-plant-photo');
 
 let currentSpeciesId; // speciesId for redirects
+let originalName = '';
+let originalPhoto = '';
 
 // Cargar planta
 async function cargarPlanta() {
@@ -53,6 +55,8 @@ async function cargarPlanta() {
   photoEl.src = data.photo;
 
   inputName.value = data.name;
+  originalName = data.name;
+  originalPhoto = data.photo;
 }
 
 btnEdit.addEventListener('click', () => {
@@ -93,6 +97,8 @@ formEdit.addEventListener('submit', async (e) => {
 
 cargarPlanta();
 btnCancelEdit.addEventListener('click', () => {
+  inputName.value = originalName;
+  inputPhoto.value = '';
   modalEdit.classList.add('hidden');
 });
 
