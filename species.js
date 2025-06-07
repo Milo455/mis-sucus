@@ -142,20 +142,6 @@ li.innerHTML = `
     });
     cargarPlantas();
   });
-let modoEdicionPlantas = false;
-
-const toggleBtn = document.getElementById('toggle-edit-mode');
-if (toggleBtn) {
-  toggleBtn.addEventListener('click', () => {
-    modoEdicionPlantas = !modoEdicionPlantas;
-
-    document.querySelectorAll('.delete-plant-btn').forEach(btn => {
-      btn.style.display = modoEdicionPlantas ? 'inline' : 'none';
-    });
-
-    toggleBtn.textContent = modoEdicionPlantas ? '✅ Terminar Edición' : '🛠️ Editar Plantas';
-  });
-}
   function mostrarOcultarBotonesEliminar() {
   document.querySelectorAll('.delete-plant-btn').forEach(btn => {
     btn.style.display = modoEdicion ? 'inline' : 'none';
