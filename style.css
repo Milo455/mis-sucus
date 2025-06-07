@@ -91,6 +91,8 @@ main {
   max-width: 500px;
   position: relative;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-content input,
@@ -143,6 +145,12 @@ button {
 }
 #calendar-container td.has-event:hover {
   background-color: #a7f3d0;
+}
+
+#events-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
 }
 
 #events-list ul {
