@@ -21,6 +21,8 @@ const formEdit = document.getElementById('edit-plant-form');
 const inputName = document.getElementById('edit-plant-name');
 const inputPhoto = document.getElementById('edit-plant-photo');
 
+let currentSpeciesId; // speciesId for redirects
+
 // Cargar planta
 async function cargarPlanta() {
   if (!plantId) {
@@ -30,14 +32,6 @@ async function cargarPlanta() {
 
   const ref = doc(db, 'plants', plantId);
   const snap = await getDoc(ref);
-  const plantData = snap.data();
-const speciesRef = doc(db, 'species', plantData.speciesId);
-const speciesSnap = await getDoc(speciesRef);
-const speciesName = speciesSnap.exists() ? speciesSnap.data().name : 'Especie no encontrada';
-
-const speciesEl = document.getElementById('species-name');
-speciesEl.textContent = `Especie: ${speciesName}`;
-
 
   if (!snap.exists()) {
     alert('Planta no encontrada');
@@ -45,7 +39,15 @@ speciesEl.textContent = `Especie: ${speciesName}`;
   }
 
   const data = snap.data();
-  const speciesId = data.speciesId;
+  currentSpeciesId = data.speciesId;
+
+  const speciesRef = doc(db, 'species', currentSpeciesId);
+  const speciesSnap = await getDoc(speciesRef);
+  const speciesName = speciesSnap.exists() ? speciesSnap.data().name : 'Especie no encontrada';
+
+  const speciesEl = document.getElementById('species-name');
+  speciesEl.textContent = `Especie: ${speciesName}`;
+
   nameEl.textContent = data.name;
   dateEl.textContent = `Creada: ${new Date(data.createdAt.toDate()).toLocaleDateString()}`;
   photoEl.src = data.photo;
@@ -97,17 +99,13 @@ btnCancelEdit.addEventListener('click', () => {
 btnDeleteInside.addEventListener('click', async () => {
   if (confirm('¿Eliminar esta planta?')) {
     await deleteDoc(doc(db, 'plants', plantId));
-    window.history.back(); // Volver a la especie
+    window.location.href = `species.html?id=${currentSpeciesId}`;
   }
 });
 
-document.getElementById('back-to-species').addEventListener('click', async () => {
-  const ref = doc(db, 'plants', plantId);
-  const snap = await getDoc(ref);
-  if (snap.exists()) {
-    const data = snap.data();
-    const speciesId = data.speciesId;
-    window.location.href = `species.html?id=${speciesId}`;
+document.getElementById('back-to-species').addEventListener('click', () => {
+  if (currentSpeciesId) {
+    window.location.href = `species.html?id=${currentSpeciesId}`;
   } else {
     window.location.href = 'index.html';
   }
