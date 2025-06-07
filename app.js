@@ -178,6 +178,7 @@ btnCalendar.addEventListener('click', async () => {
     const snapEv = await getDocs(collection(db, 'events'));
     eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
     renderCalendar();
+    renderEventList();
 
     // Poblar selector de plantas en el formulario de eventos
 const checkboxContainer = document.getElementById('plant-checkboxes');
@@ -224,6 +225,7 @@ document.getElementById('close-add-event').addEventListener('click', () => {
     modalCalendar.classList.add('hidden');
     calendarContainer.innerHTML = '';
     eventsList.innerHTML = '';
+    document.getElementById('eventos-dia').innerHTML = '';
   });
 // Guardar evento (solo una vez)
 saveEventBtn.addEventListener('click', async () => {
