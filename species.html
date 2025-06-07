@@ -36,6 +36,18 @@
     </section>
   </main>
 
+  <!-- Modal Agregar Planta -->
+  <div id="plant-modal" class="modal hidden">
+    <div class="modal-content">
+      <span id="close-plant-modal" class="close">&times;</span>
+      <h2>Agregar Planta</h2>
+      <input type="text" id="plant-name" placeholder="Nombre de la planta" />
+      <textarea id="plant-notes" placeholder="Notas y características"></textarea>
+      <input type="file" id="plant-photo" accept="image/*" />
+      <button id="save-plant">Guardar</button>
+    </div>
+  </div>
+
   <script type="module" src="species.js"></script>
 </body>
 </html>

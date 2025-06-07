@@ -19,11 +19,14 @@ const btnCancelEdit = document.getElementById('cancel-edit-plant');
 const modalEdit = document.getElementById('edit-plant-modal');
 const formEdit = document.getElementById('edit-plant-form');
 const inputName = document.getElementById('edit-plant-name');
+const inputNotes = document.getElementById('edit-plant-notes');
 const inputPhoto = document.getElementById('edit-plant-photo');
+const notesEl = document.getElementById('plant-notes');
 
 let currentSpeciesId; // speciesId for redirects
 let originalName = '';
 let originalPhoto = '';
+let originalNotes = '';
 
 // Cargar planta
 async function cargarPlanta() {
@@ -53,10 +56,13 @@ async function cargarPlanta() {
   nameEl.textContent = data.name;
   dateEl.textContent = `Creada: ${new Date(data.createdAt.toDate()).toLocaleDateString()}`;
   photoEl.src = data.photo;
+  notesEl.textContent = data.notes || '';
 
   inputName.value = data.name;
+  inputNotes.value = data.notes || '';
   originalName = data.name;
   originalPhoto = data.photo;
+  originalNotes = data.notes || '';
 }
 
 btnEdit.addEventListener('click', () => {
@@ -67,6 +73,7 @@ btnEdit.addEventListener('click', () => {
 formEdit.addEventListener('submit', async (e) => {
   e.preventDefault();
   const newName = inputName.value.trim();
+  const newNotes = inputNotes.value.trim();
   const newPhotoFile = inputPhoto.files[0];
 
   if (!newName) {
@@ -74,7 +81,7 @@ formEdit.addEventListener('submit', async (e) => {
     return;
   }
 
-  const updates = { name: newName };
+  const updates = { name: newName, notes: newNotes };
 
   if (newPhotoFile) {
     const reader = new FileReader();
@@ -82,6 +89,7 @@ formEdit.addEventListener('submit', async (e) => {
       updates.photo = e.target.result;
       await updateDoc(doc(db, 'plants', plantId), updates);
       nameEl.textContent = newName;
+      notesEl.textContent = newNotes;
       photoEl.src = e.target.result;
       inputPhoto.value = '';
       modalEdit.classList.add('hidden');
@@ -90,6 +98,7 @@ formEdit.addEventListener('submit', async (e) => {
   } else {
     await updateDoc(doc(db, 'plants', plantId), updates);
     nameEl.textContent = newName;
+    notesEl.textContent = newNotes;
     inputPhoto.value = '';
     modalEdit.classList.add('hidden');
   }
@@ -98,6 +107,7 @@ formEdit.addEventListener('submit', async (e) => {
 cargarPlanta();
 btnCancelEdit.addEventListener('click', () => {
   inputName.value = originalName;
+  inputNotes.value = originalNotes;
   inputPhoto.value = '';
   modalEdit.classList.add('hidden');
 });
