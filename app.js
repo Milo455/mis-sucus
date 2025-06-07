@@ -136,10 +136,6 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
 }
 
   // Botones para abrir el calendario y escanear QR
-  btnCalendar.addEventListener('click', () => {
-    console.log('Clic en Calendario');
-    // Aquí llamaremos a abrir calendario
-  });
   btnScanQR.addEventListener('click', () => {
     console.log('Clic en Escanear QR');
     // Aquí llamaremos a escanear QR
