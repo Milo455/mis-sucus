@@ -53,11 +53,9 @@ speciesEl.textContent = `Especie: ${speciesName}`;
   inputName.value = data.name;
 }
 
-;
-
 btnEdit.addEventListener('click', () => {
   modalEdit.classList.remove('hidden');
-  btnDelete.classList.remove('hidden');
+  btnDeleteInside.classList.remove('hidden');
 });
 
 formEdit.addEventListener('submit', async (e) => {
@@ -109,32 +107,5 @@ document.getElementById('back-to-species').addEventListener('click', async () =>
     window.location.href = `species.html?id=${speciesId}`;
   } else {
     window.location.href = 'index.html';
-  }
-});
-formEdit.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const newName = inputName.value.trim();
-  const newPhotoFile = inputPhoto.files[0];
-
-  if (!newName) {
-    alert('El nombre no puede estar vacío');
-    return;
-  }
-
-  const updates = { name: newName };
-
-  if (newPhotoFile) {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      updates.photo = e.target.result;
-      await updateDoc(doc(db, 'plants', plantId), updates);
-      modalEdit.classList.add('hidden');
-      cargarPlanta();
-    };
-    reader.readAsDataURL(newPhotoFile);
-  } else {
-    await updateDoc(doc(db, 'plants', plantId), updates);
-    modalEdit.classList.add('hidden');
-    cargarPlanta();
   }
 });
