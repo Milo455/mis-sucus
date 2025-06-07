@@ -75,14 +75,17 @@ formEdit.addEventListener('submit', async (e) => {
     reader.onload = async (e) => {
       updates.photo = e.target.result;
       await updateDoc(doc(db, 'plants', plantId), updates);
+      nameEl.textContent = newName;
+      photoEl.src = e.target.result;
+      inputPhoto.value = '';
       modalEdit.classList.add('hidden');
-      cargarPlanta();
     };
     reader.readAsDataURL(newPhotoFile);
   } else {
     await updateDoc(doc(db, 'plants', plantId), updates);
+    nameEl.textContent = newName;
+    inputPhoto.value = '';
     modalEdit.classList.add('hidden');
-    cargarPlanta();
   }
 });
 
