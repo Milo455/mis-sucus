@@ -358,6 +358,13 @@ function renderEventList() {
       - ${e.type} - ${e.date}
       <button class="delete-event" data-id="${e.id}">❌</button>
     `;
+
+    const link = li.querySelector('.plant-link');
+    link.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      mostrarCartaPlanta(link.dataset.id);
+    });
+
     list.appendChild(li);
   });
 
@@ -403,9 +410,10 @@ if (!contenedor) {
     const enlace = document.createElement('a');
     enlace.href = '#';
     enlace.textContent = nombrePlanta;
+    enlace.dataset.id = ev.plantId;
     enlace.addEventListener('click', (e) => {
       e.preventDefault();
-      mostrarCartaPlanta(ev.plantId); // Aquí pasamos el ID para mostrar info
+      mostrarCartaPlanta(enlace.dataset.id); // Aquí pasamos el ID para mostrar info
     });
 
     const spanTipo = document.createElement('span');
@@ -433,6 +441,10 @@ if (!contenedor) {
 
 async function eliminarEvento(id) {
   await deleteDoc(doc(db, 'events', id));
+}
+
+function mostrarCartaPlanta(id) {
+  window.location.href = `plant.html?id=${id}`;
 }
 
 
