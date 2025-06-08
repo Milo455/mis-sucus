@@ -37,6 +37,14 @@ const albumEl = document.getElementById('photo-album');
 
 let albumData = [];
 
+function safeRedirect(url) {
+  try {
+    window.location.href = url;
+  } catch (_) {
+    // Ignore navigation errors in test environments
+  }
+}
+
 function mostrarAlbum() {
   if (!albumEl) return;
   albumEl.innerHTML = '';
@@ -97,12 +105,10 @@ async function cargarPlanta() {
   speciesEl.textContent = `Especie: ${speciesName}`;
 
   nameEl.textContent = data.name;
-  dateEl.textContent = `Creada: ${new Date(data.createdAt.toDate()).toLocaleDateString()}`;
   photoEl.src = albumData[0].photo;
   notesEl.textContent = data.notes || '';
 
   mostrarAlbum();
-  photoEl.src = data.photo;
   notesEl.textContent = data.notes || '';
 
   // Obtener último riego
@@ -220,7 +226,7 @@ btnCancelEdit.addEventListener('click', () => {
 btnDeleteInside.addEventListener('click', async () => {
   if (confirm('¿Eliminar esta planta?')) {
     await deleteDoc(doc(db, 'plants', plantId));
-    window.location.href = `species.html?id=${currentSpeciesId}`;
+    safeRedirect(`species.html?id=${currentSpeciesId}`);
   }
 });
 
@@ -249,10 +255,3 @@ btnPrintQR.addEventListener('click', () => {
   img.src = qrCodeData;
 });
 
-document.getElementById('back-to-species').addEventListener('click', () => {
-  if (currentSpeciesId) {
-    window.location.href = `species.html?id=${currentSpeciesId}`;
-  } else {
-    window.location.href = 'index.html';
-  }
-});

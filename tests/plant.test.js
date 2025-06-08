@@ -69,7 +69,6 @@ describe('plant.js', () => {
       <input id="edit-plant-photo" type="file" />
       <span id="plant-notes"></span>
       <span id="species-name"></span>
-      <button id="back-to-species"></button>
       <button id="add-photo-record"></button>
       <input id="new-photo-input" type="file" />
       <div id="photo-album"></div>
