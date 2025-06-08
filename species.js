@@ -118,14 +118,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     snap.forEach(doc => {
-  const data = doc.data();
-  const li = document.createElement('li');
-li.innerHTML = `
-  <a href="plant.html?id=${doc.id}">${data.name}</a>
-  <button data-id="${doc.id}" class="delete-plant-btn" style="display: none; margin-left: 8px;">❌</button>
-`;
-  plantList.appendChild(li);
-});
+      const data = doc.data();
+      const li = document.createElement('li');
+      li.className = 'plant-item';
+      li.innerHTML = `
+        <img src="${data.photo}" alt="${data.name}">
+        <a href="plant.html?id=${doc.id}" class="plant-name">${data.name}</a>
+        <button data-id="${doc.id}" class="delete-plant-btn" style="display:none; margin-left:8px;">❌</button>
+      `;
+      plantList.appendChild(li);
+    });
 
     document.querySelectorAll('.delete-plant-btn').forEach(btn => {
       btn.addEventListener('click', async () => {

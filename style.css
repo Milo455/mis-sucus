@@ -249,6 +249,38 @@ button {
   font-weight: bold;
 }
 
+/* Lista de plantas dentro de una especie */
+#plant-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.plant-item {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.plant-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 0.75rem;
+}
+
+.plant-item .plant-name {
+  flex-grow: 1;
+  text-decoration: none;
+  color: inherit;
+  font-weight: bold;
+}
+
 /* Responsive tweaks for iPhone-sized screens */
 @media (max-width: 480px) {
   header {
