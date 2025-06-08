@@ -9,6 +9,12 @@ const mockDoc = jest.fn((...args) => ({ args }));
 const mockGetDoc = jest.fn();
 const mockDeleteDoc = jest.fn();
 const mockUpdateDoc = jest.fn();
+const mockCollection = jest.fn();
+const mockQuery = jest.fn();
+const mockWhere = jest.fn();
+const mockOrderBy = jest.fn();
+const mockLimit = jest.fn();
+const mockGetDocs = jest.fn();
 
 
 const flushPromises = () => new Promise(res => setTimeout(res, 0));
@@ -21,20 +27,37 @@ describe('plant.js', () => {
     global.document = newDoc;
     global.TextEncoder = global.TextEncoder || require('util').TextEncoder;
     global.TextDecoder = global.TextDecoder || require('util').TextDecoder;
+    mockGetDoc.mockReset();
+    mockGetDocs.mockReset();
+    mockDeleteDoc.mockReset();
+    mockUpdateDoc.mockReset();
+    mockCollection.mockReset();
+    mockQuery.mockReset();
+    mockWhere.mockReset();
+    mockOrderBy.mockReset();
+    mockLimit.mockReset();
+
     jest.unstable_mockModule('../firestore-web.js', () => ({
       doc: mockDoc,
       getDoc: mockGetDoc,
       deleteDoc: mockDeleteDoc,
-      updateDoc: mockUpdateDoc
+      updateDoc: mockUpdateDoc,
+      collection: mockCollection,
+      query: mockQuery,
+      where: mockWhere,
+      orderBy: mockOrderBy,
+      limit: mockLimit,
+      getDocs: mockGetDocs
     }));
 
     jest.unstable_mockModule('../firebase-init.js', () => ({
       db: {}
     }));
+    mockGetDocs.mockResolvedValue({ empty: true, docs: [], forEach: () => {} });
     document.body.innerHTML = `
       <img id="plant-photo" />
       <span id="plant-name"></span>
-      <span id="plant-date"></span>
+      <span id="last-watering-count"></span>
       <button id="edit-plant"></button>
       <button id="delete-plant-inside"></button>
       <button id="print-qr"></button>

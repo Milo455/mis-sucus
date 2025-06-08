@@ -5,7 +5,13 @@ import {
   doc,
   getDoc,
   deleteDoc,
-  updateDoc
+  updateDoc,
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs
 } from './firestore-web.js';
 
 // Obtener ID desde la URL
@@ -14,7 +20,7 @@ const plantId = params.get('id');
 
 const photoEl = document.getElementById('plant-photo');
 const nameEl = document.getElementById('plant-name');
-const dateEl = document.getElementById('plant-date');
+const lastWateringEl = document.getElementById('last-watering-count');
 const btnEdit = document.getElementById('edit-plant');
 const btnDeleteInside = document.getElementById('delete-plant-inside');
 const btnPrintQR = document.getElementById('print-qr');
@@ -96,6 +102,32 @@ async function cargarPlanta() {
   notesEl.textContent = data.notes || '';
 
   mostrarAlbum();
+  photoEl.src = data.photo;
+  notesEl.textContent = data.notes || '';
+
+  // Obtener último riego
+  try {
+    const q = query(
+      collection(db, 'events'),
+      where('plantId', '==', plantId),
+      where('type', '==', 'Riego'),
+      orderBy('date', 'desc'),
+      limit(1)
+    );
+    const snapEv = await getDocs(q);
+    if (snapEv.empty) {
+      lastWateringEl.textContent = 'Sin riegos registrados';
+    } else {
+      const lastDateStr = snapEv.docs[0].data().date;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const lastDate = new Date(`${lastDateStr}T00:00:00`);
+      const diffDays = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+      lastWateringEl.textContent = `Último riego: hace ${diffDays} días`;
+    }
+  } catch (err) {
+    console.error('Error obteniendo último riego:', err);
+  }
 
   inputName.value = data.name;
   inputNotes.value = data.notes || '';
@@ -197,9 +229,24 @@ btnPrintQR.addEventListener('click', () => {
     alert('QR no disponible');
     return;
   }
-  const w = window.open('');
-  w.document.write(`<img src="${qrCodeData}" style="width:200px;height:200px" onload="window.print()">`);
-  w.document.close();
+  const canvas = document.createElement('canvas');
+  const qrSize = 200;
+  const textHeight = 40;
+  canvas.width = qrSize;
+  canvas.height = qrSize + textHeight;
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0, qrSize, qrSize);
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(nameEl.textContent, qrSize / 2, qrSize + 25);
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `${nameEl.textContent}-qr.png`;
+    link.click();
+  };
+  img.src = qrCodeData;
 });
 
 document.getElementById('back-to-species').addEventListener('click', () => {
