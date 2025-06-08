@@ -22,9 +22,14 @@ header {
   color: var(--white);
   padding: 1rem;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   border-bottom: 3px solid var(--secondary-color);
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5rem;
 }
 
 header button {
@@ -242,4 +247,32 @@ button {
 .species-card-name {
   margin-top: 0.5rem;
   font-weight: bold;
+}
+
+/* Responsive tweaks for iPhone-sized screens */
+@media (max-width: 480px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .acciones {
+    flex-direction: column;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  header button {
+    width: 100%;
+  }
+
+  .modal-content {
+    width: 95%;
+    max-width: 400px;
+    padding: 1rem;
+  }
+
+  .species-card img {
+    height: 80px;
+  }
 }
