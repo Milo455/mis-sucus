@@ -37,6 +37,7 @@ describe('plant.js', () => {
       <span id="plant-date"></span>
       <button id="edit-plant"></button>
       <button id="delete-plant-inside"></button>
+      <button id="print-qr"></button>
       <button id="cancel-edit-plant"></button>
       <div id="edit-plant-modal"></div>
       <form id="edit-plant-form"></form>
