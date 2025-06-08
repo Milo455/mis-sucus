@@ -171,9 +171,24 @@ btnPrintQR.addEventListener('click', () => {
     alert('QR no disponible');
     return;
   }
-  const w = window.open('');
-  w.document.write(`<img src="${qrCodeData}" style="width:200px;height:200px" onload="window.print()">`);
-  w.document.close();
+  const canvas = document.createElement('canvas');
+  const qrSize = 200;
+  const textHeight = 40;
+  canvas.width = qrSize;
+  canvas.height = qrSize + textHeight;
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0, qrSize, qrSize);
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(nameEl.textContent, qrSize / 2, qrSize + 25);
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `${nameEl.textContent}-qr.png`;
+    link.click();
+  };
+  img.src = qrCodeData;
 });
 
 document.getElementById('back-to-species').addEventListener('click', () => {
