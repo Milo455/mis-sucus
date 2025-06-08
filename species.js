@@ -158,13 +158,16 @@ li.innerHTML = `
 
     const reader = new FileReader();
     reader.onload = async e => {
-      await addDoc(collection(db, 'plants'), {
+      const resizedPhoto = await resizeImage(e.target.result, 800);
+      const docRef = await addDoc(collection(db, 'plants'), {
         name: nombre,
         notes: notas,
         speciesId,
-        photo: await resizeImage(e.target.result, 800),
+        photo: resizedPhoto,
         createdAt: new Date()
       });
+      const qr = new QRious({ value: docRef.id, size: 200 });
+      await updateDoc(doc(db, 'plants', docRef.id), { qrCode: qr.toDataURL() });
       plantModal.classList.add('hidden');
       plantNameInput.value = '';
       plantNotesInput.value = '';
