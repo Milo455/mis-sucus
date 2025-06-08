@@ -1,4 +1,5 @@
 import { db } from './firebase-init.js';
+import { resizeImage } from './app.js';
 // Utility to resize uploaded images
 import { resizeImage } from './resizeImage.js';
 import {
@@ -88,6 +89,12 @@ formEdit.addEventListener('submit', async (e) => {
   if (newPhotoFile) {
     const reader = new FileReader();
     reader.onload = async (e) => {
+      updates.photo = await resizeImage(e.target.result, 800);
+      await updateDoc(doc(db, 'plants', plantId), updates);
+      nameEl.textContent = newName;
+      notesEl.textContent = newNotes;
+      photoEl.src = updates.photo;
+
       try {
         updates.photo = await resizeImage(e.target.result, 800);
         await updateDoc(doc(db, 'plants', plantId), updates);
@@ -108,6 +115,7 @@ formEdit.addEventListener('submit', async (e) => {
       await updateDoc(doc(db, 'plants', plantId), updates);
       nameEl.textContent = newName;
       notesEl.textContent = newNotes;
+
       inputPhoto.value = '';
       modalEdit.classList.add('hidden');
       alert('Planta actualizada con éxito');
