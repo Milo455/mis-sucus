@@ -9,6 +9,7 @@ const mockDoc = jest.fn((...args) => ({ args }));
 const mockGetDoc = jest.fn();
 const mockDeleteDoc = jest.fn();
 const mockUpdateDoc = jest.fn();
+const mockAddDoc = jest.fn();
 const mockCollection = jest.fn();
 const mockQuery = jest.fn();
 const mockWhere = jest.fn();
@@ -31,6 +32,7 @@ describe('plant.js', () => {
     mockGetDocs.mockReset();
     mockDeleteDoc.mockReset();
     mockUpdateDoc.mockReset();
+    mockAddDoc.mockReset();
     mockCollection.mockReset();
     mockQuery.mockReset();
     mockWhere.mockReset();
@@ -42,6 +44,7 @@ describe('plant.js', () => {
       getDoc: mockGetDoc,
       deleteDoc: mockDeleteDoc,
       updateDoc: mockUpdateDoc,
+      addDoc: mockAddDoc,
       collection: mockCollection,
       query: mockQuery,
       where: mockWhere,
