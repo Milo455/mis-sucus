@@ -18,6 +18,7 @@ const nameEl = document.getElementById('plant-name');
 const dateEl = document.getElementById('plant-date');
 const btnEdit = document.getElementById('edit-plant');
 const btnDeleteInside = document.getElementById('delete-plant-inside');
+const btnPrintQR = document.getElementById('print-qr');
 const btnCancelEdit = document.getElementById('cancel-edit-plant');
 const modalEdit = document.getElementById('edit-plant-modal');
 const formEdit = document.getElementById('edit-plant-form');
@@ -30,6 +31,7 @@ let currentSpeciesId; // speciesId for redirects
 let originalName = '';
 let originalPhoto = '';
 let originalNotes = '';
+let qrCodeData = '';
 
 // Cargar planta
 async function cargarPlanta() {
@@ -48,6 +50,7 @@ async function cargarPlanta() {
 
   const data = snap.data();
   currentSpeciesId = data.speciesId;
+  qrCodeData = data.qrCode || '';
 
   const speciesRef = doc(db, 'species', currentSpeciesId);
   const speciesSnap = await getDoc(speciesRef);
@@ -139,6 +142,16 @@ btnDeleteInside.addEventListener('click', async () => {
     await deleteDoc(doc(db, 'plants', plantId));
     window.location.href = `species.html?id=${currentSpeciesId}`;
   }
+});
+
+btnPrintQR.addEventListener('click', () => {
+  if (!qrCodeData) {
+    alert('QR no disponible');
+    return;
+  }
+  const w = window.open('');
+  w.document.write(`<img src="${qrCodeData}" style="width:200px;height:200px" onload="window.print()">`);
+  w.document.close();
 });
 
 document.getElementById('back-to-species').addEventListener('click', () => {
