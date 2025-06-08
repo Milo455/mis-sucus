@@ -152,19 +152,6 @@ button {
   background-color: #a7f3d0;
 }
 
-#events-list {
-  max-height: 200px;
-  overflow-y: auto;
-  margin-bottom: 1rem;
-}
-
-#events-list ul {
-  list-style: none;
-  padding: 0;
-}
-#events-list li {
-  margin: 0.5rem 0;
-}
 #calendar-container button {
   background-color: var(--accent-color);
   color: var(--white);

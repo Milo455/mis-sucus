@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalCalendar    = document.getElementById('calendar-modal');
   const btnCloseCalendar = document.getElementById('close-calendar');
   const calendarContainer= document.getElementById('calendar-container');
-  const eventsList       = document.getElementById('events-list');
   const eventDateInput   = document.getElementById('event-date');
   const eventTypeSelect  = document.getElementById('event-type');
   const saveEventBtn     = document.getElementById('save-event');
@@ -44,7 +43,7 @@ eventDateInput.value = hoy;
 if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
     !speciesList || !modalSpecies || !btnCloseSpecies ||
     !btnSaveSpecies || !modalCalendar || !btnCloseCalendar ||
-    !calendarContainer || !eventsList || !eventDateInput ||
+    !calendarContainer || !eventDateInput ||
     !eventTypeSelect || !saveEventBtn ||
     !qrModal || !closeQrModal ||
     !document.getElementById('plant-checkboxes')) {
@@ -178,7 +177,7 @@ btnCalendar.addEventListener('click', async () => {
     const snapEv = await getDocs(collection(db, 'events'));
     eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
     renderCalendar();
-    renderEventList();
+
 
     // Poblar selector de plantas en el formulario de eventos
 const checkboxContainer = document.getElementById('plant-checkboxes');
@@ -224,7 +223,6 @@ document.getElementById('close-add-event').addEventListener('click', () => {
   btnCloseCalendar.addEventListener('click', () => {
     modalCalendar.classList.add('hidden');
     calendarContainer.innerHTML = '';
-    eventsList.innerHTML = '';
     document.getElementById('eventos-dia').innerHTML = '';
   });
 // Guardar evento (solo una vez)
@@ -253,9 +251,6 @@ try {
   const snapEv = await getDocs(collection(db, 'events'));
   eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
   renderCalendar();
- if (!modalCalendar.classList.contains('hidden')) {
-  renderEventList();
-}
 
 
   // Resetear formulario
@@ -279,7 +274,7 @@ selectedCheckboxes.forEach(cb => cb.checked = false);
   // 🔽 Aquí empieza la función fuera del addEventListener
   function renderCalendar() {
   calendarContainer.innerHTML = '';
-  eventsList.innerHTML = '';
+  document.getElementById('eventos-dia').innerHTML = '';
 
   let currentDate = new Date();
   if (renderCalendar.current) currentDate = renderCalendar.current;
@@ -350,11 +345,10 @@ selectedCheckboxes.forEach(cb => cb.checked = false);
 
     const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const hasEvents = eventsData.some(e => e.date === dayStr);
-
     if (hasEvents) {
       td.classList.add('has-event');
-      td.addEventListener('click', () => mostrarEventosPorDia(dayStr));
     }
+    td.addEventListener('click', () => mostrarEventosPorDia(dayStr));
 
     tr.appendChild(td);
   }
@@ -362,44 +356,6 @@ selectedCheckboxes.forEach(cb => cb.checked = false);
   tbody.appendChild(tr);
   table.appendChild(tbody);
   calendarContainer.appendChild(table);
-}
-function renderEventList() {
-  if (modalCalendar.classList.contains('hidden')) return;
-  eventsList.innerHTML = '<h3>Eventos</h3>';
-  const list = document.createElement('ul');
-
-  eventsData.forEach(e => {
-    const li = document.createElement('li');
-    const planta = plantsMap.get(e.plantId);
-    const nombre = planta ? planta.name : `(ID: ${e.plantId})`;
-
-    li.innerHTML = `
-      <strong><a href="#" class="plant-link" data-id="${e.plantId}">${nombre}</a></strong>
-      - ${e.type} - ${e.date}
-      <button class="delete-event" data-id="${e.id}">❌</button>
-    `;
-
-    const link = li.querySelector('.plant-link');
-    link.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      mostrarCartaPlanta(link.dataset.id);
-    });
-
-    list.appendChild(li);
-  });
-
-  eventsList.appendChild(list);
-
-  document.querySelectorAll('.delete-event').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.getAttribute('data-id');
-      await deleteDoc(doc(db, 'events', id));
-      const snapEv = await getDocs(collection(db, 'events'));
-      eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderCalendar();
-      renderEventList();
-    });
-  });
 }
 
 
