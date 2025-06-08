@@ -25,6 +25,28 @@ const inputName = document.getElementById('edit-plant-name');
 const inputNotes = document.getElementById('edit-plant-notes');
 const inputPhoto = document.getElementById('edit-plant-photo');
 const notesEl = document.getElementById('plant-notes');
+const addPhotoBtn = document.getElementById('add-photo-record');
+const newPhotoInput = document.getElementById('new-photo-input');
+const albumEl = document.getElementById('photo-album');
+
+let albumData = [];
+
+function mostrarAlbum() {
+  if (!albumEl) return;
+  albumEl.innerHTML = '';
+  albumData.forEach(item => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'album-item';
+    const img = document.createElement('img');
+    img.src = item.photo;
+    const span = document.createElement('span');
+    span.className = 'album-date';
+    span.textContent = item.date.toLocaleDateString();
+    wrapper.appendChild(img);
+    wrapper.appendChild(span);
+    albumEl.appendChild(wrapper);
+  });
+}
 
 let currentSpeciesId; // speciesId for redirects
 let originalName = '';
@@ -51,6 +73,16 @@ async function cargarPlanta() {
   currentSpeciesId = data.speciesId;
   qrCodeData = data.qrCode || '';
 
+  albumData = (data.album || []).map(a => ({
+    photo: a.photo,
+    date: a.date && a.date.toDate ? a.date.toDate() : a.date
+  }));
+  if (albumData.length === 0 && data.photo) {
+    albumData.push({ photo: data.photo, date: data.createdAt.toDate() });
+  }
+
+  albumData.sort((a, b) => b.date - a.date);
+
   const speciesRef = doc(db, 'species', currentSpeciesId);
   const speciesSnap = await getDoc(speciesRef);
   const speciesName = speciesSnap.exists() ? speciesSnap.data().name : 'Especie no encontrada';
@@ -60,8 +92,10 @@ async function cargarPlanta() {
 
   nameEl.textContent = data.name;
   dateEl.textContent = `Creada: ${new Date(data.createdAt.toDate()).toLocaleDateString()}`;
-  photoEl.src = data.photo;
+  photoEl.src = albumData[0].photo;
   notesEl.textContent = data.notes || '';
+
+  mostrarAlbum();
 
   inputName.value = data.name;
   inputNotes.value = data.notes || '';
@@ -123,6 +157,27 @@ formEdit.addEventListener('submit', async (e) => {
 });
 
 cargarPlanta();
+if (addPhotoBtn && newPhotoInput) {
+  addPhotoBtn.addEventListener('click', () => newPhotoInput.click());
+  newPhotoInput.addEventListener('change', async () => {
+    const file = newPhotoInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const resized = await resizeImage(e.target.result, 800);
+      const entry = { photo: resized, date: new Date() };
+      albumData.unshift(entry);
+      await updateDoc(doc(db, 'plants', plantId), {
+        photo: resized,
+        album: albumData
+      });
+      photoEl.src = resized;
+      mostrarAlbum();
+      newPhotoInput.value = '';
+    };
+    reader.readAsDataURL(file);
+  });
+}
 btnCancelEdit.addEventListener('click', () => {
   inputName.value = originalName;
   inputNotes.value = originalNotes;

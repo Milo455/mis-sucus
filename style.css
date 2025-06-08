@@ -249,6 +249,36 @@ button {
   font-weight: bold;
 }
 
+/* Album de fotos */
+#photo-album {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.album-item {
+  position: relative;
+}
+
+.album-item img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.album-date {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 2px 4px;
+  font-size: 0.7rem;
+  border-radius: 3px;
+}
+
 /* Responsive tweaks for iPhone-sized screens */
 @media (max-width: 480px) {
   header {

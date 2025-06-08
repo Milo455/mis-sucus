@@ -159,12 +159,14 @@ li.innerHTML = `
     const reader = new FileReader();
     reader.onload = async e => {
       const resizedPhoto = await resizeImage(e.target.result, 800);
+      const createdAt = new Date();
       const docRef = await addDoc(collection(db, 'plants'), {
         name: nombre,
         notes: notas,
         speciesId,
         photo: resizedPhoto,
-        createdAt: new Date()
+        createdAt,
+        album: [{ photo: resizedPhoto, date: createdAt }]
       });
       const qr = new QRious({ value: docRef.id, size: 200 });
       await updateDoc(doc(db, 'plants', docRef.id), { qrCode: qr.toDataURL() });
