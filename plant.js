@@ -32,6 +32,7 @@ const inputName = document.getElementById('edit-plant-name');
 const inputNotes = document.getElementById('edit-plant-notes');
 const inputPhoto = document.getElementById('edit-plant-photo');
 const notesEl = document.getElementById('plant-notes');
+const dateEl = document.getElementById('plant-created-date');
 const addPhotoBtn = document.getElementById('add-photo-record');
 const newPhotoInput = document.getElementById('new-photo-input');
 const albumEl = document.getElementById('photo-album');
@@ -255,7 +256,6 @@ btnCancelEdit.addEventListener('click', () => {
 btnDeleteInside.addEventListener('click', async () => {
   if (confirm('¿Eliminar esta planta?')) {
     await deleteDoc(doc(db, 'plants', plantId));
-    safeRedirect(`species.html?id=${currentSpeciesId}`);
   }
 });
 
