@@ -14,6 +14,7 @@ import {
 
 
 const plantsMap = new Map();
+const speciesMap = new Map();
 // — ÚNICO document.addEventListener('DOMContentLoaded') que va a envolver TODO —
 document.addEventListener('DOMContentLoaded', () => {
   // — Referencias del DOM (YA dentro de DOMContentLoaded) —
@@ -92,7 +93,7 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
   // — Carga lista de Especies —
  async function cargarEspecies() {
   speciesList.innerHTML = '';
-  plantsMap.clear(); // Limpia el mapa antes de recargar
+  speciesMap.clear();
   const q = query(collection(db, 'species'), orderBy('name', 'asc'));
   try {
     const snap = await getDocs(q);
@@ -100,9 +101,9 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
       speciesList.innerHTML = '<li>No hay especies registradas.</li>';
       return;
     }
-    snap.forEach(doc => {
+  snap.forEach(doc => {
   const data = doc.data();
-  plantsMap.set(doc.id, data); // Guardamos en el mapa
+  speciesMap.set(doc.id, data.name);
 
   const card = document.createElement('div');
   card.className = 'species-card';
@@ -134,8 +135,22 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
 
   } catch (err) {
     console.error('Error cargando especies:', err);
-    speciesList.innerHTML = '<li>Error al cargar especies.</li>';
+  speciesList.innerHTML = '<li>Error al cargar especies.</li>';
   }
+}
+
+// Cargar todas las plantas y mapear por especie
+async function cargarPlantas() {
+  plantsMap.clear();
+  if (speciesMap.size === 0) {
+    await cargarEspecies();
+  }
+  const q = query(collection(db, 'plants'), orderBy('name', 'asc'));
+  const snap = await getDocs(q);
+  snap.forEach(docu => {
+    const data = docu.data();
+    plantsMap.set(docu.id, { name: data.name, speciesId: data.speciesId });
+  });
 }
 
   // Botones para abrir el calendario y escanear QR
@@ -168,7 +183,7 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
 btnCalendar.addEventListener('click', async () => {
   // Verificar si plantsMap está vacío
   if (plantsMap.size === 0) {
-    await cargarEspecies(); // Carga las especies y llena plantsMap
+    await cargarPlantas();
   }
 
   modalCalendar.classList.remove('hidden');
@@ -183,21 +198,31 @@ btnCalendar.addEventListener('click', async () => {
 const checkboxContainer = document.getElementById('plant-checkboxes');
 checkboxContainer.innerHTML = ''; // Limpiar antes
 
-plantsMap.forEach((data, id) => {
-  const label = document.createElement('label');
-  label.style.display = 'block';
-  label.style.marginBottom = '4px';
+  const grouped = {};
+  plantsMap.forEach((data, id) => {
+    if (!grouped[data.speciesId]) grouped[data.speciesId] = [];
+    grouped[data.speciesId].push({ id, name: data.name });
+  });
 
-  const checkbox = document.createElement('input');
-  checkbox.type = 'checkbox';
-  checkbox.value = id;
-  checkbox.name = 'plant-checkbox';
-
-  label.appendChild(checkbox);
-  label.appendChild(document.createTextNode(' ' + data.name));
-
-  checkboxContainer.appendChild(label);
-});
+  Object.keys(grouped).forEach(specId => {
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'species-group';
+    const title = document.createElement('div');
+    title.className = 'species-group-title';
+    title.textContent = speciesMap.get(specId) || 'Especie';
+    groupDiv.appendChild(title);
+    grouped[specId].forEach(p => {
+      const label = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.value = p.id;
+      checkbox.name = 'plant-checkbox';
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(' ' + p.name));
+      groupDiv.appendChild(label);
+    });
+    checkboxContainer.appendChild(groupDiv);
+  });
 
 
   } catch (err) {
