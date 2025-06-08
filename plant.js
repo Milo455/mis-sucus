@@ -1,5 +1,7 @@
 import { db } from './firebase-init.js';
 import { resizeImage } from './app.js';
+// Utility to resize uploaded images
+import { resizeImage } from './resizeImage.js';
 import {
   doc,
   getDoc,
@@ -92,16 +94,35 @@ formEdit.addEventListener('submit', async (e) => {
       nameEl.textContent = newName;
       notesEl.textContent = newNotes;
       photoEl.src = updates.photo;
-      inputPhoto.value = '';
-      modalEdit.classList.add('hidden');
+
+      try {
+        updates.photo = await resizeImage(e.target.result, 800);
+        await updateDoc(doc(db, 'plants', plantId), updates);
+        nameEl.textContent = newName;
+        notesEl.textContent = newNotes;
+        photoEl.src = updates.photo;
+        inputPhoto.value = '';
+        modalEdit.classList.add('hidden');
+        alert('Planta actualizada con éxito');
+      } catch (error) {
+        console.error('Error al guardar la planta:', error);
+        alert('Error al guardar la planta. Inténtalo de nuevo.');
+      }
     };
     reader.readAsDataURL(newPhotoFile);
   } else {
-    await updateDoc(doc(db, 'plants', plantId), updates);
-    nameEl.textContent = newName;
-    notesEl.textContent = newNotes;
-    inputPhoto.value = '';
-    modalEdit.classList.add('hidden');
+    try {
+      await updateDoc(doc(db, 'plants', plantId), updates);
+      nameEl.textContent = newName;
+      notesEl.textContent = newNotes;
+
+      inputPhoto.value = '';
+      modalEdit.classList.add('hidden');
+      alert('Planta actualizada con éxito');
+    } catch (error) {
+      console.error('Error al guardar la planta:', error);
+      alert('Error al guardar la planta. Inténtalo de nuevo.');
+    }
   }
 });
 

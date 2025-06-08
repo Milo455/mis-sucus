@@ -1,7 +1,7 @@
 // species.js
 
 import { db } from './firebase-init.js';
-import { resizeImage } from './app.js';
+import { resizeImage } from './resizeImage.js';
 import {
   doc,
   getDoc,
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (inputPhoto.files.length > 0) {
       const reader = new FileReader();
       reader.onload = async e => {
-        nuevaFoto = e.target.result;
+        nuevaFoto = await resizeImage(e.target.result, 800);
         await guardarCambios(nuevoNombre, nuevaFoto);
       };
       reader.readAsDataURL(inputPhoto.files[0]);

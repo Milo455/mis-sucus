@@ -46,14 +46,14 @@ main {
 }
 
 /* Lista de especies */
-ul#species-list {
+#species-list {
   list-style: none;
   padding: 0;
   margin: 0 auto;
   max-width: 600px;
 }
 
-ul#species-list li {
+#species-list .species-card {
   background-color: var(--white);
   margin-bottom: 0.5rem;
   padding: 0.75rem 1rem;
@@ -64,7 +64,7 @@ ul#species-list li {
   transition: background-color 0.2s;
 }
 
-ul#species-list li:hover {
+#species-list .species-card:hover {
   background-color: var(--accent-color);
   color: var(--white);
 }
@@ -91,6 +91,8 @@ ul#species-list li:hover {
   max-width: 500px;
   position: relative;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-content input,
@@ -143,6 +145,12 @@ button {
 }
 #calendar-container td.has-event:hover {
   background-color: #a7f3d0;
+}
+
+#events-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
 }
 
 #events-list ul {

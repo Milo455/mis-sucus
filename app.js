@@ -1,6 +1,7 @@
 // app.js
 
 import { db } from './firebase-init.js';
+import { resizeImage } from './resizeImage.js';
 import {
   collection,
   addDoc,
@@ -11,21 +12,6 @@ import {
   doc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-export async function resizeImage(base64Str, maxWidth = 800) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.src = base64Str;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const scale = maxWidth / img.width;
-      canvas.width = maxWidth;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL('image/jpeg', 0.8));
-    };
-  });
-}
 
 const plantsMap = new Map();
 // — ÚNICO document.addEventListener('DOMContentLoaded') que va a envolver TODO —
@@ -47,6 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const eventDateInput   = document.getElementById('event-date');
   const eventTypeSelect  = document.getElementById('event-type');
   const saveEventBtn     = document.getElementById('save-event');
+  const qrModal          = document.getElementById('qr-modal');
+  const closeQrModal     = document.getElementById('close-qr-modal');
+  let qrScanner;
   // Asignar fecha actual al campo de evento
 const hoy = new Date().toISOString().split('T')[0];
 eventDateInput.value = hoy;
@@ -57,6 +46,7 @@ if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
     !btnSaveSpecies || !modalCalendar || !btnCloseCalendar ||
     !calendarContainer || !eventsList || !eventDateInput ||
     !eventTypeSelect || !saveEventBtn ||
+    !qrModal || !closeQrModal ||
     !document.getElementById('plant-checkboxes')) {
   console.error('Faltan elementos en el DOM. Verifica tus IDs.');
   return;
@@ -150,13 +140,27 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
 }
 
   // Botones para abrir el calendario y escanear QR
-  btnCalendar.addEventListener('click', () => {
-    console.log('Clic en Calendario');
-    // Aquí llamaremos a abrir calendario
-  });
   btnScanQR.addEventListener('click', () => {
-    console.log('Clic en Escanear QR');
-    // Aquí llamaremos a escanear QR
+    qrModal.classList.remove('hidden');
+    if (!qrScanner) {
+      qrScanner = new Html5Qrcode('qr-reader');
+    }
+    qrScanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 250 },
+      (text) => {
+        qrScanner.stop().then(() => {
+          qrModal.classList.add('hidden');
+          window.location.href = `plant.html?id=${text}`;
+        }).catch(err => console.error('Error al detener scanner', err));
+      },
+      () => {}
+    ).catch(err => console.error('Error iniciando scanner', err));
+  });
+
+  closeQrModal.addEventListener('click', () => {
+    if (qrScanner) {
+      qrScanner.stop().catch(err => console.error('Error al detener scanner', err));
+    }
+    qrModal.classList.add('hidden');
   });
 
   // — Modal Calendario —
@@ -174,6 +178,7 @@ btnCalendar.addEventListener('click', async () => {
     const snapEv = await getDocs(collection(db, 'events'));
     eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
     renderCalendar();
+    renderEventList();
 
     // Poblar selector de plantas en el formulario de eventos
 const checkboxContainer = document.getElementById('plant-checkboxes');
@@ -220,6 +225,7 @@ document.getElementById('close-add-event').addEventListener('click', () => {
     modalCalendar.classList.add('hidden');
     calendarContainer.innerHTML = '';
     eventsList.innerHTML = '';
+    document.getElementById('eventos-dia').innerHTML = '';
   });
 // Guardar evento (solo una vez)
 saveEventBtn.addEventListener('click', async () => {
@@ -372,6 +378,13 @@ function renderEventList() {
       - ${e.type} - ${e.date}
       <button class="delete-event" data-id="${e.id}">❌</button>
     `;
+
+    const link = li.querySelector('.plant-link');
+    link.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      mostrarCartaPlanta(link.dataset.id);
+    });
+
     list.appendChild(li);
   });
 
@@ -417,9 +430,10 @@ if (!contenedor) {
     const enlace = document.createElement('a');
     enlace.href = '#';
     enlace.textContent = nombrePlanta;
+    enlace.dataset.id = ev.plantId;
     enlace.addEventListener('click', (e) => {
       e.preventDefault();
-      mostrarCartaPlanta(ev.plantId); // Aquí pasamos el ID para mostrar info
+      mostrarCartaPlanta(enlace.dataset.id); // Aquí pasamos el ID para mostrar info
     });
 
     const spanTipo = document.createElement('span');
@@ -447,6 +461,10 @@ if (!contenedor) {
 
 async function eliminarEvento(id) {
   await deleteDoc(doc(db, 'events', id));
+}
+
+function mostrarCartaPlanta(id) {
+  window.location.href = `plant.html?id=${id}`;
 }
 
 
