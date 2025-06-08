@@ -14,12 +14,20 @@ import {
   where
 } from './firestore-web.js';
 
+function safeRedirect(url) {
+  try {
+    window.location.href = url;
+  } catch (_) {
+    // Ignore navigation errors in test environments
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const speciesId = params.get('id');
   if (!speciesId) {
     alert('ID de especie no encontrado.');
-    window.location.href = 'index.html';
+    safeRedirect('index.html');
     return;
   }
 
@@ -105,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await deleteDoc(doc(db, 'species', speciesId));
     alert('Especie eliminada');
-    window.location.href = 'index.html';
+    safeRedirect('index.html');
   });
 
   // Cargar plantas

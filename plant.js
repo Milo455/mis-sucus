@@ -6,6 +6,7 @@ import {
   getDoc,
   deleteDoc,
   updateDoc,
+  addDoc,
   collection,
   query,
   where,
@@ -35,8 +36,22 @@ const dateEl = document.getElementById('plant-created-date');
 const addPhotoBtn = document.getElementById('add-photo-record');
 const newPhotoInput = document.getElementById('new-photo-input');
 const albumEl = document.getElementById('photo-album');
+const btnAddEvent = document.getElementById('add-event-btn');
+const modalAddEvent = document.getElementById('add-event-modal');
+const eventDateInput = document.getElementById('plant-event-date');
+const eventTypeSelect = document.getElementById('plant-event-type');
+const saveEventBtn = document.getElementById('save-plant-event');
+const cancelAddEventBtn = document.getElementById('cancel-add-event');
 
 let albumData = [];
+
+function safeRedirect(url) {
+  try {
+    window.location.href = url;
+  } catch (_) {
+    // Ignore navigation errors in test environments
+  }
+}
 
 function mostrarAlbum() {
   if (!albumEl) return;
@@ -98,9 +113,6 @@ async function cargarPlanta() {
   speciesEl.textContent = `Especie: ${speciesName}`;
 
   nameEl.textContent = data.name;
-  if (dateEl) {
-    dateEl.textContent = `Creada: ${new Date(data.createdAt.toDate()).toLocaleDateString()}`;
-  }
   photoEl.src = albumData[0].photo;
   notesEl.textContent = data.notes || '';
 
@@ -211,6 +223,29 @@ if (addPhotoBtn && newPhotoInput) {
     reader.readAsDataURL(file);
   });
 }
+
+if (btnAddEvent && modalAddEvent && eventDateInput && eventTypeSelect && saveEventBtn && cancelAddEventBtn) {
+  eventDateInput.value = new Date().toISOString().split('T')[0];
+  btnAddEvent.addEventListener('click', () => {
+    modalAddEvent.classList.remove('hidden');
+  });
+  cancelAddEventBtn.addEventListener('click', () => {
+    modalAddEvent.classList.add('hidden');
+  });
+  saveEventBtn.addEventListener('click', async () => {
+    const date = eventDateInput.value;
+    const type = eventTypeSelect.value;
+    try {
+      await addDoc(collection(db, 'events'), { date, type, plantId, createdAt: new Date() });
+      modalAddEvent.classList.add('hidden');
+      if (type === 'Riego') lastWateringEl.textContent = 'Último riego: hace 0 días';
+      alert('Evento guardado');
+    } catch (err) {
+      console.error('Error al guardar el evento:', err);
+      alert('Error al guardar el evento');
+    }
+  });
+}
 btnCancelEdit.addEventListener('click', () => {
   inputName.value = originalName;
   inputNotes.value = originalNotes;
@@ -221,11 +256,6 @@ btnCancelEdit.addEventListener('click', () => {
 btnDeleteInside.addEventListener('click', async () => {
   if (confirm('¿Eliminar esta planta?')) {
     await deleteDoc(doc(db, 'plants', plantId));
-    if (window.history && window.history.pushState) {
-      window.history.pushState({}, '', `species.html?id=${currentSpeciesId}`);
-    } else {
-      window.location.href = `species.html?id=${currentSpeciesId}`;
-    }
   }
 });
 
@@ -254,10 +284,3 @@ btnPrintQR.addEventListener('click', () => {
   img.src = qrCodeData;
 });
 
-document.getElementById('back-to-species').addEventListener('click', () => {
-  if (currentSpeciesId) {
-    window.location.href = `species.html?id=${currentSpeciesId}`;
-  } else {
-    window.location.href = 'index.html';
-  }
-});

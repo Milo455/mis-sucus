@@ -100,6 +100,10 @@ main {
   overflow-y: auto;
 }
 
+#add-event-modal .modal-content {
+  max-width: 600px;
+}
+
 .modal-content input,
 .modal-content textarea {
   width: 100%;
@@ -199,6 +203,25 @@ button {
   margin-top: 0.25rem;
   border-radius: 5px;
   border: 1px solid #ccc;
+}
+
+#plant-checkboxes {
+  margin-top: 0.5rem;
+}
+
+.species-group {
+  margin-bottom: 0.75rem;
+}
+
+.species-group-title {
+  font-weight: bold;
+  margin: 0.5rem 0 0.25rem;
+  color: var(--primary-color);
+}
+
+.species-group label {
+  display: block;
+  margin-left: 0.5rem;
 }
 
 .add-event-btn {
