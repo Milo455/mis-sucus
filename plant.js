@@ -91,12 +91,6 @@ formEdit.addEventListener('submit', async (e) => {
   if (newPhotoFile) {
     const reader = new FileReader();
     reader.onload = async (e) => {
-      updates.photo = await resizeImage(e.target.result, 800);
-      await updateDoc(doc(db, 'plants', plantId), updates);
-      nameEl.textContent = newName;
-      notesEl.textContent = newNotes;
-      photoEl.src = updates.photo;
-
       try {
         updates.photo = await resizeImage(e.target.result, 800);
         await updateDoc(doc(db, 'plants', plantId), updates);
