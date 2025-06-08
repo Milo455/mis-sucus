@@ -97,13 +97,10 @@ async function cargarPlanta() {
   speciesEl.textContent = `Especie: ${speciesName}`;
 
   nameEl.textContent = data.name;
-  dateEl.textContent = `Creada: ${new Date(data.createdAt.toDate()).toLocaleDateString()}`;
   photoEl.src = albumData[0].photo;
   notesEl.textContent = data.notes || '';
 
   mostrarAlbum();
-  photoEl.src = data.photo;
-  notesEl.textContent = data.notes || '';
 
   // Obtener último riego
   try {
