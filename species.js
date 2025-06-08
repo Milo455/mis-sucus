@@ -12,7 +12,7 @@ import {
   getDocs,
   query,
   where
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+} from './firestore-web.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
