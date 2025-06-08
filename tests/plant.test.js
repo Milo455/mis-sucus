@@ -70,6 +70,9 @@ describe('plant.js', () => {
       <span id="plant-notes"></span>
       <span id="species-name"></span>
       <button id="back-to-species"></button>
+      <button id="add-photo-record"></button>
+      <input id="new-photo-input" type="file" />
+      <div id="photo-album"></div>
     `;
     window.history.pushState({}, '', '/plant.html?id=plant1');
     window.alert = jest.fn();
@@ -99,6 +102,34 @@ describe('plant.js', () => {
     expect(document.getElementById('plant-name').textContent).toBe('Plant1');
     expect(document.getElementById('plant-photo').src).toContain('img-url');
     expect(document.getElementById('species-name').textContent).toBe('Especie: SpeciesName');
+  });
+
+  test('shows latest album photo', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          photo: 'img-old',
+          notes: 'note',
+          album: [
+            { photo: 'img-old', date: { toDate: () => new Date('2020-01-02') } },
+            { photo: 'img-new', date: { toDate: () => new Date('2020-01-03') } }
+          ]
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+
+    await import('../plant.js');
+    await flushPromises();
+
+    expect(document.getElementById('plant-photo').src).toContain('img-new');
+    expect(document.getElementById('photo-album').children.length).toBe(2);
   });
 
   test('delete button removes plant and redirects', async () => {
