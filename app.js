@@ -14,6 +14,7 @@ import {
 
 
 const plantsMap = new Map();
+const speciesMap = new Map();
 // — ÚNICO document.addEventListener('DOMContentLoaded') que va a envolver TODO —
 document.addEventListener('DOMContentLoaded', () => {
   // — Referencias del DOM (YA dentro de DOMContentLoaded) —
@@ -29,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalCalendar    = document.getElementById('calendar-modal');
   const btnCloseCalendar = document.getElementById('close-calendar');
   const calendarContainer= document.getElementById('calendar-container');
-  const eventsList       = document.getElementById('events-list');
   const eventDateInput   = document.getElementById('event-date');
   const eventTypeSelect  = document.getElementById('event-type');
   const saveEventBtn     = document.getElementById('save-event');
@@ -44,7 +44,7 @@ eventDateInput.value = hoy;
 if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
     !speciesList || !modalSpecies || !btnCloseSpecies ||
     !btnSaveSpecies || !modalCalendar || !btnCloseCalendar ||
-    !calendarContainer || !eventsList || !eventDateInput ||
+    !calendarContainer || !eventDateInput ||
     !eventTypeSelect || !saveEventBtn ||
     !qrModal || !closeQrModal ||
     !document.getElementById('plant-checkboxes')) {
@@ -93,7 +93,7 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
   // — Carga lista de Especies —
  async function cargarEspecies() {
   speciesList.innerHTML = '';
-  plantsMap.clear(); // Limpia el mapa antes de recargar
+  speciesMap.clear();
   const q = query(collection(db, 'species'), orderBy('name', 'asc'));
   try {
     const snap = await getDocs(q);
@@ -101,9 +101,9 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
       speciesList.innerHTML = '<li>No hay especies registradas.</li>';
       return;
     }
-    snap.forEach(doc => {
+  snap.forEach(doc => {
   const data = doc.data();
-  plantsMap.set(doc.id, data); // Guardamos en el mapa
+  speciesMap.set(doc.id, data.name);
 
   const card = document.createElement('div');
   card.className = 'species-card';
@@ -135,8 +135,22 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
 
   } catch (err) {
     console.error('Error cargando especies:', err);
-    speciesList.innerHTML = '<li>Error al cargar especies.</li>';
+  speciesList.innerHTML = '<li>Error al cargar especies.</li>';
   }
+}
+
+// Cargar todas las plantas y mapear por especie
+async function cargarPlantas() {
+  plantsMap.clear();
+  if (speciesMap.size === 0) {
+    await cargarEspecies();
+  }
+  const q = query(collection(db, 'plants'), orderBy('name', 'asc'));
+  const snap = await getDocs(q);
+  snap.forEach(docu => {
+    const data = docu.data();
+    plantsMap.set(docu.id, { name: data.name, speciesId: data.speciesId });
+  });
 }
 
   // Botones para abrir el calendario y escanear QR
@@ -169,7 +183,7 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
 btnCalendar.addEventListener('click', async () => {
   // Verificar si plantsMap está vacío
   if (plantsMap.size === 0) {
-    await cargarEspecies(); // Carga las especies y llena plantsMap
+    await cargarPlantas();
   }
 
   modalCalendar.classList.remove('hidden');
@@ -178,27 +192,37 @@ btnCalendar.addEventListener('click', async () => {
     const snapEv = await getDocs(collection(db, 'events'));
     eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
     renderCalendar();
-    renderEventList();
+
 
     // Poblar selector de plantas en el formulario de eventos
 const checkboxContainer = document.getElementById('plant-checkboxes');
 checkboxContainer.innerHTML = ''; // Limpiar antes
 
-plantsMap.forEach((data, id) => {
-  const label = document.createElement('label');
-  label.style.display = 'block';
-  label.style.marginBottom = '4px';
+  const grouped = {};
+  plantsMap.forEach((data, id) => {
+    if (!grouped[data.speciesId]) grouped[data.speciesId] = [];
+    grouped[data.speciesId].push({ id, name: data.name });
+  });
 
-  const checkbox = document.createElement('input');
-  checkbox.type = 'checkbox';
-  checkbox.value = id;
-  checkbox.name = 'plant-checkbox';
-
-  label.appendChild(checkbox);
-  label.appendChild(document.createTextNode(' ' + data.name));
-
-  checkboxContainer.appendChild(label);
-});
+  Object.keys(grouped).forEach(specId => {
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'species-group';
+    const title = document.createElement('div');
+    title.className = 'species-group-title';
+    title.textContent = speciesMap.get(specId) || 'Especie';
+    groupDiv.appendChild(title);
+    grouped[specId].forEach(p => {
+      const label = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.value = p.id;
+      checkbox.name = 'plant-checkbox';
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(' ' + p.name));
+      groupDiv.appendChild(label);
+    });
+    checkboxContainer.appendChild(groupDiv);
+  });
 
 
   } catch (err) {
@@ -224,7 +248,6 @@ document.getElementById('close-add-event').addEventListener('click', () => {
   btnCloseCalendar.addEventListener('click', () => {
     modalCalendar.classList.add('hidden');
     calendarContainer.innerHTML = '';
-    eventsList.innerHTML = '';
     document.getElementById('eventos-dia').innerHTML = '';
   });
 // Guardar evento (solo una vez)
@@ -253,9 +276,6 @@ try {
   const snapEv = await getDocs(collection(db, 'events'));
   eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
   renderCalendar();
- if (!modalCalendar.classList.contains('hidden')) {
-  renderEventList();
-}
 
 
   // Resetear formulario
@@ -279,7 +299,7 @@ selectedCheckboxes.forEach(cb => cb.checked = false);
   // 🔽 Aquí empieza la función fuera del addEventListener
   function renderCalendar() {
   calendarContainer.innerHTML = '';
-  eventsList.innerHTML = '';
+  document.getElementById('eventos-dia').innerHTML = '';
 
   let currentDate = new Date();
   if (renderCalendar.current) currentDate = renderCalendar.current;
@@ -350,11 +370,10 @@ selectedCheckboxes.forEach(cb => cb.checked = false);
 
     const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const hasEvents = eventsData.some(e => e.date === dayStr);
-
     if (hasEvents) {
       td.classList.add('has-event');
-      td.addEventListener('click', () => mostrarEventosPorDia(dayStr));
     }
+    td.addEventListener('click', () => mostrarEventosPorDia(dayStr));
 
     tr.appendChild(td);
   }
@@ -362,44 +381,6 @@ selectedCheckboxes.forEach(cb => cb.checked = false);
   tbody.appendChild(tr);
   table.appendChild(tbody);
   calendarContainer.appendChild(table);
-}
-function renderEventList() {
-  if (modalCalendar.classList.contains('hidden')) return;
-  eventsList.innerHTML = '<h3>Eventos</h3>';
-  const list = document.createElement('ul');
-
-  eventsData.forEach(e => {
-    const li = document.createElement('li');
-    const planta = plantsMap.get(e.plantId);
-    const nombre = planta ? planta.name : `(ID: ${e.plantId})`;
-
-    li.innerHTML = `
-      <strong><a href="#" class="plant-link" data-id="${e.plantId}">${nombre}</a></strong>
-      - ${e.type} - ${e.date}
-      <button class="delete-event" data-id="${e.id}">❌</button>
-    `;
-
-    const link = li.querySelector('.plant-link');
-    link.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      mostrarCartaPlanta(link.dataset.id);
-    });
-
-    list.appendChild(li);
-  });
-
-  eventsList.appendChild(list);
-
-  document.querySelectorAll('.delete-event').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.getAttribute('data-id');
-      await deleteDoc(doc(db, 'events', id));
-      const snapEv = await getDocs(collection(db, 'events'));
-      eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderCalendar();
-      renderEventList();
-    });
-  });
 }
 
 

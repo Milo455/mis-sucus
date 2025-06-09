@@ -14,12 +14,20 @@ import {
   where
 } from './firestore-web.js';
 
+function safeRedirect(url) {
+  try {
+    window.location.href = url;
+  } catch (_) {
+    // Ignore navigation errors in test environments
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const speciesId = params.get('id');
   if (!speciesId) {
     alert('ID de especie no encontrado.');
-    window.location.href = 'index.html';
+    safeRedirect('index.html');
     return;
   }
 
@@ -105,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await deleteDoc(doc(db, 'species', speciesId));
     alert('Especie eliminada');
-    window.location.href = 'index.html';
+    safeRedirect('index.html');
   });
 
   // Cargar plantas
@@ -116,7 +124,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (snap.empty) {
       plantList.innerHTML = '<li>No hay plantas registradas.</li>';
       return;
-    }
+    } 
+   
     snap.forEach(docSnap => {
       const data = docSnap.data();
       const li = document.createElement('li');
@@ -174,15 +183,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const reader = new FileReader();
     reader.onload = async e => {
       const resizedPhoto = await resizeImage(e.target.result, 800);
+      const createdAt = new Date();
       const docRef = await addDoc(collection(db, 'plants'), {
         name: nombre,
         notes: notas,
         speciesId,
         photo: resizedPhoto,
-        createdAt: new Date()
+        createdAt,
+        album: [{ photo: resizedPhoto, date: createdAt }]
       });
-      const qr = new QRious({ value: docRef.id, size: 200 });
-      await updateDoc(doc(db, 'plants', docRef.id), { qrCode: qr.toDataURL() });
+      if (typeof QRious !== 'undefined') {
+        const qr = new QRious({ value: docRef.id, size: 200 });
+        await updateDoc(doc(db, 'plants', docRef.id), { qrCode: qr.toDataURL() });
+      } else {
+        console.warn('QRious no disponible, se omite el código QR');
+      }
       plantModal.classList.add('hidden');
       plantNameInput.value = '';
       plantNotesInput.value = '';

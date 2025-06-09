@@ -9,6 +9,13 @@ const mockDoc = jest.fn((...args) => ({ args }));
 const mockGetDoc = jest.fn();
 const mockDeleteDoc = jest.fn();
 const mockUpdateDoc = jest.fn();
+const mockAddDoc = jest.fn();
+const mockCollection = jest.fn();
+const mockQuery = jest.fn();
+const mockWhere = jest.fn();
+const mockOrderBy = jest.fn();
+const mockLimit = jest.fn();
+const mockGetDocs = jest.fn();
 
 
 const flushPromises = () => new Promise(res => setTimeout(res, 0));
@@ -21,20 +28,39 @@ describe('plant.js', () => {
     global.document = newDoc;
     global.TextEncoder = global.TextEncoder || require('util').TextEncoder;
     global.TextDecoder = global.TextDecoder || require('util').TextDecoder;
+    mockGetDoc.mockReset();
+    mockGetDocs.mockReset();
+    mockDeleteDoc.mockReset();
+    mockUpdateDoc.mockReset();
+    mockAddDoc.mockReset();
+    mockCollection.mockReset();
+    mockQuery.mockReset();
+    mockWhere.mockReset();
+    mockOrderBy.mockReset();
+    mockLimit.mockReset();
+
     jest.unstable_mockModule('../firestore-web.js', () => ({
       doc: mockDoc,
       getDoc: mockGetDoc,
       deleteDoc: mockDeleteDoc,
-      updateDoc: mockUpdateDoc
+      updateDoc: mockUpdateDoc,
+      addDoc: mockAddDoc,
+      collection: mockCollection,
+      query: mockQuery,
+      where: mockWhere,
+      orderBy: mockOrderBy,
+      limit: mockLimit,
+      getDocs: mockGetDocs
     }));
 
     jest.unstable_mockModule('../firebase-init.js', () => ({
       db: {}
     }));
+    mockGetDocs.mockResolvedValue({ empty: true, docs: [], forEach: () => {} });
     document.body.innerHTML = `
       <img id="plant-photo" />
       <span id="plant-name"></span>
-      <span id="plant-date"></span>
+      <span id="last-watering-count"></span>
       <button id="edit-plant"></button>
       <button id="delete-plant-inside"></button>
       <button id="print-qr"></button>
@@ -46,7 +72,9 @@ describe('plant.js', () => {
       <input id="edit-plant-photo" type="file" />
       <span id="plant-notes"></span>
       <span id="species-name"></span>
-      <button id="back-to-species"></button>
+      <button id="add-photo-record"></button>
+      <input id="new-photo-input" type="file" />
+      <div id="photo-album"></div>
     `;
     window.history.pushState({}, '', '/plant.html?id=plant1');
     window.alert = jest.fn();
@@ -76,6 +104,34 @@ describe('plant.js', () => {
     expect(document.getElementById('plant-name').textContent).toBe('Plant1');
     expect(document.getElementById('plant-photo').src).toContain('img-url');
     expect(document.getElementById('species-name').textContent).toBe('Especie: SpeciesName');
+  });
+
+  test('shows latest album photo', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          photo: 'img-old',
+          notes: 'note',
+          album: [
+            { photo: 'img-old', date: { toDate: () => new Date('2020-01-02') } },
+            { photo: 'img-new', date: { toDate: () => new Date('2020-01-03') } }
+          ]
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+
+    await import('../plant.js');
+    await flushPromises();
+
+    expect(document.getElementById('plant-photo').src).toContain('img-new');
+    expect(document.getElementById('photo-album').children.length).toBe(2);
   });
 
   test('delete button removes plant and redirects', async () => {
