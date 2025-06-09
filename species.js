@@ -125,15 +125,29 @@ document.addEventListener('DOMContentLoaded', async () => {
       plantList.innerHTML = '<li>No hay plantas registradas.</li>';
       return;
     }
-    snap.forEach(doc => {
-      const data = doc.data();
+
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
       const li = document.createElement('li');
       li.className = 'plant-item';
-      li.innerHTML = `
-        <img src="${data.photo}" alt="${data.name}">
-        <a href="plant.html?id=${doc.id}" class="plant-name">${data.name}</a>
-        <button data-id="${doc.id}" class="delete-plant-btn" style="display:none; margin-left:8px;">❌</button>
-      `;
+
+      const img = document.createElement('img');
+      img.src = data.photo;
+      img.alt = data.name;
+
+      const link = document.createElement('a');
+      link.href = `plant.html?id=${docSnap.id}`;
+      link.className = 'plant-name';
+      link.textContent = data.name;
+
+      const delBtn = document.createElement('button');
+      delBtn.dataset.id = docSnap.id;
+      delBtn.className = 'delete-plant-btn';
+      delBtn.style.display = 'none';
+      delBtn.style.marginLeft = '8px';
+      delBtn.textContent = '❌';
+
+      li.append(img, link, delBtn);
       plantList.appendChild(li);
     });
 

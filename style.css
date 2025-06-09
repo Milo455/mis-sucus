@@ -302,6 +302,7 @@ button {
   font-size: 0.7rem;
   border-radius: 3px;
 
+
 /* Lista de plantas dentro de una especie */
 #plant-list {
   list-style: none;
@@ -332,7 +333,6 @@ button {
   text-decoration: none;
   color: inherit;
   font-weight: bold;
-
 }
 
 /* Responsive tweaks for iPhone-sized screens */
