@@ -124,8 +124,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (snap.empty) {
       plantList.innerHTML = '<li>No hay plantas registradas.</li>';
       return;
-    }
-
+    } 
+   
     snap.forEach(docSnap => {
       const data = docSnap.data();
       const li = document.createElement('li');
