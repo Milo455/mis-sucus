@@ -178,8 +178,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         createdAt,
         album: [{ photo: resizedPhoto, date: createdAt }]
       });
-      const qr = new QRious({ value: docRef.id, size: 200 });
-      await updateDoc(doc(db, 'plants', docRef.id), { qrCode: qr.toDataURL() });
+      if (typeof QRious !== 'undefined') {
+        const qr = new QRious({ value: docRef.id, size: 200 });
+        await updateDoc(doc(db, 'plants', docRef.id), { qrCode: qr.toDataURL() });
+      } else {
+        console.warn('QRious no disponible, se omite el código QR');
+      }
       plantModal.classList.add('hidden');
       plantNameInput.value = '';
       plantNotesInput.value = '';
