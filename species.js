@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     speciesData = snap.data();
-    photoDisplay.src = speciesData.photo;
+    photoDisplay.src = speciesData.photo || 'icons/icon-192.png';
     nameDisplay.textContent = speciesData.name;
     inputName.value = speciesData.name;
   }
