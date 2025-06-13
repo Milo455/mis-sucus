@@ -277,6 +277,9 @@ button {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
 }
 
 .plant-item {
@@ -285,9 +288,9 @@ button {
   padding: 0.5rem;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   display: flex;
+  flex-direction: column;
   align-items: center;
   transition: transform 0.2s;
-  margin-bottom: 0.5rem;
 }
 
 .plant-item:hover {
@@ -295,18 +298,18 @@ button {
 }
 
 .plant-item img {
-  width: 60px;
-  height: 60px;
+  width: 100%;
+  height: 80px;
   object-fit: cover;
   border-radius: 8px;
-  margin-right: 0.75rem;
 }
 
 .plant-item .plant-name {
-  flex-grow: 1;
   text-decoration: none;
   color: inherit;
   font-weight: bold;
+  display: block;
+  margin-top: 0.25rem;
 }
 
 
@@ -336,4 +339,23 @@ button {
   .species-card img {
     height: 80px;
   }
+}
+
+.album {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.album-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#viewer-modal img {
+  max-width: 90vw;
+  max-height: 90vh;
 }
