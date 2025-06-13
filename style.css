@@ -7,6 +7,7 @@
 
   --button-green: #A5D6A7;
   --button-green-hover: #91C295;
+  --button-margin: 0.5rem;
   --bg-color: #FDF6EC;
   --text-color: #3E3E3E;
   --white: #FFFFFF;
@@ -135,6 +136,7 @@ button {
   background-color: var(--button-green);
   color: var(--white);
   border: none;
+  margin: var(--button-margin);
   border-radius: 8px;
   transition: background-color 0.3s;
 }
@@ -148,6 +150,7 @@ button:hover {
   color: var(--white);
   border: none;
   padding: 0.3rem 0.5rem;
+  margin: var(--button-margin);
   border-radius: 6px;
   cursor: pointer;
 }
@@ -185,7 +188,7 @@ button:hover {
   color: var(--white);
   border: none;
   padding: 0.5rem 1rem;
-  margin: 0.5rem;
+  margin: var(--button-margin);
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
@@ -242,6 +245,7 @@ button:hover {
   background-color: var(--button-green);
   color: white;
   border: none;
+  margin: 0;
   border-radius: 50%;
   width: 48px;
   height: 48px;
