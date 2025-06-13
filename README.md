@@ -2,6 +2,7 @@
 
 This project is a simple PWA to manage succulent plants. It relies on Firebase for data storage and uses Jest for testing.
 
+
 ## Requirements
 
 - **Node.js** v18 or later is required to run the tests and manage dependencies.
@@ -44,6 +45,8 @@ The service worker caches core files after the first load, so the app can be use
 ## Firebase Setup
 
 Replace the placeholder values in `firebase-init.js` with the keys for your Firebase project. Ensure Firestore is enabled in the Firebase console.
+
+Reload with the updated service worker or clear caches whenever Firebase config changes.
 
 To properly query plant events, create a **composite index** on the `events` collection with these fields:
 `plantId` ascending, `type` ascending and `date` descending. When an index is missing,
