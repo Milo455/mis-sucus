@@ -42,6 +42,12 @@ const eventDateInput = document.getElementById('plant-event-date');
 const eventTypeSelect = document.getElementById('plant-event-type');
 const saveEventBtn = document.getElementById('save-plant-event');
 const cancelAddEventBtn = document.getElementById('cancel-add-event');
+const openAlbumBtn = document.getElementById('open-album');
+const albumModal = document.getElementById('album-modal');
+const closeAlbumBtn = document.getElementById('close-album');
+const viewerModal = document.getElementById('viewer-modal');
+const viewerImg = document.getElementById('viewer-img');
+const closeViewerBtn = document.getElementById('close-viewer');
 
 let albumData = [];
 
@@ -245,6 +251,34 @@ if (btnAddEvent && modalAddEvent && eventDateInput && eventTypeSelect && saveEve
       console.error('Error al guardar el evento:', err);
       alert('Error al guardar el evento');
     }
+  });
+}
+
+if (openAlbumBtn && albumModal) {
+  openAlbumBtn.addEventListener('click', () => {
+    albumModal.classList.remove('hidden');
+  });
+}
+
+if (closeAlbumBtn && albumModal) {
+  closeAlbumBtn.addEventListener('click', () => {
+    albumModal.classList.add('hidden');
+  });
+}
+
+if (albumEl && viewerModal && viewerImg) {
+  albumEl.addEventListener('click', (e) => {
+    const target = e.target;
+    if (target.tagName === 'IMG') {
+      viewerImg.src = target.src;
+      viewerModal.classList.remove('hidden');
+    }
+  });
+}
+
+if (closeViewerBtn && viewerModal) {
+  closeViewerBtn.addEventListener('click', () => {
+    viewerModal.classList.add('hidden');
   });
 }
 btnCancelEdit.addEventListener('click', () => {
