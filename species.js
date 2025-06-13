@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const closePlantModal = document.getElementById('close-plant-modal');
   const savePlantBtn = document.getElementById('save-plant');
   const plantNameInput = document.getElementById('plant-name');
-  const plantNotesInput = document.getElementById('plant-notes');
+  const plantNotesInput = document.getElementById('plant-notes-input');
   const plantPhotoInput = document.getElementById('plant-photo');
 
   let speciesData = null;
