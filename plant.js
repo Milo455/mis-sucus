@@ -71,6 +71,7 @@ function mostrarAlbum() {
 }
 
 let currentSpeciesId; // speciesId for redirects
+let currentSpeciesName = '';
 let originalName = '';
 let originalPhoto = '';
 let originalNotes = '';
@@ -107,10 +108,10 @@ async function cargarPlanta() {
 
   const speciesRef = doc(db, 'species', currentSpeciesId);
   const speciesSnap = await getDoc(speciesRef);
-  const speciesName = speciesSnap.exists() ? speciesSnap.data().name : 'Especie no encontrada';
+  currentSpeciesName = speciesSnap.exists() ? speciesSnap.data().name : 'Especie no encontrada';
 
   const speciesEl = document.getElementById('species-name');
-  speciesEl.textContent = `Especie: ${speciesName}`;
+  speciesEl.textContent = `Especie: ${currentSpeciesName}`;
 
   nameEl.textContent = data.name;
   photoEl.src = albumData[0].photo;
@@ -266,7 +267,7 @@ btnPrintQR.addEventListener('click', () => {
   }
   const canvas = document.createElement('canvas');
   const qrSize = 200;
-  const textHeight = 40;
+  const textHeight = 60;
   canvas.width = qrSize;
   canvas.height = qrSize + textHeight;
   const ctx = canvas.getContext('2d');
@@ -275,7 +276,8 @@ btnPrintQR.addEventListener('click', () => {
     ctx.drawImage(img, 0, 0, qrSize, qrSize);
     ctx.font = '16px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(nameEl.textContent, qrSize / 2, qrSize + 25);
+    ctx.fillText(nameEl.textContent, qrSize / 2, qrSize + 20);
+    ctx.fillText(currentSpeciesName, qrSize / 2, qrSize + 40);
     const link = document.createElement('a');
     link.href = canvas.toDataURL('image/png');
     link.download = `${nameEl.textContent}-qr.png`;
