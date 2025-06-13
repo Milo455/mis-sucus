@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const delBtn = document.createElement('button');
       delBtn.dataset.id = docSnap.id;
-      delBtn.className = 'delete-plant-btn';
+      delBtn.className = 'delete-plant-btn small-button';
       delBtn.style.display = 'none';
       delBtn.style.marginLeft = '8px';
       delBtn.textContent = '❌';

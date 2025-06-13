@@ -4,6 +4,8 @@
   --primary-color: #7D5A50;
   --secondary-color: #C4A484;
   --accent-color: #A1B57D;
+  --button-green: #A5D6A7;
+  --button-green-hover: #91C295;
   --bg-color: #FDF6EC;
   --text-color: #3E3E3E;
   --white: #FFFFFF;
@@ -33,7 +35,7 @@ header {
 }
 
 header button {
-  background-color: var(--accent-color);
+  background-color: var(--button-green);
   color: var(--white);
   border: none;
   padding: 0.6rem 1rem;
@@ -43,7 +45,7 @@ header button {
 }
 
 header button:hover {
-  background-color: var(--secondary-color);
+  background-color: var(--button-green-hover);
 }
 
 main {
@@ -122,18 +124,26 @@ main {
   font-size: 1.5rem;
   cursor: pointer;
   color: var(--danger-color);
-  background: none;
+  background-color: var(--button-green);
   border: none;
 }
 
 .hidden { display: none !important; }
 
 button {
+  background-color: var(--button-green);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
   transition: background-color 0.3s;
 }
 
+button:hover {
+  background-color: var(--button-green-hover);
+}
+
 .small-button {
-  background-color: var(--accent-color);
+  background-color: var(--button-green);
   color: var(--white);
   border: none;
   padding: 0.3rem 0.5rem;
@@ -142,7 +152,7 @@ button {
 }
 
 .small-button:hover {
-  background-color: var(--secondary-color);
+  background-color: var(--button-green-hover);
 }
 /* Calendario */
 #calendar-container table {
@@ -170,7 +180,7 @@ button {
 }
 
 #calendar-container button {
-  background-color: var(--accent-color);
+  background-color: var(--button-green);
   color: var(--white);
   border: none;
   padding: 0.5rem 1rem;
@@ -182,7 +192,7 @@ button {
 }
 
 #calendar-container button:hover {
-  background-color: var(--secondary-color);
+  background-color: var(--button-green-hover);
 }
 #add-event-form {
   padding: 1rem;
@@ -228,7 +238,7 @@ button {
   position: fixed;
   bottom: 80px;
   right: 20px;
-  background-color: #4CAF50;
+  background-color: var(--button-green);
   color: white;
   border: none;
   border-radius: 50%;
