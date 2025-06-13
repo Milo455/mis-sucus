@@ -49,12 +49,17 @@ const viewerModal = document.getElementById('viewer-modal');
 const viewerImg = document.getElementById('viewer-img');
 const closeViewerBtn = document.getElementById('close-viewer');
 
+const PLACEHOLDER_IMG = 'icons/icon-192.png';
 let albumData = [];
 
 
 function mostrarAlbum() {
   if (!albumEl) return;
   albumEl.innerHTML = '';
+  if (albumData.length === 0) {
+    albumEl.textContent = 'No hay imágenes';
+    return;
+  }
   albumData.forEach(item => {
     const wrapper = document.createElement('div');
     wrapper.className = 'album-item';
@@ -112,7 +117,11 @@ async function cargarPlanta() {
   speciesEl.textContent = `Especie: ${currentSpeciesName}`;
 
   nameEl.textContent = data.name;
-  photoEl.src = albumData[0].url;
+  if (albumData.length === 0) {
+    photoEl.src = PLACEHOLDER_IMG;
+  } else {
+    photoEl.src = albumData[0].url;
+  }
   notesEl.textContent = data.notes || '';
 
   mostrarAlbum();
