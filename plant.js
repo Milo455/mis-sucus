@@ -16,6 +16,14 @@ import {
 } from './firestore-web.js';
 import { ref, uploadString, getDownloadURL } from './storage-web.js';
 
+function safeRedirect(url) {
+  try {
+    window.location.href = url;
+  } catch {
+    // Ignore navigation errors in test environments
+  }
+}
+
 // Obtener ID desde la URL
 const params = new URLSearchParams(window.location.search);
 const plantId = params.get('id');
@@ -292,7 +300,17 @@ btnCancelEdit.addEventListener('click', () => {
 
 btnDeleteInside.addEventListener('click', async () => {
   if (confirm('¿Eliminar esta planta?')) {
-    await deleteDoc(doc(db, 'plants', plantId));
+    try {
+      await deleteDoc(doc(db, 'plants', plantId));
+      if (currentSpeciesId) {
+        safeRedirect(`species.html?id=${currentSpeciesId}`);
+      } else {
+        safeRedirect('index.html');
+      }
+    } catch (err) {
+      console.error('Error al eliminar la planta:', err);
+      alert('Error al eliminar la planta');
+    }
   }
 });
 
