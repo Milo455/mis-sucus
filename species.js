@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       li.className = 'plant-item';
 
       const img = document.createElement('img');
-      img.src = data.photo;
+      img.src = data.photo || 'icons/icon-192.png';
       img.alt = data.name;
 
       const imgLink = document.createElement('a');

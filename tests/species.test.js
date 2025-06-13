@@ -142,7 +142,7 @@ describe('species.js', () => {
 
     document.getElementById('add-plant-btn').click();
     const nameInput = document.getElementById('plant-name');
-    const notesInput = document.getElementById('plant-notes');
+    const notesInput = document.getElementById('plant-notes-input');
     const photoInput = document.getElementById('plant-photo');
     nameInput.value = 'My Plant';
     notesInput.value = 'notes';
