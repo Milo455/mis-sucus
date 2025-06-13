@@ -310,8 +310,6 @@ btnPrintQR.addEventListener('click', () => {
     ctx.drawImage(img, 0, 0, qrSize, qrSize);
     ctx.font = '16px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(currentSpeciesName, qrSize / 2, qrSize + 20);
-    ctx.fillText(nameEl.textContent, qrSize / 2, qrSize + 40);
     const link = document.createElement('a');
     link.href = canvas.toDataURL('image/png');
     link.download = `${nameEl.textContent}-qr.png`;
