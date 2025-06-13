@@ -189,32 +189,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const reader = new FileReader();
     reader.onload = async e => {
-      const resizedPhoto = await resizeImage(e.target.result, 800);
-      const createdAt = new Date();
-      const docRef = await addDoc(collection(db, 'plants'), {
-        name: nombre,
-        notes: notas,
-        speciesId,
-        createdAt
-      });
-      const photoRef = ref(storage, `plants/${docRef.id}/album/${Date.now()}.jpg`);
-      await uploadString(photoRef, resizedPhoto, 'data_url');
-      const url = await getDownloadURL(photoRef);
-      await updateDoc(doc(db, 'plants', docRef.id), {
-        photo: url,
-        album: [{ url, date: createdAt }]
-      });
-      if (typeof QRious !== 'undefined') {
-        const qr = new QRious({ value: docRef.id, size: 200 });
-        await updateDoc(doc(db, 'plants', docRef.id), { qrCode: qr.toDataURL() });
-      } else {
-        console.warn('QRious no disponible, se omite el código QR');
+      try {
+        const resizedPhoto = await resizeImage(e.target.result, 800);
+        const createdAt = new Date();
+        const docRef = await addDoc(collection(db, 'plants'), {
+          name: nombre,
+          notes: notas,
+          speciesId,
+          createdAt
+        });
+        const photoRef = ref(storage, `plants/${docRef.id}/album/${Date.now()}.jpg`);
+        await uploadString(photoRef, resizedPhoto, 'data_url');
+        const url = await getDownloadURL(photoRef);
+        await updateDoc(doc(db, 'plants', docRef.id), {
+          photo: url,
+          album: [{ url, date: createdAt }]
+        });
+        if (typeof QRious !== 'undefined') {
+          const qr = new QRious({ value: docRef.id, size: 200 });
+          await updateDoc(doc(db, 'plants', docRef.id), { qrCode: qr.toDataURL() });
+        } else {
+          console.warn('QRious no disponible, se omite el código QR');
+        }
+        plantModal.classList.add('hidden');
+        plantNameInput.value = '';
+        plantNotesInput.value = '';
+        plantPhotoInput.value = '';
+        cargarPlantas();
+      } catch (err) {
+        console.error(err);
+        alert('Error al guardar la planta. Int\u00e9ntalo de nuevo.');
       }
-      plantModal.classList.add('hidden');
-      plantNameInput.value = '';
-      plantNotesInput.value = '';
-      plantPhotoInput.value = '';
-      cargarPlantas();
     };
     reader.readAsDataURL(plantPhotoInput.files[0]);
   });
