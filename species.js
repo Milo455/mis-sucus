@@ -18,7 +18,7 @@ import { ref, uploadString, getDownloadURL } from './storage-web.js';
 function safeRedirect(url) {
   try {
     window.location.href = url;
-  } catch (_) {
+  } catch {
     // Ignore navigation errors in test environments
   }
 }
