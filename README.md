@@ -17,8 +17,14 @@ npm install
 
 ## Running Tests
 
-Before running tests, install dependencies with `npm install` if you haven't already.
-Then execute the test suite with:
+If this is a fresh environment without packages installed, run the setup script.
+It installs all development dependencies using `npm ci`:
+
+```bash
+./scripts/setup.sh
+```
+
+After dependencies are installed you can execute the test suite with:
 
 ```bash
 npm test
