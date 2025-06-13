@@ -18,7 +18,7 @@ npm install
 ## Running Tests
 
 If this is a fresh environment without packages installed, run the setup script.
-It installs all development dependencies using `npm ci`:
+It installs all development dependencies using `npm install`:
 
 ```bash
 ./scripts/setup.sh
