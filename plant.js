@@ -42,6 +42,12 @@ const eventDateInput = document.getElementById('plant-event-date');
 const eventTypeSelect = document.getElementById('plant-event-type');
 const saveEventBtn = document.getElementById('save-plant-event');
 const cancelAddEventBtn = document.getElementById('cancel-add-event');
+const openAlbumBtn = document.getElementById('open-album');
+const albumModal = document.getElementById('album-modal');
+const closeAlbumBtn = document.getElementById('close-album');
+const viewerModal = document.getElementById('viewer-modal');
+const viewerImg = document.getElementById('viewer-img');
+const closeViewerBtn = document.getElementById('close-viewer');
 
 let albumData = [];
 
@@ -71,6 +77,7 @@ function mostrarAlbum() {
 }
 
 let currentSpeciesId; // speciesId for redirects
+let currentSpeciesName = '';
 let originalName = '';
 let originalPhoto = '';
 let originalNotes = '';
@@ -107,10 +114,10 @@ async function cargarPlanta() {
 
   const speciesRef = doc(db, 'species', currentSpeciesId);
   const speciesSnap = await getDoc(speciesRef);
-  const speciesName = speciesSnap.exists() ? speciesSnap.data().name : 'Especie no encontrada';
+  currentSpeciesName = speciesSnap.exists() ? speciesSnap.data().name : 'Especie no encontrada';
 
   const speciesEl = document.getElementById('species-name');
-  speciesEl.textContent = `Especie: ${speciesName}`;
+  speciesEl.textContent = `Especie: ${currentSpeciesName}`;
 
   nameEl.textContent = data.name;
   photoEl.src = albumData[0].photo;
@@ -246,6 +253,34 @@ if (btnAddEvent && modalAddEvent && eventDateInput && eventTypeSelect && saveEve
     }
   });
 }
+
+if (openAlbumBtn && albumModal) {
+  openAlbumBtn.addEventListener('click', () => {
+    albumModal.classList.remove('hidden');
+  });
+}
+
+if (closeAlbumBtn && albumModal) {
+  closeAlbumBtn.addEventListener('click', () => {
+    albumModal.classList.add('hidden');
+  });
+}
+
+if (albumEl && viewerModal && viewerImg) {
+  albumEl.addEventListener('click', (e) => {
+    const target = e.target;
+    if (target.tagName === 'IMG') {
+      viewerImg.src = target.src;
+      viewerModal.classList.remove('hidden');
+    }
+  });
+}
+
+if (closeViewerBtn && viewerModal) {
+  closeViewerBtn.addEventListener('click', () => {
+    viewerModal.classList.add('hidden');
+  });
+}
 btnCancelEdit.addEventListener('click', () => {
   inputName.value = originalName;
   inputNotes.value = originalNotes;
@@ -266,7 +301,7 @@ btnPrintQR.addEventListener('click', () => {
   }
   const canvas = document.createElement('canvas');
   const qrSize = 200;
-  const textHeight = 40;
+  const textHeight = 60;
   canvas.width = qrSize;
   canvas.height = qrSize + textHeight;
   const ctx = canvas.getContext('2d');
@@ -275,7 +310,8 @@ btnPrintQR.addEventListener('click', () => {
     ctx.drawImage(img, 0, 0, qrSize, qrSize);
     ctx.font = '16px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(nameEl.textContent, qrSize / 2, qrSize + 25);
+    ctx.fillText(currentSpeciesName, qrSize / 2, qrSize + 20);
+    ctx.fillText(nameEl.textContent, qrSize / 2, qrSize + 40);
     const link = document.createElement('a');
     link.href = canvas.toDataURL('image/png');
     link.download = `${nameEl.textContent}-qr.png`;
