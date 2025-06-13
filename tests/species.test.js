@@ -87,7 +87,7 @@ describe('species.js', () => {
       <button id="close-plant-modal"></button>
       <button id="save-plant"></button>
       <input id="plant-name" />
-      <input id="plant-notes" />
+      <input id="plant-notes-input" />
       <input id="plant-photo" type="file" />
     `;
     window.history.pushState({}, '', '/species.html?id=spec1');
