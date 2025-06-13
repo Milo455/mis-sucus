@@ -33,7 +33,6 @@ const inputName = document.getElementById('edit-plant-name');
 const inputNotes = document.getElementById('edit-plant-notes');
 const inputPhoto = document.getElementById('edit-plant-photo');
 const notesEl = document.getElementById('plant-notes');
-const dateEl = document.getElementById('plant-created-date');
 const addPhotoBtn = document.getElementById('add-photo-record');
 const newPhotoInput = document.getElementById('new-photo-input');
 const albumEl = document.getElementById('photo-album');
@@ -52,13 +51,6 @@ const closeViewerBtn = document.getElementById('close-viewer');
 
 let albumData = [];
 
-function safeRedirect(url) {
-  try {
-    window.location.href = url;
-  } catch (_) {
-    // Ignore navigation errors in test environments
-  }
-}
 
 function mostrarAlbum() {
   if (!albumEl) return;
@@ -80,7 +72,6 @@ function mostrarAlbum() {
 let currentSpeciesId; // speciesId for redirects
 let currentSpeciesName = '';
 let originalName = '';
-let originalPhoto = '';
 let originalNotes = '';
 let qrCodeData = '';
 
@@ -152,9 +143,7 @@ async function cargarPlanta() {
 
   inputName.value = data.name;
   inputNotes.value = data.notes || '';
-  originalName = data.name;
-  originalPhoto = data.photo;
-  originalNotes = data.notes || '';
+  originalName = data.name;  originalNotes = data.notes || '';
 }
 
 btnEdit.addEventListener('click', () => {
