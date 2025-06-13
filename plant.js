@@ -1,4 +1,4 @@
-import { db } from './firebase-init.js';
+import { db, storage } from './firebase-init.js';
 // Utility to resize uploaded images
 import { resizeImage } from './resizeImage.js';
 import {
@@ -14,6 +14,7 @@ import {
   limit,
   getDocs
 } from './firestore-web.js';
+import { ref, uploadString, getDownloadURL } from './storage-web.js';
 
 // Obtener ID desde la URL
 const params = new URLSearchParams(window.location.search);
@@ -66,7 +67,7 @@ function mostrarAlbum() {
     const wrapper = document.createElement('div');
     wrapper.className = 'album-item';
     const img = document.createElement('img');
-    img.src = item.photo;
+    img.src = item.url;
     const span = document.createElement('span');
     span.className = 'album-date';
     span.textContent = item.date.toLocaleDateString();
@@ -103,11 +104,11 @@ async function cargarPlanta() {
   qrCodeData = data.qrCode || '';
 
   albumData = (data.album || []).map(a => ({
-    photo: a.photo,
+    url: a.url,
     date: a.date && a.date.toDate ? a.date.toDate() : a.date
   }));
   if (albumData.length === 0 && data.photo) {
-    albumData.push({ photo: data.photo, date: data.createdAt.toDate() });
+    albumData.push({ url: data.photo, date: data.createdAt.toDate() });
   }
 
   albumData.sort((a, b) => b.date - a.date);
@@ -120,7 +121,7 @@ async function cargarPlanta() {
   speciesEl.textContent = `Especie: ${currentSpeciesName}`;
 
   nameEl.textContent = data.name;
-  photoEl.src = albumData[0].photo;
+  photoEl.src = albumData[0].url;
   notesEl.textContent = data.notes || '';
 
   mostrarAlbum();
@@ -217,13 +218,16 @@ if (addPhotoBtn && newPhotoInput) {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const resized = await resizeImage(e.target.result, 800);
-      const entry = { photo: resized, date: new Date() };
+      const storageRef = ref(storage, `plants/${plantId}/album/${Date.now()}.jpg`);
+      await uploadString(storageRef, resized, 'data_url');
+      const url = await getDownloadURL(storageRef);
+      const entry = { url, date: new Date() };
       albumData.unshift(entry);
       await updateDoc(doc(db, 'plants', plantId), {
-        photo: resized,
+        photo: url,
         album: albumData
       });
-      photoEl.src = resized;
+      photoEl.src = url;
       mostrarAlbum();
       newPhotoInput.value = '';
     };

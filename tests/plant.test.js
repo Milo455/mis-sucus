@@ -53,8 +53,15 @@ describe('plant.js', () => {
       getDocs: mockGetDocs
     }));
 
+    jest.unstable_mockModule('../storage-web.js', () => ({
+      ref: jest.fn(() => 'ref'),
+      uploadString: jest.fn(() => Promise.resolve()),
+      getDownloadURL: jest.fn(() => Promise.resolve('url'))
+    }));
+
     jest.unstable_mockModule('../firebase-init.js', () => ({
-      db: {}
+      db: {},
+      storage: {}
     }));
     mockGetDocs.mockResolvedValue({ empty: true, docs: [], forEach: () => {} });
     document.body.innerHTML = `
@@ -117,8 +124,8 @@ describe('plant.js', () => {
           photo: 'img-old',
           notes: 'note',
           album: [
-            { photo: 'img-old', date: { toDate: () => new Date('2020-01-02') } },
-            { photo: 'img-new', date: { toDate: () => new Date('2020-01-03') } }
+            { url: 'img-old', date: { toDate: () => new Date('2020-01-02') } },
+            { url: 'img-new', date: { toDate: () => new Date('2020-01-03') } }
           ]
         })
       })
