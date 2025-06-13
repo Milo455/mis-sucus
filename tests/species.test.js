@@ -14,6 +14,8 @@ const mockAddDoc = jest.fn();
 const mockGetDocs = jest.fn();
 const mockQuery = jest.fn();
 const mockWhere = jest.fn();
+const mockUploadString = jest.fn(() => Promise.resolve());
+const mockGetDownloadURL = jest.fn(() => Promise.resolve('url'));
 
 
 const flushPromises = () => new Promise(res => setTimeout(res, 0));
@@ -49,14 +51,25 @@ describe('species.js', () => {
 
     jest.unstable_mockModule('../storage-web.js', () => ({
       ref: jest.fn(() => 'ref'),
-      uploadString: jest.fn(() => Promise.resolve()),
-      getDownloadURL: jest.fn(() => Promise.resolve('url'))
+      uploadString: mockUploadString,
+      getDownloadURL: mockGetDownloadURL
+    }));
+
+    jest.unstable_mockModule('../resizeImage.js', () => ({
+      resizeImage: jest.fn(async () => 'resized-image')
     }));
 
     jest.unstable_mockModule('../firebase-init.js', () => ({
       db: {},
       storage: {}
     }));
+    global.FileReader = class {
+      readAsDataURL() {
+        if (this.onload) {
+          this.onload({ target: { result: 'data-url' } });
+        }
+      }
+    };
     // default return
     mockGetDocs.mockImplementation(() => Promise.resolve({ empty: true, docs: [], forEach: () => {} }));
     document.body.innerHTML = `
@@ -114,5 +127,48 @@ describe('species.js', () => {
     await flushPromises();
 
     expect(mockDeleteDoc.mock.calls.length).toBeGreaterThan(0);
+  });
+
+  test('adds a plant and closes modal', async () => {
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ name: 'Aloe', photo: 'photo-url' })
+    });
+    mockAddDoc.mockResolvedValue({ id: 'newPlant' });
+
+    await jest.isolateModulesAsync(() => import('../species.js'));
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await flushPromises();
+
+    document.getElementById('add-plant-btn').click();
+    const nameInput = document.getElementById('plant-name');
+    const notesInput = document.getElementById('plant-notes');
+    const photoInput = document.getElementById('plant-photo');
+    nameInput.value = 'My Plant';
+    notesInput.value = 'notes';
+    Object.defineProperty(photoInput, 'files', { value: [{}], writable: false });
+
+    document.getElementById('save-plant').click();
+    await flushPromises();
+    await flushPromises();
+
+    expect(mockAddDoc).toHaveBeenCalled();
+    const addData = mockAddDoc.mock.calls[0][1];
+    expect(addData).toEqual(
+      expect.objectContaining({
+        name: 'My Plant',
+        notes: 'notes',
+        speciesId: 'spec1',
+        createdAt: expect.any(Date)
+      })
+    );
+    expect(mockUpdateDoc).toHaveBeenCalledWith(
+      expect.objectContaining({ args: [{}, 'plants', 'newPlant'] }),
+      {
+        photo: 'url',
+        album: [{ url: 'url', date: addData.createdAt }]
+      }
+    );
+    expect(document.getElementById('plant-modal').classList.contains('hidden')).toBe(true);
   });
 });
