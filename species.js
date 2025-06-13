@@ -1,6 +1,6 @@
 // species.js
 
-import { db } from './firebase-init.js';
+import { db, storage } from './firebase-init.js';
 import { resizeImage } from './resizeImage.js';
 import {
   doc,
@@ -13,6 +13,7 @@ import {
   query,
   where
 } from './firestore-web.js';
+import { ref, uploadString, getDownloadURL } from './storage-web.js';
 
 function safeRedirect(url) {
   try {
@@ -192,9 +193,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         name: nombre,
         notes: notas,
         speciesId,
-        photo: resizedPhoto,
-        createdAt,
-        album: [{ photo: resizedPhoto, date: createdAt }]
+        createdAt
+      });
+      const photoRef = ref(storage, `plants/${docRef.id}/album/${Date.now()}.jpg`);
+      await uploadString(photoRef, resizedPhoto, 'data_url');
+      const url = await getDownloadURL(photoRef);
+      await updateDoc(doc(db, 'plants', docRef.id), {
+        photo: url,
+        album: [{ url, date: createdAt }]
       });
       if (typeof QRious !== 'undefined') {
         const qr = new QRious({ value: docRef.id, size: 200 });
