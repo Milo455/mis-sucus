@@ -33,6 +33,7 @@ npx http-server -c-1
 ```
 
 Then open `http://localhost:8080/index.html` in your browser. Alternatively, you can open `index.html` directly, but using a local server is recommended for module loading.
+The service worker caches core files after the first load, so the app can be used offline.
 
 ## Firebase Setup
 
