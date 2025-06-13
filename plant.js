@@ -65,6 +65,7 @@ function mostrarAlbum() {
     wrapper.className = 'album-item';
     const img = document.createElement('img');
     img.src = item.url;
+    img.alt = 'Foto del ' + item.date.toLocaleDateString();
     const span = document.createElement('span');
     span.className = 'album-date';
     span.textContent = item.date.toLocaleDateString();
