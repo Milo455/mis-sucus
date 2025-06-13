@@ -17,7 +17,8 @@ npm install
 
 ## Running Tests
 
-Execute the test suite with:
+Before running tests, install dependencies with `npm install` if you haven't already.
+Then execute the test suite with:
 
 ```bash
 npm test
