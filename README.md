@@ -38,3 +38,7 @@ Then open `http://localhost:8080/index.html` in your browser. Alternatively, you
 
 Replace the placeholder values in `firebase-init.js` with the keys for your Firebase project. Ensure Firestore is enabled in the Firebase console.
 
+To properly query plant events, create a **composite index** on the `events` collection with these fields:
+`plantId` ascending, `type` ascending and `date` descending. When an index is missing,
+the Firestore console usually includes a link to build it automatically.
+
