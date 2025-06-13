@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mis-sucus-cache-v1';
+const CACHE_NAME = 'mis-sucus-cache-v2';
 const URLS_TO_CACHE = [
   '/',
   'index.html',
@@ -19,7 +19,17 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then(names =>
+      Promise.all(
+        names.map(name => {
+          if (name !== CACHE_NAME) {
+            return caches.delete(name);
+          }
+        })
+      )
+    ).then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener('fetch', event => {
