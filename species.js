@@ -165,6 +165,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       });
     });
+
+    mostrarOcultarBotonesEliminar();
   }
 
   // Agregar planta
