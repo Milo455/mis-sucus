@@ -4,8 +4,9 @@
   --primary-color: #7D5A50;
   --secondary-color: #C4A484;
   --accent-color: #A1B57D;
-  --button-green: #4CAF50;
-  --button-green-hover: #367C39;
+
+  --button-green: #A5D6A7;
+  --button-green-hover: #91C295;
   --bg-color: #FDF6EC;
   --text-color: #3E3E3E;
   --white: #FFFFFF;
@@ -134,6 +135,7 @@ button {
   background-color: var(--button-green);
   color: var(--white);
   border: none;
+  border-radius: 8px;
   transition: background-color 0.3s;
 }
 
