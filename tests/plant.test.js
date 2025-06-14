@@ -17,6 +17,9 @@ const mockOrderBy = jest.fn();
 const mockLimit = jest.fn();
 const mockGetDocs = jest.fn();
 
+const mockUploadString = jest.fn(() => Promise.resolve());
+const mockGetDownloadURL = jest.fn(() => Promise.resolve('url'));
+
 
 const flushPromises = () => new Promise(res => setTimeout(res, 0));
 
@@ -55,14 +58,25 @@ describe('plant.js', () => {
 
     jest.unstable_mockModule('../storage-web.js', () => ({
       ref: jest.fn(() => 'ref'),
-      uploadString: jest.fn(() => Promise.resolve()),
-      getDownloadURL: jest.fn(() => Promise.resolve('url'))
+      uploadString: mockUploadString,
+      getDownloadURL: mockGetDownloadURL
+    }));
+
+    jest.unstable_mockModule('../resizeImage.js', () => ({
+      resizeImage: jest.fn(async () => 'resized-image')
     }));
 
     jest.unstable_mockModule('../firebase-init.js', () => ({
       db: {},
       storage: {}
     }));
+    global.FileReader = class {
+      readAsDataURL() {
+        if (this.onload) {
+          this.onload({ target: { result: 'data-url' } });
+        }
+      }
+    };
     mockGetDocs.mockResolvedValue({ empty: true, docs: [], forEach: () => {} });
     document.body.innerHTML = `
       <img id="plant-photo" />
@@ -139,6 +153,43 @@ describe('plant.js', () => {
 
     expect(document.getElementById('plant-photo').src).toContain('img-new');
     expect(document.getElementById('photo-album').children.length).toBe(2);
+  });
+
+  test('adds a new album photo on file selection', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          photo: 'img-old',
+          notes: 'note',
+          album: [
+            { url: 'img-old', date: { toDate: () => new Date('2020-01-02') } }
+          ]
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+
+    await import('../plant.js');
+    await flushPromises();
+
+    const input = document.getElementById('new-photo-input');
+    Object.defineProperty(input, 'files', { value: [{}], writable: false });
+    input.dispatchEvent(new Event('change'));
+    await flushPromises();
+    await flushPromises();
+
+    const updateData = mockUpdateDoc.mock.calls[0][1];
+    expect(updateData.album.length).toBe(2);
+    expect(updateData.album[0].url).toBe('url');
+    const album = document.getElementById('photo-album');
+    expect(album.children.length).toBe(2);
+    expect(album.children[0].querySelector('img').src).toContain('url');
   });
 
   test('delete button removes plant and redirects', async () => {
