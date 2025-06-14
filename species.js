@@ -13,7 +13,7 @@ import {
   query,
   where
 } from './firestore-web.js';
-import { ref, uploadString, getDownloadURL } from './storage-web.js';
+import { ref, uploadBytes, getDownloadURL } from './storage-web.js';
 
 function safeRedirect(url) {
   try {
@@ -21,6 +21,17 @@ function safeRedirect(url) {
   } catch {
     // Ignore navigation errors in test environments
   }
+}
+
+function dataURLToBlob(dataURL) {
+  const parts = dataURL.split(',');
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const binary = atob(parts[1]);
+  const array = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    array[i] = binary.charCodeAt(i);
+  }
+  return new Blob([array], { type: mime });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -223,7 +234,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           createdAt
         });
         const photoRef = ref(storage, `plants/${docRef.id}/album/${Date.now()}.jpg`);
-        await uploadString(photoRef, resizedPhoto, 'data_url');
+        const blob = dataURLToBlob(resizedPhoto);
+        await uploadBytes(photoRef, blob);
         const url = await getDownloadURL(photoRef);
         await updateDoc(doc(db, 'plants', docRef.id), {
           photo: url,

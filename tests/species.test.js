@@ -14,7 +14,7 @@ const mockAddDoc = jest.fn();
 const mockGetDocs = jest.fn();
 const mockQuery = jest.fn();
 const mockWhere = jest.fn();
-const mockUploadString = jest.fn(() => Promise.resolve());
+const mockUploadBytes = jest.fn(() => Promise.resolve());
 const mockGetDownloadURL = jest.fn(() => Promise.resolve('url'));
 
 
@@ -51,12 +51,12 @@ describe('species.js', () => {
 
     jest.unstable_mockModule('../storage-web.js', () => ({
       ref: jest.fn(() => 'ref'),
-      uploadString: mockUploadString,
+      uploadBytes: mockUploadBytes,
       getDownloadURL: mockGetDownloadURL
     }));
 
     jest.unstable_mockModule('../resizeImage.js', () => ({
-      resizeImage: jest.fn(async () => 'resized-image')
+      resizeImage: jest.fn(async () => 'data:image/jpeg;base64,fake')
     }));
 
     jest.unstable_mockModule('../firebase-init.js', () => ({
