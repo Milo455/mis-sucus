@@ -1,0 +1,16 @@
+{
+  "name": "mis-sucus",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest --passWithNoTests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "jest": "^30.0.0"
+  }
+}
