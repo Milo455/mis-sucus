@@ -87,3 +87,19 @@ gsutil cors set cors.json gs://<your-storage-bucket>
 The `cors.json` file must list your domain. If Storage rules or CORS are not
 configured, you will encounter CORS errors when adding photos.
 
+Create `cors.json` in the project root with contents similar to:
+
+```json
+[
+  {
+    "origin": ["https://example.com"],
+    "method": ["GET", "POST", "PUT"],
+    "responseHeader": ["Content-Type"],
+    "maxAgeSeconds": 3600
+  }
+]
+```
+
+Replace `https://example.com` with the domain that hosts your app, then run the
+`gsutil cors set` command above.
+
