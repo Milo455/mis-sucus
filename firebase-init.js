@@ -1,7 +1,5 @@
 // firebase-init.js
-import firebase from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js';
-import 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js';
-
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getStorage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
@@ -14,8 +12,6 @@ const firebaseConfig = {
   appId: "1:535386004336:web:4701b88dc0ed7f75164db5"
 };
 
-firebase.initializeApp(firebaseConfig);
-const app = firebase.app();
+const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export { firebase };

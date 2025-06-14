@@ -1,6 +1,7 @@
 // species.js
 
-import { db, firebase } from './firebase-init.js';
+import { db, storage } from './firebase-init.js';
+import { ref, uploadBytes, getDownloadURL } from './storage-web.js';
 import { resizeImage } from './resizeImage.js';
 import {
   doc,
@@ -233,10 +234,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           createdAt
         });
         const blob = dataURLToBlob(resizedPhoto);
-        const storageRef = firebase.storage().ref();
-        const imageRef = storageRef.child(`plants/${docRef.id}/album/${Date.now()}.jpg`);
-        await imageRef.put(blob);
-        const url = await imageRef.getDownloadURL();
+        const imageRef = ref(storage, `plants/${docRef.id}/album/${Date.now()}.jpg`);
+        await uploadBytes(imageRef, blob);
+        const url = await getDownloadURL(imageRef);
         await updateDoc(doc(db, 'plants', docRef.id), {
           photo: url,
           album: [{ url, date: createdAt }]
