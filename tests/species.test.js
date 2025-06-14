@@ -14,7 +14,7 @@ const mockAddDoc = jest.fn();
 const mockGetDocs = jest.fn();
 const mockQuery = jest.fn();
 const mockWhere = jest.fn();
-const mockUploadBytes = jest.fn(() => Promise.resolve());
+const mockPut = jest.fn(() => Promise.resolve());
 const mockGetDownloadURL = jest.fn(() => Promise.resolve('url'));
 
 
@@ -49,18 +49,25 @@ describe('species.js', () => {
       where: mockWhere
     }));
 
-    jest.unstable_mockModule('../storage-web.js', () => ({
-      ref: jest.fn(() => 'ref'),
-      uploadBytes: mockUploadBytes,
-      getDownloadURL: mockGetDownloadURL
-    }));
+
 
     jest.unstable_mockModule('../resizeImage.js', () => ({
       resizeImage: jest.fn(async () => 'data:image/jpeg;base64,fake')
     }));
 
+    const mockFirebase = {
+      storage: jest.fn(() => ({
+        ref: jest.fn(() => ({
+          child: jest.fn(() => ({
+            put: mockPut,
+            getDownloadURL: mockGetDownloadURL
+          }))
+        }))
+      }))
+    };
     jest.unstable_mockModule('../firebase-init.js', () => ({
       db: {},
+      firebase: mockFirebase,
       storage: {}
     }));
     global.FileReader = class {
