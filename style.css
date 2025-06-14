@@ -158,6 +158,19 @@ button:hover {
 .small-button:hover {
   background-color: var(--button-green-hover);
 }
+
+/* Ensure consistent margin for plant detail buttons */
+#edit-plant,
+#print-qr,
+#open-album,
+#add-event-btn,
+#save-plant-event,
+#cancel-add-event,
+#cancel-edit-plant,
+#delete-plant-inside,
+#add-photo-record {
+  margin: var(--button-margin);
+}
 /* Calendario */
 #calendar-container table {
   border-collapse: collapse;
