@@ -50,6 +50,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   const plantNotesInput = document.getElementById('plant-notes-input');
   const plantPhotoInput = document.getElementById('plant-photo');
 
+  const requiredEls = [
+    photoDisplay,
+    nameDisplay,
+    editBtn,
+    editForm,
+    inputName,
+    inputPhoto,
+    saveBtn,
+    deleteBtn,
+    plantList,
+    addPlantBtn,
+    plantModal,
+    closePlantModal,
+    savePlantBtn,
+    plantNameInput,
+    plantNotesInput,
+    plantPhotoInput
+  ];
+
+  if (requiredEls.some(el => el === null)) {
+    console.error('Missing required DOM elements in species.js');
+    return;
+  }
+
   let speciesData = null;
 
   // Cargar datos
