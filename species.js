@@ -1,6 +1,6 @@
 // species.js
 
-import { db, storage } from './firebase-init.js';
+import { db, firebase } from './firebase-init.js';
 import { resizeImage } from './resizeImage.js';
 import {
   doc,
@@ -13,7 +13,6 @@ import {
   query,
   where
 } from './firestore-web.js';
-import { ref, uploadBytes, getDownloadURL } from './storage-web.js';
 
 function safeRedirect(url) {
   try {
@@ -233,10 +232,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           speciesId,
           createdAt
         });
-        const photoRef = ref(storage, `plants/${docRef.id}/album/${Date.now()}.jpg`);
         const blob = dataURLToBlob(resizedPhoto);
-        await uploadBytes(photoRef, blob);
-        const url = await getDownloadURL(photoRef);
+        const storageRef = firebase.storage().ref();
+        const imageRef = storageRef.child(`plants/${docRef.id}/album/${Date.now()}.jpg`);
+        await imageRef.put(blob);
+        const url = await imageRef.getDownloadURL();
         await updateDoc(doc(db, 'plants', docRef.id), {
           photo: url,
           album: [{ url, date: createdAt }]
