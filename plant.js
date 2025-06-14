@@ -73,7 +73,7 @@ function mostrarAlbum() {
     wrapper.className = 'album-item';
     const img = document.createElement('img');
     img.src = item.url;
-    img.alt = 'Foto del ' + item.date.toLocaleDateString();
+    img.alt = 'Foto tomada el ' + item.date.toLocaleDateString();
     const span = document.createElement('span');
     span.className = 'album-date';
     span.textContent = item.date.toLocaleDateString();
@@ -108,12 +108,16 @@ async function cargarPlanta() {
   currentSpeciesId = data.speciesId;
   qrCodeData = data.qrCode || '';
 
+  const albumMissing = data.album === undefined;
   albumData = (data.album || []).map(a => ({
     url: a.url,
     date: a.date && a.date.toDate ? a.date.toDate() : a.date
   }));
   if (albumData.length === 0 && data.photo) {
     albumData.push({ url: data.photo, date: data.createdAt.toDate() });
+    if (albumMissing) {
+      await updateDoc(doc(db, 'plants', plantId), { album: albumData });
+    }
   }
 
   albumData.sort((a, b) => b.date - a.date);

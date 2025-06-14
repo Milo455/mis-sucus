@@ -135,7 +135,9 @@ describe('plant.js', () => {
     expect(document.getElementById('species-name').textContent).toBe('Especie: SpeciesName');
   });
 
+
   test('adds initial photo to album when none exists', async () => {
+
     mockGetDoc
       .mockResolvedValueOnce({
         exists: () => true,
@@ -158,6 +160,7 @@ describe('plant.js', () => {
     const album = document.getElementById('photo-album');
     expect(album.children.length).toBe(1);
     expect(album.children[0].querySelector('img').src).toContain('img-url');
+
   });
 
   test('shows latest album photo', async () => {
@@ -185,7 +188,12 @@ describe('plant.js', () => {
     await flushPromises();
 
     expect(document.getElementById('plant-photo').src).toContain('img-new');
-    expect(document.getElementById('photo-album').children.length).toBe(2);
+    const album = document.getElementById('photo-album');
+    expect(album.children.length).toBe(2);
+    const altFirst = album.children[0].querySelector('img').alt;
+    expect(altFirst).toBe(
+      'Foto tomada el ' + new Date('2020-01-03').toLocaleDateString()
+    );
   });
 
   test('adds a new album photo on file selection', async () => {
@@ -211,6 +219,8 @@ describe('plant.js', () => {
     await import('../plant.js');
     await flushPromises();
 
+    const todayStr = new Date().toLocaleDateString();
+
     const input = document.getElementById('new-photo-input');
     Object.defineProperty(input, 'files', { value: [{}], writable: false });
     input.dispatchEvent(new Event('change'));
@@ -223,6 +233,8 @@ describe('plant.js', () => {
     const album = document.getElementById('photo-album');
     expect(album.children.length).toBe(2);
     expect(album.children[0].querySelector('img').src).toContain('url');
+    const alt = album.children[0].querySelector('img').alt;
+    expect(alt).toBe('Foto tomada el ' + todayStr);
   });
 
   test('editing with a new photo updates the album', async () => {
