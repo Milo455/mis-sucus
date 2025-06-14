@@ -14,7 +14,7 @@ import {
   limit,
   getDocs
 } from './firestore-web.js';
-import { ref, uploadString, getDownloadURL } from './storage-web.js';
+import { ref, uploadBytes, getDownloadURL } from './storage-web.js';
 
 function safeRedirect(url) {
   try {
@@ -22,6 +22,17 @@ function safeRedirect(url) {
   } catch {
     // Ignore navigation errors in test environments
   }
+}
+
+function dataURLToBlob(dataURL) {
+  const parts = dataURL.split(',');
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const binary = atob(parts[1]);
+  const array = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    array[i] = binary.charCodeAt(i);
+  }
+  return new Blob([array], { type: mime });
 }
 
 // Obtener ID desde la URL
@@ -261,8 +272,9 @@ function initialize() {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const resized = await resizeImage(e.target.result, 800);
+        const blob = dataURLToBlob(resized);
         const storageRef = ref(storage, `plants/${plantId}/album/${Date.now()}.jpg`);
-        await uploadString(storageRef, resized, 'data_url');
+        await uploadBytes(storageRef, blob);
         const url = await getDownloadURL(storageRef);
         const entry = { url, date: new Date() };
         albumData.unshift(entry);
