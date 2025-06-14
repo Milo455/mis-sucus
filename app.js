@@ -1,7 +1,6 @@
 // app.js
 
 import { db } from './firebase-init.js';
-import { resizeImage } from './resizeImage.js';
 import {
   collection,
   addDoc,
@@ -74,7 +73,7 @@ if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
         await addDoc(collection(db, 'species'), {
           name,
           info,
-photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
+          photo: e.target.result,
           createdAt: new Date()
         });
         modalSpecies.classList.add('hidden');

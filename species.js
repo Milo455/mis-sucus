@@ -1,8 +1,7 @@
 // species.js
 
 import { db, storage } from './firebase-init.js';
-import { ref, uploadBytes, getDownloadURL } from './storage-web.js';
-import { resizeImage } from './resizeImage.js';
+import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 import {
   doc,
   getDoc,
@@ -13,7 +12,7 @@ import {
   getDocs,
   query,
   where
-} from './firestore-web.js';
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 function safeRedirect(url) {
   try {
@@ -118,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (inputPhoto.files.length > 0) {
       const reader = new FileReader();
       reader.onload = async e => {
-        nuevaFoto = await resizeImage(e.target.result, 800);
+        nuevaFoto = e.target.result;
         await guardarCambios(nuevoNombre, nuevaFoto);
       };
       reader.readAsDataURL(inputPhoto.files[0]);
@@ -225,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const reader = new FileReader();
     reader.onload = async e => {
       try {
-        const resizedPhoto = await resizeImage(e.target.result, 800);
+        const resizedPhoto = e.target.result;
         const createdAt = new Date();
         const docRef = await addDoc(collection(db, 'plants'), {
           name: nombre,
