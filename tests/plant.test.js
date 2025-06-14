@@ -405,4 +405,10 @@ describe('plant.js', () => {
     expect(viewerModal.classList.contains('hidden')).toBe(false);
     expect(viewerImg.src).toBe(firstImg.src);
   });
+
+  test('handles missing DOM elements gracefully', async () => {
+    document.body.innerHTML = '';
+    await import('../plant.js');
+    await flushPromises();
+  });
 });
