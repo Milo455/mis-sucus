@@ -1,6 +1,5 @@
 import { db, storage } from './firebase-init.js';
 // Utility to resize uploaded images
-import { resizeImage } from './resizeImage.js';
 import {
   doc,
   getDoc,
@@ -13,8 +12,8 @@ import {
   orderBy,
   limit,
   getDocs
-} from './firestore-web.js';
-import { ref, uploadBytes, getDownloadURL } from './storage-web.js';
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
 function safeRedirect(url) {
   try {
@@ -227,7 +226,7 @@ function initialize() {
       const reader = new FileReader();
       reader.onload = async (e) => {
         try {
-          updates.photo = await resizeImage(e.target.result, 800);
+          updates.photo = e.target.result;
 
           albumData.unshift({ url: updates.photo, date: new Date() });
           await updateDoc(doc(db, 'plants', plantId), {
@@ -271,7 +270,7 @@ function initialize() {
       if (!file) return;
       const reader = new FileReader();
       reader.onload = async (e) => {
-        const resized = await resizeImage(e.target.result, 800);
+        const resized = e.target.result;
         const blob = dataURLToBlob(resized);
         const storageRef = ref(storage, `plants/${plantId}/album/${Date.now()}.jpg`);
         await uploadBytes(storageRef, blob);
