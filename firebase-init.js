@@ -1,6 +1,7 @@
 // firebase-init.js
-import firebase from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+import firebase from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js';
+import 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js';
+
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getStorage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
