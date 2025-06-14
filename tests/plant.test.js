@@ -17,7 +17,7 @@ const mockOrderBy = jest.fn();
 const mockLimit = jest.fn();
 const mockGetDocs = jest.fn();
 
-const mockUploadString = jest.fn(() => Promise.resolve());
+const mockUploadBytes = jest.fn(() => Promise.resolve());
 const mockGetDownloadURL = jest.fn(() => Promise.resolve('url'));
 
 
@@ -58,12 +58,12 @@ describe('plant.js', () => {
 
     jest.unstable_mockModule('../storage-web.js', () => ({
       ref: jest.fn(() => 'ref'),
-      uploadString: mockUploadString,
+      uploadBytes: mockUploadBytes,
       getDownloadURL: mockGetDownloadURL
     }));
 
     jest.unstable_mockModule('../resizeImage.js', () => ({
-      resizeImage: jest.fn(async () => 'resized-image')
+      resizeImage: jest.fn(async () => 'data:image/jpeg;base64,fake')
     }));
 
     jest.unstable_mockModule('../firebase-init.js', () => ({
@@ -269,7 +269,7 @@ describe('plant.js', () => {
 
     const updateData = mockUpdateDoc.mock.calls[0][1];
     expect(updateData.album.length).toBe(2);
-    expect(updateData.album[0].url).toBe('resized-image');
+    expect(updateData.album[0].url).toBe('data:image/jpeg;base64,fake');
   });
 
   test('editing the photo adds it to the album', async () => {
@@ -305,10 +305,10 @@ describe('plant.js', () => {
 
     const updateData = mockUpdateDoc.mock.calls[0][1];
     expect(updateData.album.length).toBe(2);
-    expect(updateData.album[0].url).toBe('resized-image');
+    expect(updateData.album[0].url).toBe('data:image/jpeg;base64,fake');
     const album = document.getElementById('photo-album');
     expect(album.children.length).toBe(2);
-    expect(album.children[0].querySelector('img').src).toContain('resized-image');
+    expect(album.children[0].querySelector('img').src).toContain('data:image/jpeg;base64,fake');
   });
 
   test('delete button removes plant and redirects', async () => {
