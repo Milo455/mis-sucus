@@ -81,7 +81,15 @@ describe('plant.js', () => {
       <span id="species-name"></span>
       <button id="add-photo-record"></button>
       <input id="new-photo-input" type="file" />
-      <div id="photo-album"></div>
+      <button id="open-album"></button>
+      <div id="album-modal" class="hidden">
+        <button id="close-album"></button>
+        <div id="photo-album"></div>
+      </div>
+      <div id="viewer-modal" class="hidden">
+        <img id="viewer-img" />
+        <button id="close-viewer"></button>
+      </div>
     `;
     window.history.pushState({}, '', '/plant.html?id=plant1');
     window.alert = jest.fn();
@@ -166,5 +174,73 @@ describe('plant.js', () => {
     await flushPromises();
 
     expect(mockDeleteDoc).toHaveBeenCalled();
+  });
+
+  test('open and close album modal', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          photo: 'img-url',
+          notes: 'note'
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+
+    await import('../plant.js');
+    await flushPromises();
+
+    const albumModal = document.getElementById('album-modal');
+    const openBtn = document.getElementById('open-album');
+    const closeBtn = document.getElementById('close-album');
+
+    expect(albumModal.classList.contains('hidden')).toBe(true);
+
+    openBtn.click();
+    expect(albumModal.classList.contains('hidden')).toBe(false);
+
+    closeBtn.click();
+    expect(albumModal.classList.contains('hidden')).toBe(true);
+  });
+
+  test('viewer modal shows clicked album photo', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          photo: 'img-old',
+          notes: 'note',
+          album: [
+            { url: 'img-old', date: { toDate: () => new Date('2020-01-02') } },
+            { url: 'img-new', date: { toDate: () => new Date('2020-01-03') } }
+          ]
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+
+    await import('../plant.js');
+    await flushPromises();
+
+    const albumEl = document.getElementById('photo-album');
+    const firstImg = albumEl.querySelector('img');
+    const viewerModal = document.getElementById('viewer-modal');
+    const viewerImg = document.getElementById('viewer-img');
+
+    firstImg.click();
+
+    expect(viewerModal.classList.contains('hidden')).toBe(false);
+    expect(viewerImg.src).toBe(firstImg.src);
   });
 });
