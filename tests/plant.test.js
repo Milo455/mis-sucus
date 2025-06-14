@@ -135,6 +135,39 @@ describe('plant.js', () => {
     expect(document.getElementById('species-name').textContent).toBe('Especie: SpeciesName');
   });
 
+  test('updates album when loading plant without album', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          photo: 'img-url',
+          notes: 'note'
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+
+    await import('../plant.js');
+    await flushPromises();
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith(
+      expect.objectContaining({ args: [{}, 'plants', 'plant1'] }),
+      {
+        album: [
+          {
+            url: 'img-url',
+            date: expect.any(Date)
+          }
+        ]
+      }
+    );
+  });
+
   test('shows latest album photo', async () => {
     mockGetDoc
       .mockResolvedValueOnce({

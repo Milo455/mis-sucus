@@ -108,12 +108,16 @@ async function cargarPlanta() {
   currentSpeciesId = data.speciesId;
   qrCodeData = data.qrCode || '';
 
+  const albumMissing = data.album === undefined;
   albumData = (data.album || []).map(a => ({
     url: a.url,
     date: a.date && a.date.toDate ? a.date.toDate() : a.date
   }));
   if (albumData.length === 0 && data.photo) {
     albumData.push({ url: data.photo, date: data.createdAt.toDate() });
+    if (albumMissing) {
+      await updateDoc(doc(db, 'plants', plantId), { album: albumData });
+    }
   }
 
   albumData.sort((a, b) => b.date - a.date);
