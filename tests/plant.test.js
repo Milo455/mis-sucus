@@ -200,6 +200,45 @@ describe('plant.js', () => {
     expect(album.children[0].querySelector('img').src).toContain('url');
   });
 
+  test('editing the photo adds it to the album', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          photo: 'img-old',
+          notes: 'note',
+          album: [
+            { url: 'img-old', date: { toDate: () => new Date('2020-01-02') } }
+          ]
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+
+    await import('../plant.js');
+    await flushPromises();
+
+    const photoInput = document.getElementById('edit-plant-photo');
+    const nameInput = document.getElementById('edit-plant-name');
+    nameInput.value = 'Plant1';
+    Object.defineProperty(photoInput, 'files', { value: [{}], writable: false });
+    document.getElementById('edit-plant-form').dispatchEvent(new Event('submit'));
+    await flushPromises();
+    await flushPromises();
+
+    const updateData = mockUpdateDoc.mock.calls[0][1];
+    expect(updateData.album.length).toBe(2);
+    expect(updateData.album[0].url).toBe('resized-image');
+    const album = document.getElementById('photo-album');
+    expect(album.children.length).toBe(2);
+    expect(album.children[0].querySelector('img').src).toContain('resized-image');
+  });
+
   test('delete button removes plant and redirects', async () => {
     mockGetDoc
       .mockResolvedValueOnce({
