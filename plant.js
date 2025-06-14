@@ -187,10 +187,16 @@ formEdit.addEventListener('submit', async (e) => {
     reader.onload = async (e) => {
       try {
         updates.photo = await resizeImage(e.target.result, 800);
-        await updateDoc(doc(db, 'plants', plantId), updates);
+        const entry = { url: updates.photo, date: new Date() };
+        albumData.unshift(entry);
+        await updateDoc(doc(db, 'plants', plantId), {
+          ...updates,
+          album: albumData
+        });
         nameEl.textContent = newName;
         notesEl.textContent = newNotes;
         photoEl.src = updates.photo;
+        mostrarAlbum();
         inputPhoto.value = '';
         modalEdit.classList.add('hidden');
         alert('Planta actualizada con éxito');

@@ -135,6 +135,31 @@ describe('plant.js', () => {
     expect(document.getElementById('species-name').textContent).toBe('Especie: SpeciesName');
   });
 
+  test('adds initial photo to album when none exists', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          photo: 'img-url',
+          notes: 'note'
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+
+    await import('../plant.js');
+    await flushPromises();
+
+    const album = document.getElementById('photo-album');
+    expect(album.children.length).toBe(1);
+    expect(album.children[0].querySelector('img').src).toContain('img-url');
+  });
+
   test('shows latest album photo', async () => {
     mockGetDoc
       .mockResolvedValueOnce({
@@ -198,6 +223,41 @@ describe('plant.js', () => {
     const album = document.getElementById('photo-album');
     expect(album.children.length).toBe(2);
     expect(album.children[0].querySelector('img').src).toContain('url');
+  });
+
+  test('editing with a new photo updates the album', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          photo: 'img-old',
+          notes: 'note',
+          album: [
+            { url: 'img-old', date: { toDate: () => new Date('2020-01-02') } }
+          ]
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+
+    await import('../plant.js');
+    await flushPromises();
+
+    const form = document.getElementById('edit-plant-form');
+    const photoInput = document.getElementById('edit-plant-photo');
+    Object.defineProperty(photoInput, 'files', { value: [{}], writable: false });
+    form.dispatchEvent(new Event('submit'));
+    await flushPromises();
+    await flushPromises();
+
+    const updateData = mockUpdateDoc.mock.calls[0][1];
+    expect(updateData.album.length).toBe(2);
+    expect(updateData.album[0].url).toBe('resized-image');
   });
 
   test('delete button removes plant and redirects', async () => {
