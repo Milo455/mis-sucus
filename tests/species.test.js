@@ -171,4 +171,11 @@ describe('species.js', () => {
     );
     expect(document.getElementById('plant-modal').classList.contains('hidden')).toBe(true);
   });
+
+  test('handles missing DOM elements gracefully', async () => {
+    document.body.innerHTML = '';
+    await jest.isolateModulesAsync(() => import('../species.js'));
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await flushPromises();
+  });
 });
