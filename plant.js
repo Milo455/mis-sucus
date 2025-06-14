@@ -226,17 +226,21 @@ function initialize() {
       const reader = new FileReader();
       reader.onload = async (e) => {
         try {
-          updates.photo = e.target.result;
-
-          albumData.unshift({ url: updates.photo, date: new Date() });
+          const dataUrl = e.target.result;
+          const blob = dataURLToBlob(dataUrl);
+          const storageRef = ref(storage, `plants/${plantId}/album/${Date.now()}.jpg`);
+          await uploadBytes(storageRef, blob);
+          const url = await getDownloadURL(storageRef);
+          updates.photo = url;
+          albumData.unshift({ url, date: new Date() });
           await updateDoc(doc(db, 'plants', plantId), {
-            photo: updates.photo,
+            photo: url,
             album: albumData,
 
           });
           nameEl.textContent = newName;
           notesEl.textContent = newNotes;
-          photoEl.src = updates.photo;
+          photoEl.src = url;
           mostrarAlbum();
           inputPhoto.value = '';
           modalEdit.classList.add('hidden');
