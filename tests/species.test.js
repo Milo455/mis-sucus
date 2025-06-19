@@ -47,8 +47,15 @@ describe('species.js', () => {
       where: mockWhere
     }));
 
+    jest.unstable_mockModule('../storage-web.js', () => ({
+      ref: jest.fn(() => 'ref'),
+      uploadString: jest.fn(() => Promise.resolve()),
+      getDownloadURL: jest.fn(() => Promise.resolve('url'))
+    }));
+
     jest.unstable_mockModule('../firebase-init.js', () => ({
-      db: {}
+      db: {},
+      storage: {}
     }));
     // default return
     mockGetDocs.mockImplementation(() => Promise.resolve({ empty: true, docs: [], forEach: () => {} }));

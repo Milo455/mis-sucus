@@ -1,4 +1,4 @@
-import { db } from './firebase-init.js';
+import { db, storage } from './firebase-init.js';
 // Utility to resize uploaded images
 import { resizeImage } from './resizeImage.js';
 import {
@@ -14,6 +14,7 @@ import {
   limit,
   getDocs
 } from './firestore-web.js';
+import { ref, uploadString, getDownloadURL } from './storage-web.js';
 
 // Obtener ID desde la URL
 const params = new URLSearchParams(window.location.search);
@@ -32,7 +33,6 @@ const inputName = document.getElementById('edit-plant-name');
 const inputNotes = document.getElementById('edit-plant-notes');
 const inputPhoto = document.getElementById('edit-plant-photo');
 const notesEl = document.getElementById('plant-notes');
-const dateEl = document.getElementById('plant-created-date');
 const addPhotoBtn = document.getElementById('add-photo-record');
 const newPhotoInput = document.getElementById('new-photo-input');
 const albumEl = document.getElementById('photo-album');
@@ -49,24 +49,22 @@ const viewerModal = document.getElementById('viewer-modal');
 const viewerImg = document.getElementById('viewer-img');
 const closeViewerBtn = document.getElementById('close-viewer');
 
+const PLACEHOLDER_IMG = 'icons/icon-192.png';
 let albumData = [];
 
-function safeRedirect(url) {
-  try {
-    window.location.href = url;
-  } catch (_) {
-    // Ignore navigation errors in test environments
-  }
-}
 
 function mostrarAlbum() {
   if (!albumEl) return;
   albumEl.innerHTML = '';
+  if (albumData.length === 0) {
+    albumEl.textContent = 'No hay imágenes';
+    return;
+  }
   albumData.forEach(item => {
     const wrapper = document.createElement('div');
     wrapper.className = 'album-item';
     const img = document.createElement('img');
-    img.src = item.photo;
+    img.src = item.url;
     const span = document.createElement('span');
     span.className = 'album-date';
     span.textContent = item.date.toLocaleDateString();
@@ -79,7 +77,6 @@ function mostrarAlbum() {
 let currentSpeciesId; // speciesId for redirects
 let currentSpeciesName = '';
 let originalName = '';
-let originalPhoto = '';
 let originalNotes = '';
 let qrCodeData = '';
 
@@ -103,11 +100,11 @@ async function cargarPlanta() {
   qrCodeData = data.qrCode || '';
 
   albumData = (data.album || []).map(a => ({
-    photo: a.photo,
+    url: a.url,
     date: a.date && a.date.toDate ? a.date.toDate() : a.date
   }));
   if (albumData.length === 0 && data.photo) {
-    albumData.push({ photo: data.photo, date: data.createdAt.toDate() });
+    albumData.push({ url: data.photo, date: data.createdAt.toDate() });
   }
 
   albumData.sort((a, b) => b.date - a.date);
@@ -120,7 +117,11 @@ async function cargarPlanta() {
   speciesEl.textContent = `Especie: ${currentSpeciesName}`;
 
   nameEl.textContent = data.name;
-  photoEl.src = albumData[0].photo;
+  if (albumData.length === 0) {
+    photoEl.src = PLACEHOLDER_IMG;
+  } else {
+    photoEl.src = albumData[0].url;
+  }
   notesEl.textContent = data.notes || '';
 
   mostrarAlbum();
@@ -151,9 +152,7 @@ async function cargarPlanta() {
 
   inputName.value = data.name;
   inputNotes.value = data.notes || '';
-  originalName = data.name;
-  originalPhoto = data.photo;
-  originalNotes = data.notes || '';
+  originalName = data.name;  originalNotes = data.notes || '';
 }
 
 btnEdit.addEventListener('click', () => {
@@ -217,13 +216,16 @@ if (addPhotoBtn && newPhotoInput) {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const resized = await resizeImage(e.target.result, 800);
-      const entry = { photo: resized, date: new Date() };
+      const storageRef = ref(storage, `plants/${plantId}/album/${Date.now()}.jpg`);
+      await uploadString(storageRef, resized, 'data_url');
+      const url = await getDownloadURL(storageRef);
+      const entry = { url, date: new Date() };
       albumData.unshift(entry);
       await updateDoc(doc(db, 'plants', plantId), {
-        photo: resized,
+        photo: url,
         album: albumData
       });
-      photoEl.src = resized;
+      photoEl.src = url;
       mostrarAlbum();
       newPhotoInput.value = '';
     };
