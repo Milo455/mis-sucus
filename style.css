@@ -5,9 +5,9 @@
   --secondary-color: #C4A484;
   --accent-color: #A1B57D;
 
-  --button-green: #A5D6A7;
-  --button-green-hover: #91C295;
-  --button-margin: 0.5rem;
+  --button-green: #4CAF50;
+  --button-green-hover: #367C39;
+
   --bg-color: #FDF6EC;
   --text-color: #3E3E3E;
   --white: #FFFFFF;
@@ -136,8 +136,6 @@ button {
   background-color: var(--button-green);
   color: var(--white);
   border: none;
-  margin: var(--button-margin);
-  border-radius: 8px;
   transition: background-color 0.3s;
 }
 
@@ -292,21 +290,27 @@ button:hover {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
-  padding: 1rem 0;
-  justify-content: start;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
 }
 
 .plant-item {
   background: #fff;
   border-radius: 10px;
   padding: 0.5rem;
-  text-align: center;
+
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+
   transition: transform 0.2s;
+  margin-bottom: 0;
+
 }
 
 .plant-item:hover {
@@ -314,11 +318,13 @@ button:hover {
 }
 
 .plant-item img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+
+  width: 80px;
+  height: 80px;
   object-fit: cover;
-  border-radius: 8px;
-  margin-right: 0;
+  border-radius: 0;
+  margin-right: 0.75rem;
+
 }
 
 .plant-item .plant-name {
