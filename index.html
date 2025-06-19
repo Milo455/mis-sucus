@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+  <title>Mis Sucus</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <header>
+    <h1>🌵 Mis Sucus</h1>
+    <div class="acciones">
+      <button id="btnAddSpecies">➕ Agregar Especie</button>
+      <button id="open-calendar">📅 Calendario</button>
+      <button id="scan-qr">📷 Escanear QR</button>
+    </div>
+  </header>
+
+  <main>
+    <h2>Lista de Especies</h2>
+    <div id="species-list" class="species-grid"></div>
+  </main>
+
+  <!-- Modal Agregar Especie -->
+  <div id="species-modal" class="modal hidden">
+    <div class="modal-content">
+      <span id="close-species-modal" class="close">&times;</span>
+      <h2>Agregar Especie</h2>
+      <input type="text" id="species-name" placeholder="Nombre de la especie"/>
+      <textarea id="species-info" placeholder="Cuidados y características"></textarea>
+      <input type="file" id="species-photo" accept="image/*"/>
+      <button id="save-species">Guardar</button>
+    </div>
+  </div>
+    <!-- Modal Calendario -->
+<div id="calendar-modal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" id="close-calendar">&times;</span>
+    <h2>Calendario</h2>
+    <div id="calendar-container"></div>
+    <h3>Eventos</h3>
+    <div id="eventos-dia"></div>
+   <button id="open-event-modal" class="add-event-btn">+</button>
+  </div>
+</div>
+
+<div id="add-event-modal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" id="close-add-event">&times;</span>
+    <h3>Agregar evento</h3>
+    <label for="event-date">Fecha:</label>
+    <input type="date" id="event-date" required><br>
+
+    <label for="event-type">Tipo de evento:</label>
+    <select id="event-type">
+      <option value="Riego">Riego</option>
+      <option value="Trasplante">Trasplante</option>
+      <option value="Fertilización">Fertilización</option>
+      <option value="Mantenimiento">Mantenimiento</option>
+    </select><br>
+
+<label>Selecciona plantas:</label>
+<div id="plant-checkboxes" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 0.5rem; border-radius: 5px;">
+  <!-- Aquí irán los checkboxes generados dinámicamente -->
+</div>
+
+
+    <button id="save-event" class="mt-2">Guardar evento</button>
+  </div>
+</div>
+<!-- Modal Escanear QR -->
+<div id="qr-modal" class="modal hidden">
+  <div class="modal-content">
+    <span id="close-qr-modal" class="close">&times;</span>
+    <h2>Escanear Código</h2>
+    <div id="qr-reader" style="width: 300px; margin: 0 auto;"></div>
+  </div>
+</div>
+
+
+  <script type="module" src="firebase-init.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
