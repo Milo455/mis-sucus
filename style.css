@@ -158,6 +158,19 @@ button:hover {
 .small-button:hover {
   background-color: var(--button-green-hover);
 }
+
+/* Ensure consistent margin for plant detail buttons */
+#edit-plant,
+#print-qr,
+#open-album,
+#add-event-btn,
+#save-plant-event,
+#cancel-add-event,
+#cancel-edit-plant,
+#delete-plant-inside,
+#add-photo-record {
+  margin: var(--button-margin);
+}
 /* Calendario */
 #calendar-container table {
   border-collapse: collapse;
@@ -293,9 +306,10 @@ button:hover {
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1rem;
   padding: 1rem 0;
+  justify-content: start;
 }
 
 .plant-item {
@@ -385,4 +399,10 @@ button:hover {
 #viewer-modal img {
   max-width: 90vw;
   max-height: 90vh;
+}
+
+.logo {
+  height: 1.5rem;
+  vertical-align: middle;
+  margin-right: 0.5rem;
 }

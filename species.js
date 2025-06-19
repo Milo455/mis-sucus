@@ -1,7 +1,7 @@
 // species.js
 
 import { db, storage } from './firebase-init.js';
-import { resizeImage } from './resizeImage.js';
+import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 import {
   doc,
   getDoc,
@@ -12,8 +12,7 @@ import {
   getDocs,
   query,
   where
-} from './firestore-web.js';
-import { ref, uploadString, getDownloadURL } from './storage-web.js';
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 function safeRedirect(url) {
   try {
@@ -22,6 +21,32 @@ function safeRedirect(url) {
     // Ignore navigation errors in test environments
   }
 }
+
+function dataURLToBlob(dataURL) {
+  const parts = dataURL.split(',');
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const binary = atob(parts[1]);
+  const array = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    array[i] = binary.charCodeAt(i);
+  }
+  return new Blob([array], { type: mime });
+}
+async function ensureDownloadURL(raw) {
+  if (!raw || raw.includes("?alt=media")) return raw;
+  try {
+    let path = raw;
+    if (raw.startsWith("http")) {
+      const u = new URL(raw);
+      path = u.searchParams.get("name") || raw;
+    }
+    return await getDownloadURL(ref(storage, path));
+  } catch (err) {
+    console.warn("No se pudo obtener URL de descarga para", raw, err);
+    return raw;
+  }
+}
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
@@ -47,8 +72,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   const closePlantModal = document.getElementById('close-plant-modal');
   const savePlantBtn = document.getElementById('save-plant');
   const plantNameInput = document.getElementById('plant-name');
-  const plantNotesInput = document.getElementById('plant-notes');
+  const plantNotesInput = document.getElementById('plant-notes-input');
   const plantPhotoInput = document.getElementById('plant-photo');
+
+  const requiredEls = [
+    photoDisplay,
+    nameDisplay,
+    editBtn,
+    editForm,
+    inputName,
+    inputPhoto,
+    saveBtn,
+    deleteBtn,
+    plantList,
+    addPlantBtn,
+    plantModal,
+    closePlantModal,
+    savePlantBtn,
+    plantNameInput,
+    plantNotesInput,
+    plantPhotoInput
+  ];
+
+  if (requiredEls.some(el => el === null)) {
+    console.error('Missing required DOM elements in species.js');
+    return;
+  }
 
   let speciesData = null;
 
@@ -61,7 +110,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     speciesData = snap.data();
-    photoDisplay.src = speciesData.photo;
+    speciesData.photo = await ensureDownloadURL(speciesData.photo);
+
+    photoDisplay.src = speciesData.photo || 'icons/icon-192.png';
     nameDisplay.textContent = speciesData.name;
     inputName.value = speciesData.name;
   }
@@ -83,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (inputPhoto.files.length > 0) {
       const reader = new FileReader();
       reader.onload = async e => {
-        nuevaFoto = await resizeImage(e.target.result, 800);
+        nuevaFoto = e.target.result;
         await guardarCambios(nuevoNombre, nuevaFoto);
       };
       reader.readAsDataURL(inputPhoto.files[0]);
@@ -127,13 +178,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     } 
    
-    snap.forEach(docSnap => {
+    for (const docSnap of snap.docs) {
       const data = docSnap.data();
       const li = document.createElement('li');
-      li.className = 'plant-item';
-
       const img = document.createElement('img');
-      img.src = data.photo;
+      const photoUrl = await ensureDownloadURL(data.photo);
+      img.src = photoUrl || 'icons/icon-192.png';
       img.alt = data.name;
 
       const imgLink = document.createElement('a');
@@ -154,7 +204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       li.append(imgLink, link, delBtn);
       plantList.appendChild(li);
-    });
+    }
 
     document.querySelectorAll('.delete-plant-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -189,32 +239,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const reader = new FileReader();
     reader.onload = async e => {
-      const resizedPhoto = await resizeImage(e.target.result, 800);
-      const createdAt = new Date();
-      const docRef = await addDoc(collection(db, 'plants'), {
-        name: nombre,
-        notes: notas,
-        speciesId,
-        createdAt
-      });
-      const photoRef = ref(storage, `plants/${docRef.id}/album/${Date.now()}.jpg`);
-      await uploadString(photoRef, resizedPhoto, 'data_url');
-      const url = await getDownloadURL(photoRef);
-      await updateDoc(doc(db, 'plants', docRef.id), {
-        photo: url,
-        album: [{ url, date: createdAt }]
-      });
-      if (typeof QRious !== 'undefined') {
-        const qr = new QRious({ value: docRef.id, size: 200 });
-        await updateDoc(doc(db, 'plants', docRef.id), { qrCode: qr.toDataURL() });
-      } else {
-        console.warn('QRious no disponible, se omite el código QR');
+      try {
+        const resizedPhoto = e.target.result;
+        const createdAt = new Date();
+        const docRef = await addDoc(collection(db, 'plants'), {
+          name: nombre,
+          notes: notas,
+          speciesId,
+          createdAt
+        });
+        const blob = dataURLToBlob(resizedPhoto);
+        const imageRef = ref(storage, `plants/${docRef.id}/album/${Date.now()}.jpg`);
+        await uploadBytes(imageRef, blob);
+        const url = await getDownloadURL(imageRef);
+        await updateDoc(doc(db, 'plants', docRef.id), {
+          photo: url,
+          album: [{ url, date: createdAt }]
+        });
+        if (typeof QRious !== 'undefined') {
+          const qr = new QRious({ value: docRef.id, size: 200 });
+          await updateDoc(doc(db, 'plants', docRef.id), { qrCode: qr.toDataURL() });
+        } else {
+          console.warn('QRious no disponible, se omite el código QR');
+        }
+        plantModal.classList.add('hidden');
+        plantNameInput.value = '';
+        plantNotesInput.value = '';
+        plantPhotoInput.value = '';
+        cargarPlantas();
+      } catch (err) {
+        console.error(err);
+        alert('Error al guardar la planta. Int\u00e9ntalo de nuevo.');
       }
-      plantModal.classList.add('hidden');
-      plantNameInput.value = '';
-      plantNotesInput.value = '';
-      plantPhotoInput.value = '';
-      cargarPlantas();
     };
     reader.readAsDataURL(plantPhotoInput.files[0]);
   });

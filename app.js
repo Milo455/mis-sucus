@@ -1,7 +1,6 @@
 // app.js
 
-import { db } from './firebase-init.js';
-import { resizeImage } from './resizeImage.js';
+import { db, storage } from './firebase-init.js';
 import {
   collection,
   addDoc,
@@ -11,9 +10,25 @@ import {
   deleteDoc,
   doc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 
 const plantsMap = new Map();
+async function ensureDownloadURL(raw) {
+  if (!raw || raw.includes("?alt=media")) return raw;
+  try {
+    let path = raw;
+    if (raw.startsWith("http")) {
+      const u = new URL(raw);
+      path = u.searchParams.get("name") || raw;
+    }
+    return await getDownloadURL(ref(storage, path));
+  } catch (err) {
+    console.warn("No se pudo obtener URL de descarga para", raw, err);
+    return raw;
+  }
+}
+
 const speciesMap = new Map();
 // — ÚNICO document.addEventListener('DOMContentLoaded') que va a envolver TODO —
 document.addEventListener('DOMContentLoaded', () => {
@@ -74,7 +89,7 @@ if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
         await addDoc(collection(db, 'species'), {
           name,
           info,
-photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
+          photo: e.target.result,
           createdAt: new Date()
         });
         modalSpecies.classList.add('hidden');
@@ -101,22 +116,23 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
       speciesList.innerHTML = '<li>No hay especies registradas.</li>';
       return;
     }
-  snap.forEach(doc => {
-  const data = doc.data();
-  speciesMap.set(doc.id, data.name);
+  for (const docSnap of snap.docs) {
+    const data = docSnap.data();
+    speciesMap.set(docSnap.id, data.name);
 
-  const card = document.createElement('div');
-  card.className = 'species-card';
-  card.innerHTML = `
-    <img src="${data.photo}" alt="${data.name}">
-    <div class="species-card-name">${data.name}</div>
-  `;
-  card.addEventListener('click', () => {
-    window.location.href = `species.html?id=${doc.id}`;
-  });
+    const card = document.createElement('div');
+    card.className = 'species-card';
+    const photoUrl = await ensureDownloadURL(data.photo);
+    card.innerHTML = `
+      <img src="${photoUrl}" alt="${data.name}">
+      <div class="species-card-name">${data.name}</div>
+    `;
+    card.addEventListener('click', () => {
+      window.location.href = `species.html?id=${docSnap.id}`;
+    });
 
-  speciesList.appendChild(card);
-});
+    speciesList.appendChild(card);
+  }
 
     document.querySelectorAll('.delete-species-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
