@@ -96,6 +96,21 @@ const PLACEHOLDER_IMG = 'icons/icon-192.png';
 let albumData = [];
 
 
+async function ensureDownloadURL(raw) {
+  if (!raw || raw.includes("?alt=media")) return raw;
+  try {
+    let path = raw;
+    if (raw.startsWith("http")) {
+      const u = new URL(raw);
+      path = u.searchParams.get("name") || raw;
+    }
+    return await getDownloadURL(ref(storage, path));
+  } catch (err) {
+    console.warn("No se pudo obtener URL de descarga para", raw, err);
+    return raw;
+  }
+}
+
 function mostrarAlbum() {
   if (!albumEl) return;
   albumEl.innerHTML = '';
@@ -154,6 +169,10 @@ async function cargarPlanta() {
       await updateDoc(doc(db, 'plants', plantId), { album: albumData });
     }
   }
+  for (const item of albumData) {
+    item.url = await ensureDownloadURL(item.url);
+  }
+
 
   albumData.sort((a, b) => b.date - a.date);
 
