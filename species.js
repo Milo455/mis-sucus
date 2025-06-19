@@ -32,6 +32,21 @@ function dataURLToBlob(dataURL) {
   }
   return new Blob([array], { type: mime });
 }
+async function ensureDownloadURL(raw) {
+  if (!raw || raw.includes("?alt=media")) return raw;
+  try {
+    let path = raw;
+    if (raw.startsWith("http")) {
+      const u = new URL(raw);
+      path = u.searchParams.get("name") || raw;
+    }
+    return await getDownloadURL(ref(storage, path));
+  } catch (err) {
+    console.warn("No se pudo obtener URL de descarga para", raw, err);
+    return raw;
+  }
+}
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
@@ -95,6 +110,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     speciesData = snap.data();
+    speciesData.photo = await ensureDownloadURL(speciesData.photo);
+
     photoDisplay.src = speciesData.photo || 'icons/icon-192.png';
     nameDisplay.textContent = speciesData.name;
     inputName.value = speciesData.name;
@@ -161,13 +178,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     } 
    
-    snap.forEach(docSnap => {
+    for (const docSnap of snap.docs) {
       const data = docSnap.data();
       const li = document.createElement('li');
-      li.className = 'plant-item';
-
       const img = document.createElement('img');
-      img.src = data.photo || 'icons/icon-192.png';
+      const photoUrl = await ensureDownloadURL(data.photo);
+      img.src = photoUrl || 'icons/icon-192.png';
       img.alt = data.name;
 
       const imgLink = document.createElement('a');
@@ -188,7 +204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       li.append(imgLink, link, delBtn);
       plantList.appendChild(li);
-    });
+    }
 
     document.querySelectorAll('.delete-plant-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
