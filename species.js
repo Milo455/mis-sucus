@@ -135,6 +135,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       img.src = data.photo;
       img.alt = data.name;
 
+      const imgLink = document.createElement('a');
+      imgLink.href = `plant.html?id=${docSnap.id}`;
+      imgLink.appendChild(img);
+
       const link = document.createElement('a');
       link.href = `plant.html?id=${docSnap.id}`;
       link.className = 'plant-name';
@@ -142,12 +146,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const delBtn = document.createElement('button');
       delBtn.dataset.id = docSnap.id;
-      delBtn.className = 'delete-plant-btn';
+      delBtn.className = 'delete-plant-btn small-button';
       delBtn.style.display = 'none';
       delBtn.style.marginLeft = '8px';
       delBtn.textContent = '❌';
 
-      li.append(img, link, delBtn);
+      li.append(imgLink, link, delBtn);
       plantList.appendChild(li);
     });
 
