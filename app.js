@@ -168,7 +168,10 @@ async function cargarPlantas() {
     qrScanner
       .start(
         { facingMode: 'environment' },
-        { fps: 10, qrbox: 250 },
+        {
+          fps: 10,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+        },
         async (text) => {
           try {
             const ref = doc(db, 'plants', text);
