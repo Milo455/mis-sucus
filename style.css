@@ -240,6 +240,7 @@ button:hover {
 
 #plant-checkboxes {
   margin-top: 0.5rem;
+  text-align: left;
 }
 
 .species-group {
@@ -256,15 +257,14 @@ button:hover {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  margin-left: 0.5rem;
+  margin-left: 0;
 }
 
 #add-event-form .species-group label {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-
-  margin-left: 0.5rem;
+  margin-left: 0;
 }
 
 .add-event-btn {
