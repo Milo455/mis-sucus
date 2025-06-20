@@ -191,7 +191,10 @@ button:hover {
 }
 
 #calendar-container td.selected-day {
-  background-color: #fde68a; /* amarillo claro */
+  outline: 2px solid #f59e0b; /* marco naranja */
+  outline-offset: -2px;
+  border-radius: 6px;
+
 }
 
 #calendar-container button {

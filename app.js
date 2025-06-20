@@ -37,12 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const qrModal          = document.getElementById('qr-modal');
   const closeQrModal     = document.getElementById('close-qr-modal');
   let qrScanner;
+
   // Asignar fecha local actual al campo de evento
   const now = new Date();
   const hoy = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
     .toISOString()
     .split('T')[0];
   eventDateInput.value = hoy;
+
 let selectedDate = hoy;
 let selectedDayCell = null;
 
