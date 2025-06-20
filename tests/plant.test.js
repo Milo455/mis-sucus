@@ -220,5 +220,11 @@ describe('plant.js', () => {
 
     document.getElementById('prev-photo').click();
     expect(document.getElementById('viewer-img').src).toContain('img2');
+
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(document.getElementById('viewer-img').src).toContain('img1');
+
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    expect(document.getElementById('viewer-img').src).toContain('img2');
   });
 });
