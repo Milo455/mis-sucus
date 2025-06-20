@@ -217,12 +217,19 @@ btnCalendar.addEventListener('click', async () => {
     await cargarPlantas();
   }
 
+  const nowOpen = new Date();
+  selectedDate = new Date(nowOpen.getTime() - nowOpen.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split('T')[0];
+  selectedDayCell = null;
+  eventDateInput.value = selectedDate;
   modalCalendar.classList.remove('hidden');
 
   try {
     const snapEv = await getDocs(collection(db, 'events'));
     eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
     renderCalendar();
+    mostrarEventosPorDia(selectedDate);
 
 
     // Poblar selector de plantas en el formulario de eventos
@@ -427,6 +434,7 @@ selectedCheckboxes.forEach(cb => cb.checked = false);
   tbody.appendChild(tr);
   table.appendChild(tbody);
   calendarContainer.appendChild(table);
+  mostrarEventosPorDia(selectedDate);
 }
 
 
@@ -450,13 +458,16 @@ if (!contenedor) {
     const div = document.createElement('div');
     div.className = 'evento-dia';
 
-    // Obtener nombre de la planta desde plantsMap usando plantId
+    // Obtener nombre de la planta y especie usando plantId
     const planta = plantsMap.get(ev.plantId);
     const nombrePlanta = planta ? planta.name : '(Planta no encontrada)';
+    const nombreEspecie = planta
+      ? speciesMap.get(planta.speciesId) || '(Especie no encontrada)'
+      : '(Especie no encontrada)';
 
     const enlace = document.createElement('a');
     enlace.href = '#';
-    enlace.textContent = nombrePlanta;
+    enlace.textContent = `${nombreEspecie} - ${nombrePlanta}`;
     enlace.dataset.id = ev.plantId;
     enlace.addEventListener('click', (e) => {
       e.preventDefault();
