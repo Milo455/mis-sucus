@@ -372,7 +372,9 @@ button:hover {
 .album {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+
   grid-auto-rows: minmax(120px, auto);
+
   gap: 10px;
   height: 70vh;
   overflow-y: auto;
