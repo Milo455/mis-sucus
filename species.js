@@ -11,8 +11,22 @@ import {
   addDoc,
   getDocs,
   query,
-  where
+  where,
+  orderBy,
+  limit
 } from './firestore-web.js';
+
+async function ensureAuth() {
+  try {
+    const { getAuth, signInAnonymously } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    const auth = getAuth();
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
+  } catch (_) {
+    // ignore auth errors
+  }
+}
 
 function safeRedirect(url) {
   try {
@@ -124,15 +138,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (snap.empty) {
       plantList.innerHTML = '<li>No hay plantas registradas.</li>';
       return;
-    } 
-   
-    snap.forEach(docSnap => {
+    }
+
+    for (const docSnap of snap.docs) {
       const data = docSnap.data();
       const li = document.createElement('li');
       li.className = 'plant-item';
 
+      let imgSrc = '';
+      try {
+        const imgQ = query(
+          collection(db, 'images'),
+          where('plantId', '==', docSnap.id),
+          orderBy('createdAt', 'desc'),
+          limit(1)
+        );
+        const imgSnap = await getDocs(imgQ);
+        if (!imgSnap.empty) {
+          imgSrc = imgSnap.docs[0].data().base64;
+        }
+      } catch (_) {
+        imgSrc = '';
+      }
+
       const img = document.createElement('img');
-      img.src = data.photo;
+      img.src = imgSrc;
       img.alt = data.name;
 
       const imgLink = document.createElement('a');
@@ -153,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       li.append(imgLink, link, delBtn);
       plantList.appendChild(li);
-    });
+    }
 
     document.querySelectorAll('.delete-plant-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -187,14 +217,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     const reader = new FileReader();
     reader.onload = async e => {
       const resizedPhoto = await resizeImage(e.target.result, 800);
+      const size = atob(resizedPhoto.split(',')[1]).length;
+      if (size > 1024 * 1024) {
+        alert('Imagen demasiado grande incluso después de comprimir.');
+        return;
+      }
+
       const createdAt = new Date();
       const docRef = await addDoc(collection(db, 'plants'), {
         name: nombre,
         notes: notas,
         speciesId,
-        photo: resizedPhoto,
-        createdAt,
-        album: [{ photo: resizedPhoto, date: createdAt }]
+        createdAt
+      });
+      await ensureAuth();
+      await addDoc(collection(db, 'images'), {
+        plantId: docRef.id,
+        base64: resizedPhoto,
+        createdAt
       });
       if (typeof QRious !== 'undefined') {
         const qr = new QRious({ value: docRef.id, size: 200 });
