@@ -22,10 +22,10 @@
     <p id="last-watering-count"></p>
     <p id="plant-notes"></p>
 
-    <button id="edit-plant">✏️ Editar</button>
-    <button id="print-qr">Imprimir QR</button>
+    <button id="edit-plant" class="small-button">✏️ Editar</button>
+    <button id="print-qr" class="small-button">Imprimir QR</button>
     <button id="open-album" class="small-button">📸 Ver Álbum</button>
-    <button id="add-event-btn">➕ Agregar Evento</button>
+    <button id="add-event-btn" class="small-button">➕ Agregar Evento</button>
   </main>
 
   <!-- Modal edición -->
@@ -37,9 +37,9 @@
   <textarea id="edit-plant-notes" placeholder="Notas y características"></textarea>
   <input type="file" id="edit-plant-photo" accept="image/*" />
   <div style="margin-top: 10px;">
-    <button type="submit">Guardar</button>
-    <button type="button" id="cancel-edit-plant">Cancelar</button>
-    <button type="button" id="delete-plant-inside" style="color:red;">Eliminar</button>
+    <button type="submit" class="small-button">Guardar</button>
+    <button type="button" id="cancel-edit-plant" class="small-button">Cancelar</button>
+    <button type="button" id="delete-plant-inside" class="small-button" style="color:red;">Eliminar</button>
   </div>
 </form>
     </div>
@@ -58,8 +58,8 @@
         <option value="Revisión">Revisión</option>
       </select>
       <div style="margin-top: 10px;">
-        <button id="save-plant-event">Guardar</button>
-        <button id="cancel-add-event" type="button">Cancelar</button>
+        <button id="save-plant-event" class="small-button">Guardar</button>
+        <button id="cancel-add-event" type="button" class="small-button">Cancelar</button>
       </div>
     </div>
   </div>
@@ -68,7 +68,7 @@
     <div class="modal-content">
       <span id="close-album" class="close">&times;</span>
       <h3>Registro Fotográfico</h3>
-      <button id="add-photo-record">📷 Agregar Foto</button>
+      <button id="add-photo-record" class="small-button">📷 Agregar Foto</button>
       <input id="new-photo-input" type="file" accept="image/*" style="display:none;" />
       <div id="photo-album" class="album"></div>
     </div>
