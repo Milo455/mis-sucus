@@ -162,26 +162,35 @@ async function cargarPlantas() {
 }
 
   // Botones para abrir el calendario y escanear QR
-  btnScanQR.addEventListener('click', () => {
+  btnScanQR.addEventListener('click', async () => {
     qrModal.classList.remove('hidden');
     if (!qrScanner) {
       qrScanner = new Html5Qrcode('qr-reader');
     }
-  qrScanner
-  .start(
-    { facingMode: 'environment' },
-    {
-      fps: 30,
-      qrbox: { width: 300, height: 300 },
-      aspectRatio: 1.7778,
-      rememberLastUsedCamera: true,
-      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-      videoConstraints: {
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        advanced: [{ focusMode: 'continuous' }]
+    try {
+      let cameraParam = { facingMode: 'environment' };
+      const cameras = await Html5Qrcode.getCameras();
+      if (cameras && cameras.length > 0) {
+        const back = cameras.find(cam =>
+          /back|rear|environment/i.test(cam.label)
+        );
+        cameraParam = back ? back.id : cameras[0].id;
+
       }
-    },
+      await qrScanner.start(
+        cameraParam,
+        {
+          fps: 30,
+          qrbox: { width: 300, height: 300 },
+          aspectRatio: 1.7778,
+          rememberLastUsedCamera: true,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+          videoConstraints: {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            advanced: [{ focusMode: 'continuous' }]
+          }
+        },
         async (text) => {
           try {
             const ref = doc(db, 'plants', text);
@@ -198,9 +207,11 @@ async function cargarPlantas() {
             alert('Error al verificar la planta');
           }
         },
-        () => {}
-      )
-      .catch((err) => console.error('Error iniciando scanner', err));
+          () => {}
+      );
+    } catch (err) {
+      console.error('Error iniciando scanner', err);
+    }
   });
 
   closeQrModal.addEventListener('click', () => {
