@@ -15,6 +15,18 @@ import {
   getDocs
 } from './firestore-web.js';
 
+async function ensureAuth() {
+  try {
+    const { getAuth, signInAnonymously } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    const auth = getAuth();
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
+  } catch (_) {
+    // ignore auth errors
+  }
+}
+
 // Obtener ID desde la URL
 const params = new URLSearchParams(window.location.search);
 const plantId = params.get('id');
@@ -79,7 +91,6 @@ function mostrarAlbum() {
 let currentSpeciesId; // speciesId for redirects
 let currentSpeciesName = '';
 let originalName = '';
-let originalPhoto = '';
 let originalNotes = '';
 let qrCodeData = '';
 
@@ -102,15 +113,22 @@ async function cargarPlanta() {
   currentSpeciesId = data.speciesId;
   qrCodeData = data.qrCode || '';
 
-  albumData = (data.album || []).map(a => ({
-    photo: a.photo,
-    date: a.date && a.date.toDate ? a.date.toDate() : a.date
-  }));
-  if (albumData.length === 0 && data.photo) {
-    albumData.push({ photo: data.photo, date: data.createdAt.toDate() });
+  try {
+    const imgQ = query(
+      collection(db, 'images'),
+      where('plantId', '==', plantId),
+      orderBy('createdAt', 'desc')
+    );
+    const imgSnap = await getDocs(imgQ);
+    albumData = imgSnap.docs.map(d => ({
+      photo: d.data().base64,
+      date: d.data().createdAt.toDate ? d.data().createdAt.toDate() : new Date(d.data().createdAt)
+    }));
+    albumData.sort((a, b) => b.date - a.date);
+  } catch (err) {
+    console.error('Error cargando imágenes', err);
+    albumData = [];
   }
-
-  albumData.sort((a, b) => b.date - a.date);
 
   const speciesRef = doc(db, 'species', currentSpeciesId);
   const speciesSnap = await getDoc(speciesRef);
@@ -120,7 +138,7 @@ async function cargarPlanta() {
   speciesEl.textContent = `Especie: ${currentSpeciesName}`;
 
   nameEl.textContent = data.name;
-  photoEl.src = albumData[0].photo;
+  photoEl.src = albumData.length ? albumData[0].photo : '';
   notesEl.textContent = data.notes || '';
 
   mostrarAlbum();
@@ -152,7 +170,6 @@ async function cargarPlanta() {
   inputName.value = data.name;
   inputNotes.value = data.notes || '';
   originalName = data.name;
-  originalPhoto = data.photo;
   originalNotes = data.notes || '';
 }
 
@@ -178,11 +195,24 @@ formEdit.addEventListener('submit', async (e) => {
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        updates.photo = await resizeImage(e.target.result, 800);
+        const resized = await resizeImage(e.target.result, 800);
+        const size = atob(resized.split(',')[1]).length;
+        if (size > 1024 * 1024) {
+          alert('Imagen demasiado grande incluso después de comprimir.');
+          return;
+        }
         await updateDoc(doc(db, 'plants', plantId), updates);
+        await ensureAuth();
+        await addDoc(collection(db, 'images'), {
+          plantId,
+          base64: resized,
+          createdAt: new Date()
+        });
         nameEl.textContent = newName;
         notesEl.textContent = newNotes;
-        photoEl.src = updates.photo;
+        photoEl.src = resized;
+        albumData.unshift({ photo: resized, date: new Date() });
+        mostrarAlbum();
         inputPhoto.value = '';
         modalEdit.classList.add('hidden');
         alert('Planta actualizada con éxito');
@@ -217,11 +247,18 @@ if (addPhotoBtn && newPhotoInput) {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const resized = await resizeImage(e.target.result, 800);
+      const size = atob(resized.split(',')[1]).length;
+      if (size > 1024 * 1024) {
+        alert('Imagen demasiado grande incluso después de comprimir.');
+        return;
+      }
       const entry = { photo: resized, date: new Date() };
       albumData.unshift(entry);
-      await updateDoc(doc(db, 'plants', plantId), {
-        photo: resized,
-        album: albumData
+      await ensureAuth();
+      await addDoc(collection(db, 'images'), {
+        plantId,
+        base64: resized,
+        createdAt: entry.date
       });
       photoEl.src = resized;
       mostrarAlbum();

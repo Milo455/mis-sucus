@@ -89,7 +89,6 @@ describe('plant.js', () => {
           name: 'Plant1',
           speciesId: 'spec1',
           createdAt: { toDate: () => new Date('2020-01-02') },
-          photo: 'img-url',
           notes: 'note'
         })
       })
@@ -97,6 +96,16 @@ describe('plant.js', () => {
         exists: () => true,
         data: () => ({ name: 'SpeciesName' })
       });
+    mockGetDocs
+      .mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            data: () => ({ base64: 'img-url', createdAt: { toDate: () => new Date('2020-01-02') } })
+          }
+        ]
+      })
+      .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} });
 
     await import('../plant.js');
     await flushPromises();
@@ -114,18 +123,22 @@ describe('plant.js', () => {
           name: 'Plant1',
           speciesId: 'spec1',
           createdAt: { toDate: () => new Date('2020-01-02') },
-          photo: 'img-old',
-          notes: 'note',
-          album: [
-            { photo: 'img-old', date: { toDate: () => new Date('2020-01-02') } },
-            { photo: 'img-new', date: { toDate: () => new Date('2020-01-03') } }
-          ]
+          notes: 'note'
         })
       })
       .mockResolvedValueOnce({
         exists: () => true,
         data: () => ({ name: 'SpeciesName' })
       });
+    mockGetDocs
+      .mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          { data: () => ({ base64: 'img-new', createdAt: { toDate: () => new Date('2020-01-03') } }) },
+          { data: () => ({ base64: 'img-old', createdAt: { toDate: () => new Date('2020-01-02') } }) }
+        ]
+      })
+      .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} });
 
     await import('../plant.js');
     await flushPromises();
@@ -142,7 +155,6 @@ describe('plant.js', () => {
           name: 'Plant1',
           speciesId: 'spec1',
           createdAt: { toDate: () => new Date('2020-01-02') },
-          photo: 'img-url',
           notes: 'note'
         })
       })
@@ -150,6 +162,9 @@ describe('plant.js', () => {
         exists: () => true,
         data: () => ({ name: 'SpeciesName' })
       });
+    mockGetDocs
+      .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} })
+      .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} });
     mockDeleteDoc.mockResolvedValue();
 
     await import('../plant.js');
