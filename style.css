@@ -256,6 +256,7 @@ button:hover {
 .species-group label {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.25rem;
   margin-left: 0;
 
@@ -266,6 +267,7 @@ button:hover {
 #add-event-form .species-group label {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.25rem;
   margin-left: 0;
 
