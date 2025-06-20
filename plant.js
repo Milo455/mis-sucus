@@ -133,6 +133,13 @@ async function cargarPlanta() {
     console.error('Error cargando imágenes', err);
     albumData = [];
   }
+  if (!albumData.length && Array.isArray(data.album)) {
+    albumData = data.album.map(item => ({
+      photo: item.photo,
+      date: item.date?.toDate ? item.date.toDate() : new Date(item.date)
+    }));
+    albumData.sort((a, b) => b.date - a.date);
+  }
 
   const speciesRef = doc(db, 'species', currentSpeciesId);
   const speciesSnap = await getDoc(speciesRef);

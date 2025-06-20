@@ -190,10 +190,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const id = btn.getAttribute('data-id');
         if (confirm('¿Eliminar esta planta?')) {
           await deleteDoc(doc(db, 'plants', id));
-          cargarPlantas();
+          await cargarPlantas();
         }
       });
     });
+
+    mostrarOcultarBotonesEliminar();
   }
 
   // Agregar planta
@@ -246,7 +248,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       plantNameInput.value = '';
       plantNotesInput.value = '';
       plantPhotoInput.value = '';
-      cargarPlantas();
+      await cargarPlantas();
+      mostrarOcultarBotonesEliminar();
     };
     reader.readAsDataURL(plantPhotoInput.files[0]);
   });
@@ -258,4 +261,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await cargarEspecie();
   await cargarPlantas();
+  mostrarOcultarBotonesEliminar();
 });
