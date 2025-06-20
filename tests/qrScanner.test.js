@@ -78,11 +78,11 @@ describe('QR scanner initialization', () => {
   test('starts scanner with rear camera', async () => {
     document.getElementById('scan-qr').click();
     await flushPromises();
-    expect(startMock).toHaveBeenCalledWith(
-      { deviceId: { exact: 'rear1' } },
-      expect.any(Object),
-      expect.any(Function),
-      expect.any(Function)
-    );
+
+    const [cameraArg, configArg, successCb, errorCb] = startMock.mock.calls[0];
+    expect(cameraArg).toEqual({ deviceId: { exact: 'rear1' } });
+    expect(typeof successCb).toBe('function');
+    expect(typeof errorCb).toBe('function');
+    expect(configArg.qrbox).toBeUndefined();
   });
 });
