@@ -37,5 +37,24 @@ Then open `http://localhost:8080/index.html` in your browser. Alternatively, you
 
 Replace the placeholder values in `firebase-init.js` with the keys for your Firebase project. Ensure Firestore is enabled in the Firebase console.
 
+
 Anonymous sign-in must be enabled from the Firebase console (Authentication → Sign-in method). `ensureAuth()` will automatically handle signing in when the app loads.
+
+### Required Indexes
+
+Create the following composite indexes in Firestore:
+
+- **images** collection: `plantId` (ascending) + `createdAt` (descending)
+- **events** collection: `plantId` (ascending) + `type` (ascending) + `date` (descending)
+
+You can define them from the Firebase console or via CLI:
+
+```bash
+firebase firestore:indexes > firestore.indexes.json
+# edit the generated file to include the indexes above
+firebase deploy --only firestore:indexes
+```
+
+Anonymous authentication must also be enabled in Firebase Auth so users can upload images.
+
 
