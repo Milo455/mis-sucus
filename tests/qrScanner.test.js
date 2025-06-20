@@ -50,7 +50,7 @@ describe('QR scanner initialization', () => {
       static getCameras() {
         return Promise.resolve([
           { id: 'front1', label: 'Front Camera' },
-          { id: 'rear1', label: 'Back Camera' }
+          { id: 'rear1', label: 'Cámara trasera' }
         ]);
       }
     }

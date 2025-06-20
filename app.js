@@ -172,7 +172,8 @@ async function cargarPlantas() {
       if (Html5Qrcode.getCameras) {
         const cams = await Html5Qrcode.getCameras();
         if (Array.isArray(cams) && cams.length > 0) {
-          const preferred = cams.find(c => /back|rear|traser|environment/i.test(c.label));
+          const preferred = cams.find(c => /back|rear|trasera|environment/i.test(c.label));
+
           if (preferred) {
             cameraConfig = { deviceId: { exact: preferred.id } };
           }
