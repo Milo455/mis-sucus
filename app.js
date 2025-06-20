@@ -175,6 +175,7 @@ async function cargarPlantas() {
           /back|rear|environment/i.test(cam.label)
         );
         cameraParam = back ? back.id : cameras[0].id;
+
       }
       await qrScanner.start(
         cameraParam,
