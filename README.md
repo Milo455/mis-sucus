@@ -37,3 +37,5 @@ Then open `http://localhost:8080/index.html` in your browser. Alternatively, you
 
 Replace the placeholder values in `firebase-init.js` with the keys for your Firebase project. Ensure Firestore is enabled in the Firebase console.
 
+Anonymous sign-in must be enabled from the Firebase console (Authentication → Sign-in method). `ensureAuth()` will automatically handle signing in when the app loads.
+
