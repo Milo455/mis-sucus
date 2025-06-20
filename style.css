@@ -221,13 +221,18 @@ button:hover {
   margin-top: 0.5rem;
 }
 
-#add-event-form input,
+#add-event-form input:not([type="checkbox"]),
 #add-event-form select {
   width: 100%;
   padding: 0.5rem;
   margin-top: 0.25rem;
   border-radius: 5px;
   border: 1px solid #ccc;
+}
+
+#add-event-form input[type="checkbox"] {
+  width: auto;
+  margin-top: 0.25rem;
 }
 
 #plant-checkboxes {
@@ -245,7 +250,16 @@ button:hover {
 }
 
 .species-group label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+#add-event-form .species-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   margin-left: 0.5rem;
 }
 
