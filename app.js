@@ -171,13 +171,15 @@ async function cargarPlantas() {
       .start(
         {
           facingMode: { exact: 'environment' },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          advanced: [{ focusMode: 'continuous' }]
         },
         {
           fps: 30,
           qrbox: { width: 300, height: 300 },
           aspectRatio: 1.7778,
+          rememberLastUsedCamera: true,
           experimentalFeatures: { useBarCodeDetectorIfSupported: true }
         },
         async (text) => {
