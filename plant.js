@@ -286,7 +286,10 @@ if (addPhotoBtn && newPhotoInput) {
 }
 
 if (btnAddEvent && modalAddEvent && eventDateInput && eventTypeSelect && saveEventBtn && cancelAddEventBtn) {
-  eventDateInput.value = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  eventDateInput.value = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split('T')[0];
   btnAddEvent.addEventListener('click', () => {
     modalAddEvent.classList.remove('hidden');
   });
