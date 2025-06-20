@@ -192,16 +192,20 @@ describe('plant.js', () => {
           createdAt: { toDate: () => new Date('2020-01-02') },
           photo: 'img1',
           notes: 'note',
-          album: [
-            { photo: 'img1', date: { toDate: () => new Date('2020-01-01') } },
-            { photo: 'img2', date: { toDate: () => new Date('2020-01-02') } }
-          ]
         })
       })
       .mockResolvedValueOnce({
         exists: () => true,
         data: () => ({ name: 'SpeciesName' })
       });
+
+    mockGetDocs.mockResolvedValueOnce({
+      empty: false,
+      docs: [
+        { data: () => ({ base64: 'img1', createdAt: { toDate: () => new Date('2020-01-01') } }) },
+        { data: () => ({ base64: 'img2', createdAt: { toDate: () => new Date('2020-01-02') } }) }
+      ]
+    });
 
     await import('../plant.js');
     await flushPromises();
