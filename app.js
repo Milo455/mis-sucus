@@ -9,7 +9,8 @@ import {
   query,
   orderBy,
   deleteDoc,
-  doc
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 
@@ -164,15 +165,29 @@ async function cargarPlantas() {
     if (!qrScanner) {
       qrScanner = new Html5Qrcode('qr-reader');
     }
-    qrScanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 250 },
-      (text) => {
-        qrScanner.stop().then(() => {
-          qrModal.classList.add('hidden');
-          window.location.href = `plant.html?id=${text}`;
-        }).catch(err => console.error('Error al detener scanner', err));
-      },
-      () => {}
-    ).catch(err => console.error('Error iniciando scanner', err));
+    qrScanner
+      .start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: 250 },
+        async (text) => {
+          try {
+            const ref = doc(db, 'plants', text);
+            const snap = await getDoc(ref);
+            await qrScanner.stop();
+            qrModal.classList.add('hidden');
+            if (snap.exists()) {
+              window.location.href = `plant.html?id=${text}`;
+            } else {
+              alert('La planta no existe');
+            }
+          } catch (err) {
+            console.error('Error verificando planta', err);
+            alert('Error al verificar la planta');
+          }
+        },
+        () => {}
+      )
+      .catch((err) => console.error('Error iniciando scanner', err));
   });
 
   closeQrModal.addEventListener('click', () => {
