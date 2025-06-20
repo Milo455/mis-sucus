@@ -183,6 +183,10 @@ button:hover {
   background-color: #a7f3d0;
 }
 
+#calendar-container td.selected-day {
+  background-color: #fde68a; /* amarillo claro */
+}
+
 #calendar-container button {
   background-color: var(--button-green);
   color: var(--white);

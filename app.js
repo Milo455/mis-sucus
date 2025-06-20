@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Asignar fecha actual al campo de evento
 const hoy = new Date().toISOString().split('T')[0];
 eventDateInput.value = hoy;
+let selectedDate = hoy;
+let selectedDayCell = null;
 
   // Comprueba que todo exista
 if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
@@ -234,6 +236,7 @@ checkboxContainer.innerHTML = ''; // Limpiar antes
 
 // Abrir modal de agregar evento
 document.getElementById('open-event-modal').addEventListener('click', () => {
+  eventDateInput.value = selectedDate;
   document.getElementById('add-event-modal').classList.remove('hidden');
 });
 
@@ -373,7 +376,18 @@ selectedCheckboxes.forEach(cb => cb.checked = false);
     if (hasEvents) {
       td.classList.add('has-event');
     }
-    td.addEventListener('click', () => mostrarEventosPorDia(dayStr));
+    if (dayStr === selectedDate) {
+      td.classList.add('selected-day');
+      selectedDayCell = td;
+    }
+    td.addEventListener('click', () => {
+      if (selectedDayCell) selectedDayCell.classList.remove('selected-day');
+      td.classList.add('selected-day');
+      selectedDayCell = td;
+      selectedDate = dayStr;
+      eventDateInput.value = dayStr;
+      mostrarEventosPorDia(dayStr);
+    });
 
     tr.appendChild(td);
   }
