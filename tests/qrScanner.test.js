@@ -85,4 +85,14 @@ describe('QR scanner initialization', () => {
     expect(typeof errorCb).toBe('function');
     expect(configArg.qrbox).toBeUndefined();
   });
+
+  test('falls back to environment facing mode when cameras unavailable', async () => {
+    startMock.mockClear();
+    delete global.Html5Qrcode.getCameras;
+    document.getElementById('scan-qr').click();
+    await flushPromises();
+
+    const [cameraArg] = startMock.mock.calls[0];
+    expect(cameraArg).toEqual({ facingMode: { exact: 'environment' } });
+  });
 });
