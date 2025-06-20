@@ -11,7 +11,7 @@ import {
   deleteDoc,
   doc,
   getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+} from './firestore-web.js';
 
 
 const plantsMap = new Map();
@@ -162,14 +162,29 @@ async function cargarPlantas() {
 }
 
   // Botones para abrir el calendario y escanear QR
-  btnScanQR.addEventListener('click', () => {
+  btnScanQR.addEventListener('click', async () => {
     qrModal.classList.remove('hidden');
     if (!qrScanner) {
       qrScanner = new Html5Qrcode('qr-reader');
     }
+
+    let cameraConfig = { facingMode: 'environment' };
+    try {
+      if (Html5Qrcode.getCameras) {
+        const cams = await Html5Qrcode.getCameras();
+        if (Array.isArray(cams) && cams.length > 0) {
+          const preferred = cams.find(c => /back|rear|traser|environment/i.test(c.label));
+          const selected = preferred || cams[0];
+          cameraConfig = { deviceId: { exact: selected.id } };
+        }
+      }
+    } catch (e) {
+      console.warn('Falling back to default camera', e);
+    }
+
   qrScanner
   .start(
-    { facingMode: 'environment' },
+    cameraConfig,
     {
       fps: 30,
       qrbox: { width: 300, height: 300 },
