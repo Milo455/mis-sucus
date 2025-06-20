@@ -59,6 +59,7 @@ const albumModal = document.getElementById('album-modal');
 const closeAlbumBtn = document.getElementById('close-album');
 const viewerModal = document.getElementById('viewer-modal');
 const viewerImg = document.getElementById('viewer-img');
+const viewerDate = document.getElementById('viewer-date');
 const closeViewerBtn = document.getElementById('close-viewer');
 const prevPhotoBtn = document.getElementById('prev-photo');
 const nextPhotoBtn = document.getElementById('next-photo');
@@ -311,6 +312,7 @@ function showImage(idx) {
   if (!albumData.length) return;
   currentAlbumIndex = (idx + albumData.length) % albumData.length;
   viewerImg.src = albumData[currentAlbumIndex].photo;
+  if (viewerDate) viewerDate.textContent = albumData[currentAlbumIndex].date.toLocaleDateString();
 }
 
 function handleKey(e) {
