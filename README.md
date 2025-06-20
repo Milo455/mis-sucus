@@ -35,7 +35,7 @@ Then open `http://localhost:8080/index.html` in your browser. Alternatively, you
 
 ## QR Scanning
 
-The built-in QR scanner now uses a high-resolution stream and continuous autofocus, allowing codes to be detected from farther away and at different angles.
+The built-in QR scanner now uses a high-resolution stream and continuous autofocus, allowing codes to be detected from farther away and at different angles. It also explicitly requests the device's rear-facing camera when scanning. If a rear camera is not available, it will gracefully fall back to whichever camera is accessible.
 
 ## Firebase Setup
 
