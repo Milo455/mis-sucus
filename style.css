@@ -377,6 +377,7 @@ button:hover {
 
   gap: 10px;
   height: 70vh;
+  align-content: start;
   overflow-y: auto;
 
 }
