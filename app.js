@@ -11,7 +11,7 @@ import {
   deleteDoc,
   doc,
   getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+} from './firestore-web.js';
 
 
 const plantsMap = new Map();
@@ -167,14 +167,35 @@ async function cargarPlantas() {
     if (!qrScanner) {
       qrScanner = new Html5Qrcode('qr-reader');
     }
+
+
+    let cameraConfig = { facingMode: 'environment' };
     try {
-      let cameraParam = { facingMode: 'environment' };
-      const cameras = await Html5Qrcode.getCameras();
-      if (cameras && cameras.length > 0) {
-        const back = cameras.find(cam =>
-          /back|rear|environment/i.test(cam.label)
-        );
-        cameraParam = back ? back.id : cameras[0].id;
+      if (Html5Qrcode.getCameras) {
+        const cams = await Html5Qrcode.getCameras();
+        if (Array.isArray(cams) && cams.length > 0) {
+          const preferred = cams.find(c => /back|rear|traser|environment/i.test(c.label));
+          const selected = preferred || cams[0];
+          cameraConfig = { deviceId: { exact: selected.id } };
+        }
+      }
+    } catch (e) {
+      console.warn('Falling back to default camera', e);
+    }
+
+  qrScanner
+  .start(
+    cameraConfig,
+    {
+      fps: 30,
+      qrbox: { width: 300, height: 300 },
+      aspectRatio: 1.7778,
+      rememberLastUsedCamera: true,
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+      videoConstraints: {
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        advanced: [{ focusMode: 'continuous' }]
 
       }
       await qrScanner.start(
