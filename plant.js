@@ -323,8 +323,13 @@ function showImage(idx) {
 }
 
 function handleKey(e) {
-  if (e.key === 'ArrowRight') showImage(currentAlbumIndex - 1);
-  else if (e.key === 'ArrowLeft') showImage(currentAlbumIndex + 1);
+  if (e.key === 'ArrowRight') {
+    // Move forward in the album
+    showImage(currentAlbumIndex - 1);
+  } else if (e.key === 'ArrowLeft') {
+    // Move backward in the album
+    showImage(currentAlbumIndex + 1);
+  }
 }
 
 if (albumEl && viewerModal && viewerImg) {
@@ -344,7 +349,10 @@ if (prevPhotoBtn) {
 }
 
 if (nextPhotoBtn) {
-  nextPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex - 1));
+  nextPhotoBtn.addEventListener('click', () => {
+    // Moving right should show the next photo
+    showImage(currentAlbumIndex - 1);
+  });
 }
 
 if (closeViewerBtn && viewerModal) {
