@@ -134,6 +134,13 @@ async function cargarPlanta() {
     console.error('Error cargando imágenes', err);
     albumData = [];
   }
+  if (!albumData.length && Array.isArray(data.album)) {
+    albumData = data.album.map(item => ({
+      photo: item.photo,
+      date: item.date?.toDate ? item.date.toDate() : new Date(item.date)
+    }));
+    albumData.sort((a, b) => b.date - a.date);
+  }
 
   const speciesRef = doc(db, 'species', currentSpeciesId);
   const speciesSnap = await getDoc(speciesRef);
@@ -316,8 +323,8 @@ function showImage(idx) {
 }
 
 function handleKey(e) {
-  if (e.key === 'ArrowRight') showImage(currentAlbumIndex + 1);
-  else if (e.key === 'ArrowLeft') showImage(currentAlbumIndex - 1);
+  if (e.key === 'ArrowRight') showImage(currentAlbumIndex - 1);
+  else if (e.key === 'ArrowLeft') showImage(currentAlbumIndex + 1);
 }
 
 if (albumEl && viewerModal && viewerImg) {
@@ -333,11 +340,11 @@ if (albumEl && viewerModal && viewerImg) {
 }
 
 if (prevPhotoBtn) {
-  prevPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex - 1));
+  prevPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex + 1));
 }
 
 if (nextPhotoBtn) {
-  nextPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex + 1));
+  nextPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex - 1));
 }
 
 if (closeViewerBtn && viewerModal) {
