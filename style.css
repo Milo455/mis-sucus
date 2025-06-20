@@ -243,6 +243,14 @@ button:hover {
   text-align: left;
 }
 
+#plant-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0;
+  text-align: left;
+}
+
 .species-group {
   margin-bottom: 0.75rem;
 }
