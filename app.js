@@ -168,6 +168,7 @@ async function cargarPlantas() {
       qrScanner = new Html5Qrcode('qr-reader');
     }
 
+
     let cameraConfig = { facingMode: 'environment' };
     try {
       if (Html5Qrcode.getCameras) {
@@ -195,8 +196,22 @@ async function cargarPlantas() {
         width: { ideal: 1920 },
         height: { ideal: 1080 },
         advanced: [{ focusMode: 'continuous' }]
+
       }
-    },
+      await qrScanner.start(
+        cameraParam,
+        {
+          fps: 30,
+          qrbox: { width: 300, height: 300 },
+          aspectRatio: 1.7778,
+          rememberLastUsedCamera: true,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+          videoConstraints: {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            advanced: [{ focusMode: 'continuous' }]
+          }
+        },
         async (text) => {
           try {
             const ref = doc(db, 'plants', text);
@@ -213,9 +228,11 @@ async function cargarPlantas() {
             alert('Error al verificar la planta');
           }
         },
-        () => {}
-      )
-      .catch((err) => console.error('Error iniciando scanner', err));
+          () => {}
+      );
+    } catch (err) {
+      console.error('Error iniciando scanner', err);
+    }
   });
 
   closeQrModal.addEventListener('click', () => {

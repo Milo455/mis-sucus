@@ -270,6 +270,10 @@ button:hover {
 
 }
 
+.species-group input[type="checkbox"] {
+  margin: 0 0.25rem 0 0;
+}
+
 #add-event-form .species-group label {
   display: flex;
   align-items: center;
