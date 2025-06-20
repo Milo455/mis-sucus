@@ -14,6 +14,8 @@ const mockAddDoc = jest.fn();
 const mockGetDocs = jest.fn();
 const mockQuery = jest.fn();
 const mockWhere = jest.fn();
+const mockOrderBy = jest.fn();
+const mockLimit = jest.fn();
 
 
 const flushPromises = () => new Promise(res => setTimeout(res, 0));
@@ -34,6 +36,8 @@ describe('species.js', () => {
     mockAddDoc.mockReset();
     mockQuery.mockReset();
     mockWhere.mockReset();
+    mockOrderBy.mockReset();
+    mockLimit.mockReset();
 
     jest.unstable_mockModule('../firestore-web.js', () => ({
       doc: mockDoc,
@@ -44,7 +48,9 @@ describe('species.js', () => {
       addDoc: mockAddDoc,
       getDocs: mockGetDocs,
       query: mockQuery,
-      where: mockWhere
+      where: mockWhere,
+      orderBy: mockOrderBy,
+      limit: mockLimit
     }));
 
     jest.unstable_mockModule('../firebase-init.js', () => ({
@@ -96,7 +102,14 @@ describe('species.js', () => {
     });
     mockGetDocs
       .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} })
-      .mockResolvedValueOnce({ docs: [{ id: 'p1' }, { id: 'p2' }], forEach: () => {}, empty: false });
+      .mockResolvedValueOnce({
+        docs: [
+          { id: 'p1', data: () => ({}) },
+          { id: 'p2', data: () => ({}) }
+        ],
+        forEach: () => {},
+        empty: false
+      });
     mockDeleteDoc.mockResolvedValue();
 
     await jest.isolateModulesAsync(() => import('../species.js'));
