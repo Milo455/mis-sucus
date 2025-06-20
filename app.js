@@ -186,7 +186,6 @@ async function cargarPlantas() {
         cameraConfig,
         {
           fps: 30,
-          qrbox: { width: 300, height: 300 },
           aspectRatio: 1.7778,
           rememberLastUsedCamera: true,
           experimentalFeatures: { useBarCodeDetectorIfSupported: true },
