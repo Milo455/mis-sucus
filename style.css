@@ -258,6 +258,9 @@ button:hover {
   align-items: center;
   gap: 0.25rem;
   margin-left: 0;
+
+  text-align: left;
+
 }
 
 #add-event-form .species-group label {
@@ -265,6 +268,9 @@ button:hover {
   align-items: center;
   gap: 0.25rem;
   margin-left: 0;
+
+  text-align: left;
+
 }
 
 .add-event-btn {
