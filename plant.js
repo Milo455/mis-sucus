@@ -324,11 +324,11 @@ function showImage(idx) {
 
 function handleKey(e) {
   if (e.key === 'ArrowRight') {
-    // Move backward in the album
-    showImage(currentAlbumIndex + 1);
-  } else if (e.key === 'ArrowLeft') {
     // Move forward in the album
     showImage(currentAlbumIndex - 1);
+  } else if (e.key === 'ArrowLeft') {
+    // Move backward in the album
+    showImage(currentAlbumIndex + 1);
   }
 }
 
