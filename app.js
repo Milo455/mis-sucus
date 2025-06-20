@@ -167,21 +167,21 @@ async function cargarPlantas() {
     if (!qrScanner) {
       qrScanner = new Html5Qrcode('qr-reader');
     }
-    qrScanner
-      .start(
-        {
-          facingMode: { exact: 'environment' },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          advanced: [{ focusMode: 'continuous' }]
-        },
-        {
-          fps: 30,
-          qrbox: { width: 300, height: 300 },
-          aspectRatio: 1.7778,
-          rememberLastUsedCamera: true,
-          experimentalFeatures: { useBarCodeDetectorIfSupported: true }
-        },
+  qrScanner
+  .start(
+    { facingMode: { exact: 'environment' } },
+    {
+      fps: 30,
+      qrbox: { width: 300, height: 300 },
+      aspectRatio: 1.7778,
+      rememberLastUsedCamera: true,
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+      videoConstraints: {
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        advanced: [{ focusMode: 'continuous' }]
+      }
+    },
         async (text) => {
           try {
             const ref = doc(db, 'plants', text);
