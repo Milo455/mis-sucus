@@ -169,16 +169,18 @@ async function cargarPlantas() {
     }
     qrScanner
       .start(
-        {
-          facingMode: { exact: 'environment' },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        },
+        { facingMode: { exact: 'environment' } },
         {
           fps: 30,
           qrbox: { width: 300, height: 300 },
           aspectRatio: 1.7778,
-          experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+          rememberLastUsedCamera: true,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+          videoConstraints: {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            advanced: [{ focusMode: 'continuous' }]
+          }
         },
         async (text) => {
           try {

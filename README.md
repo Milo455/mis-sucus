@@ -33,6 +33,10 @@ npx http-server -c-1
 
 Then open `http://localhost:8080/index.html` in your browser. Alternatively, you can open `index.html` directly, but using a local server is recommended for module loading.
 
+## QR Scanning
+
+The built-in QR scanner now uses a high-resolution stream and continuous autofocus, allowing codes to be detected from farther away and at different angles.
+
 ## Firebase Setup
 
 Replace the placeholder values in `firebase-init.js` with the keys for your Firebase project. Ensure Firestore is enabled in the Firebase console.
