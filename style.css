@@ -241,10 +241,16 @@ button:hover {
 #plant-checkboxes {
   margin-top: 0.5rem;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .species-group {
   margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .species-group-title {
@@ -262,6 +268,10 @@ button:hover {
 
   text-align: left;
 
+}
+
+.species-group input[type="checkbox"] {
+  margin: 0 0.25rem 0 0;
 }
 
 #add-event-form .species-group label {
