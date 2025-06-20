@@ -183,6 +183,12 @@ button:hover {
   background-color: #a7f3d0;
 }
 
+#calendar-container td.selected-day {
+  outline: 2px solid #f59e0b; /* marco naranja */
+  outline-offset: -2px;
+  border-radius: 6px;
+}
+
 #calendar-container button {
   background-color: var(--button-green);
   color: var(--white);
