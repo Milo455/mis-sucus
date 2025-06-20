@@ -79,6 +79,7 @@ describe('plant.js', () => {
         <button id="prev-photo"></button>
         <img id="viewer-img" />
         <button id="next-photo"></button>
+        <button id="delete-photo"></button>
         <span id="close-viewer"></span>
       </div>
     `;
@@ -226,5 +227,51 @@ describe('plant.js', () => {
 
     document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     expect(document.getElementById('viewer-img').src).toContain('img2');
+
+  });
+
+  test('deleting photo removes it from viewer and album', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          notes: 'note'
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+    mockGetDocs
+      .mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'img1',
+            data: () => ({ base64: 'img1', createdAt: { toDate: () => new Date('2020-01-01') } })
+          },
+          {
+            id: 'img2',
+            data: () => ({ base64: 'img2', createdAt: { toDate: () => new Date('2020-01-02') } })
+          }
+        ]
+      })
+      .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} });
+    mockDeleteDoc.mockResolvedValue();
+
+    await import('../plant.js');
+    await flushPromises();
+
+    const firstImg = document.querySelector('#photo-album img');
+    firstImg.click();
+
+    document.getElementById('delete-photo').click();
+    await flushPromises();
+
+    expect(document.getElementById('photo-album').children.length).toBe(1);
+    expect(document.getElementById('viewer-img').src).toContain('img1');
   });
 });

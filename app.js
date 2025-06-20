@@ -36,9 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const qrModal          = document.getElementById('qr-modal');
   const closeQrModal     = document.getElementById('close-qr-modal');
   let qrScanner;
-  // Asignar fecha actual al campo de evento
-const hoy = new Date().toISOString().split('T')[0];
-eventDateInput.value = hoy;
+  // Asignar fecha local actual al campo de evento
+  const now = new Date();
+  const hoy = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split('T')[0];
+  eventDateInput.value = hoy;
 let selectedDate = hoy;
 let selectedDayCell = null;
 
@@ -281,8 +284,11 @@ try {
   renderCalendar();
 
 
-  // Resetear formulario
-  eventDateInput.value = new Date().toISOString().split('T')[0];
+  // Resetear formulario con la fecha local actual
+  const nowForm = new Date();
+  eventDateInput.value = new Date(nowForm.getTime() - nowForm.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split('T')[0];
   eventTypeSelect.value = 'Riego';
   
 

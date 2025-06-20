@@ -245,7 +245,9 @@ button:hover {
 }
 
 .species-group label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   margin-left: 0.5rem;
 }
 
@@ -377,6 +379,7 @@ button:hover {
 
   gap: 10px;
   height: 70vh;
+  align-content: start;
   overflow-y: auto;
 
 }
