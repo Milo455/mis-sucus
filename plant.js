@@ -354,11 +354,11 @@ async function deleteCurrentPhoto() {
 
 function handleKey(e) {
   if (e.key === 'ArrowRight') {
-    // Move forward in the album
-    showImage(currentAlbumIndex - 1);
-  } else if (e.key === 'ArrowLeft') {
-    // Move backward in the album
+    // Previously left arrow: move backward in the album
     showImage(currentAlbumIndex + 1);
+  } else if (e.key === 'ArrowLeft') {
+    // Previously right arrow: move forward in the album
+    showImage(currentAlbumIndex - 1);
   }
 }
 
@@ -375,13 +375,13 @@ if (albumEl && viewerModal && viewerImg) {
 }
 
 if (prevPhotoBtn) {
-  prevPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex + 1));
+  prevPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex - 1));
 }
 
 if (nextPhotoBtn) {
   nextPhotoBtn.addEventListener('click', () => {
-    // Moving right should show the next photo
-    showImage(currentAlbumIndex - 1);
+    // Moving right now behaves like the previous left arrow
+    showImage(currentAlbumIndex + 1);
   });
 }
 
