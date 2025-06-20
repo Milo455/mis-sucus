@@ -167,8 +167,6 @@ async function cargarPlantas() {
     if (!qrScanner) {
       qrScanner = new Html5Qrcode('qr-reader');
     }
-
-
     let cameraConfig = { facingMode: 'environment' };
     try {
       if (Html5Qrcode.getCameras) {
@@ -183,23 +181,9 @@ async function cargarPlantas() {
       console.warn('Falling back to default camera', e);
     }
 
-  qrScanner
-  .start(
-    cameraConfig,
-    {
-      fps: 30,
-      qrbox: { width: 300, height: 300 },
-      aspectRatio: 1.7778,
-      rememberLastUsedCamera: true,
-      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-      videoConstraints: {
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        advanced: [{ focusMode: 'continuous' }]
-
-      }
+    try {
       await qrScanner.start(
-        cameraParam,
+        cameraConfig,
         {
           fps: 30,
           qrbox: { width: 300, height: 300 },
