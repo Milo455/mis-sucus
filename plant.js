@@ -15,6 +15,18 @@ import {
   getDocs
 } from './firestore-web.js';
 
+async function ensureAuth() {
+  try {
+    const { getAuth, signInAnonymously } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    const auth = getAuth();
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
+  } catch (_) {
+    // ignore auth errors
+  }
+}
+
 // Obtener ID desde la URL
 const params = new URLSearchParams(window.location.search);
 const plantId = params.get('id');
@@ -47,9 +59,14 @@ const albumModal = document.getElementById('album-modal');
 const closeAlbumBtn = document.getElementById('close-album');
 const viewerModal = document.getElementById('viewer-modal');
 const viewerImg = document.getElementById('viewer-img');
+const viewerDate = document.getElementById('viewer-date');
 const closeViewerBtn = document.getElementById('close-viewer');
+const prevPhotoBtn = document.getElementById('prev-photo');
+const nextPhotoBtn = document.getElementById('next-photo');
+const deletePhotoBtn = document.getElementById('delete-photo');
 
 let albumData = [];
+let currentAlbumIndex = 0;
 
 function safeRedirect(url) {
   try {
@@ -62,11 +79,12 @@ function safeRedirect(url) {
 function mostrarAlbum() {
   if (!albumEl) return;
   albumEl.innerHTML = '';
-  albumData.forEach(item => {
+  albumData.forEach((item, idx) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'album-item';
     const img = document.createElement('img');
     img.src = item.photo;
+    img.dataset.index = idx;
     const span = document.createElement('span');
     span.className = 'album-date';
     span.textContent = item.date.toLocaleDateString();
@@ -79,7 +97,6 @@ function mostrarAlbum() {
 let currentSpeciesId; // speciesId for redirects
 let currentSpeciesName = '';
 let originalName = '';
-let originalPhoto = '';
 let originalNotes = '';
 let qrCodeData = '';
 
@@ -102,15 +119,30 @@ async function cargarPlanta() {
   currentSpeciesId = data.speciesId;
   qrCodeData = data.qrCode || '';
 
-  albumData = (data.album || []).map(a => ({
-    photo: a.photo,
-    date: a.date && a.date.toDate ? a.date.toDate() : a.date
-  }));
-  if (albumData.length === 0 && data.photo) {
-    albumData.push({ photo: data.photo, date: data.createdAt.toDate() });
+  try {
+    const imgQ = query(
+      collection(db, 'images'),
+      where('plantId', '==', plantId),
+      orderBy('createdAt', 'desc')
+    );
+    const imgSnap = await getDocs(imgQ);
+    albumData = imgSnap.docs.map(d => ({
+      id: d.id,
+      photo: d.data().base64,
+      date: d.data().createdAt.toDate ? d.data().createdAt.toDate() : new Date(d.data().createdAt)
+    }));
+    albumData.sort((a, b) => b.date - a.date);
+  } catch (err) {
+    console.error('Error cargando imágenes', err);
+    albumData = [];
   }
-
-  albumData.sort((a, b) => b.date - a.date);
+  if (!albumData.length && Array.isArray(data.album)) {
+    albumData = data.album.map(item => ({
+      photo: item.photo,
+      date: item.date?.toDate ? item.date.toDate() : new Date(item.date)
+    }));
+    albumData.sort((a, b) => b.date - a.date);
+  }
 
   const speciesRef = doc(db, 'species', currentSpeciesId);
   const speciesSnap = await getDoc(speciesRef);
@@ -120,7 +152,7 @@ async function cargarPlanta() {
   speciesEl.textContent = `Especie: ${currentSpeciesName}`;
 
   nameEl.textContent = data.name;
-  photoEl.src = albumData[0].photo;
+  photoEl.src = albumData.length ? albumData[0].photo : '';
   notesEl.textContent = data.notes || '';
 
   mostrarAlbum();
@@ -152,7 +184,6 @@ async function cargarPlanta() {
   inputName.value = data.name;
   inputNotes.value = data.notes || '';
   originalName = data.name;
-  originalPhoto = data.photo;
   originalNotes = data.notes || '';
 }
 
@@ -178,11 +209,26 @@ formEdit.addEventListener('submit', async (e) => {
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        updates.photo = await resizeImage(e.target.result, 800);
+        const resized = await resizeImage(e.target.result, 800);
+        const size = atob(resized.split(',')[1]).length;
+        if (size > 1024 * 1024) {
+          alert('Imagen demasiado grande incluso después de comprimir.');
+          return;
+        }
         await updateDoc(doc(db, 'plants', plantId), updates);
+        await ensureAuth();
+        const entry = { photo: resized, date: new Date() };
+        const refImg = await addDoc(collection(db, 'images'), {
+          plantId,
+          base64: resized,
+          createdAt: entry.date
+        });
+        entry.id = refImg && refImg.id;
         nameEl.textContent = newName;
         notesEl.textContent = newNotes;
-        photoEl.src = updates.photo;
+        photoEl.src = resized;
+        albumData.unshift(entry);
+        mostrarAlbum();
         inputPhoto.value = '';
         modalEdit.classList.add('hidden');
         alert('Planta actualizada con éxito');
@@ -217,12 +263,20 @@ if (addPhotoBtn && newPhotoInput) {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const resized = await resizeImage(e.target.result, 800);
+      const size = atob(resized.split(',')[1]).length;
+      if (size > 1024 * 1024) {
+        alert('Imagen demasiado grande incluso después de comprimir.');
+        return;
+      }
       const entry = { photo: resized, date: new Date() };
-      albumData.unshift(entry);
-      await updateDoc(doc(db, 'plants', plantId), {
-        photo: resized,
-        album: albumData
+      await ensureAuth();
+      const refImg = await addDoc(collection(db, 'images'), {
+        plantId,
+        base64: resized,
+        createdAt: entry.date
       });
+      entry.id = refImg && refImg.id;
+      albumData.unshift(entry);
       photoEl.src = resized;
       mostrarAlbum();
       newPhotoInput.value = '';
@@ -232,7 +286,10 @@ if (addPhotoBtn && newPhotoInput) {
 }
 
 if (btnAddEvent && modalAddEvent && eventDateInput && eventTypeSelect && saveEventBtn && cancelAddEventBtn) {
-  eventDateInput.value = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  eventDateInput.value = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split('T')[0];
   btnAddEvent.addEventListener('click', () => {
     modalAddEvent.classList.remove('hidden');
   });
@@ -266,20 +323,76 @@ if (closeAlbumBtn && albumModal) {
   });
 }
 
+function showImage(idx) {
+  if (!albumData.length) return;
+  currentAlbumIndex = (idx + albumData.length) % albumData.length;
+  viewerImg.src = albumData[currentAlbumIndex].photo;
+  if (viewerDate) viewerDate.textContent = albumData[currentAlbumIndex].date.toLocaleDateString();
+}
+
+async function deleteCurrentPhoto() {
+  if (!albumData.length) return;
+  const { id } = albumData[currentAlbumIndex];
+  if (id) {
+    try {
+      await deleteDoc(doc(db, 'images', id));
+    } catch (err) {
+      console.error('Error deleting image', err);
+    }
+  }
+  albumData.splice(currentAlbumIndex, 1);
+  mostrarAlbum();
+  if (!albumData.length) {
+    viewerModal.classList.add('hidden');
+    document.removeEventListener('keydown', handleKey);
+    photoEl.src = '';
+    return;
+  }
+  if (currentAlbumIndex >= albumData.length) currentAlbumIndex = albumData.length - 1;
+  showImage(currentAlbumIndex);
+}
+
+function handleKey(e) {
+  if (e.key === 'ArrowRight') {
+    // Move forward in the album
+    showImage(currentAlbumIndex - 1);
+  } else if (e.key === 'ArrowLeft') {
+    // Move backward in the album
+    showImage(currentAlbumIndex + 1);
+  }
+}
+
 if (albumEl && viewerModal && viewerImg) {
   albumEl.addEventListener('click', (e) => {
     const target = e.target;
     if (target.tagName === 'IMG') {
-      viewerImg.src = target.src;
+      const idx = parseInt(target.dataset.index, 10) || 0;
+      showImage(idx);
       viewerModal.classList.remove('hidden');
+      document.addEventListener('keydown', handleKey);
     }
+  });
+}
+
+if (prevPhotoBtn) {
+  prevPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex + 1));
+}
+
+if (nextPhotoBtn) {
+  nextPhotoBtn.addEventListener('click', () => {
+    // Moving right should show the next photo
+    showImage(currentAlbumIndex - 1);
   });
 }
 
 if (closeViewerBtn && viewerModal) {
   closeViewerBtn.addEventListener('click', () => {
     viewerModal.classList.add('hidden');
+    document.removeEventListener('keydown', handleKey);
   });
+}
+if (deletePhotoBtn) {
+  deletePhotoBtn.addEventListener('click', deleteCurrentPhoto);
 }
 btnCancelEdit.addEventListener('click', () => {
   inputName.value = originalName;

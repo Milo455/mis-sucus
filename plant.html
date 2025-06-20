@@ -66,7 +66,7 @@
 
   <div id="album-modal" class="modal hidden">
     <div class="modal-content">
-      <span id="close-album" class="close">&times;</span>
+      <button id="close-album" class="close small-button">&times;</button>
       <h3>Registro Fotográfico</h3>
       <button id="add-photo-record" class="small-button">📷 Agregar Foto</button>
       <input id="new-photo-input" type="file" accept="image/*" style="display:none;" />
@@ -76,8 +76,12 @@
 
   <div id="viewer-modal" class="modal hidden">
     <div class="modal-content">
-      <span id="close-viewer" class="close">&times;</span>
-      <img id="viewer-img" src="" alt="Foto" style="max-width:100%; height:auto; border-radius:8px;" />
+<button id="close-viewer" class="close small-button">&times;</button>
+<button id="prev-photo" class="viewer-btn">&#10094;</button>
+<img id="viewer-img" src="" alt="Foto" style="max-width:100%; height:auto; border-radius:8px;" />
+<p id="viewer-date" class="viewer-date"></p>
+<button id="next-photo" class="viewer-btn">&#10095;</button>
+<button id="delete-photo" class="small-button" style="color:red;">Eliminar Foto</button>
     </div>
   </div>
 

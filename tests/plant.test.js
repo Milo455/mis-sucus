@@ -75,6 +75,13 @@ describe('plant.js', () => {
       <button id="add-photo-record"></button>
       <input id="new-photo-input" type="file" />
       <div id="photo-album"></div>
+      <div id="viewer-modal" class="hidden">
+        <button id="prev-photo"></button>
+        <img id="viewer-img" />
+        <button id="next-photo"></button>
+        <button id="delete-photo"></button>
+        <span id="close-viewer"></span>
+      </div>
     `;
     window.history.pushState({}, '', '/plant.html?id=plant1');
     window.alert = jest.fn();
@@ -89,7 +96,6 @@ describe('plant.js', () => {
           name: 'Plant1',
           speciesId: 'spec1',
           createdAt: { toDate: () => new Date('2020-01-02') },
-          photo: 'img-url',
           notes: 'note'
         })
       })
@@ -97,6 +103,16 @@ describe('plant.js', () => {
         exists: () => true,
         data: () => ({ name: 'SpeciesName' })
       });
+    mockGetDocs
+      .mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            data: () => ({ base64: 'img-url', createdAt: { toDate: () => new Date('2020-01-02') } })
+          }
+        ]
+      })
+      .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} });
 
     await import('../plant.js');
     await flushPromises();
@@ -114,18 +130,22 @@ describe('plant.js', () => {
           name: 'Plant1',
           speciesId: 'spec1',
           createdAt: { toDate: () => new Date('2020-01-02') },
-          photo: 'img-old',
-          notes: 'note',
-          album: [
-            { photo: 'img-old', date: { toDate: () => new Date('2020-01-02') } },
-            { photo: 'img-new', date: { toDate: () => new Date('2020-01-03') } }
-          ]
+          notes: 'note'
         })
       })
       .mockResolvedValueOnce({
         exists: () => true,
         data: () => ({ name: 'SpeciesName' })
       });
+    mockGetDocs
+      .mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          { data: () => ({ base64: 'img-new', createdAt: { toDate: () => new Date('2020-01-03') } }) },
+          { data: () => ({ base64: 'img-old', createdAt: { toDate: () => new Date('2020-01-02') } }) }
+        ]
+      })
+      .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} });
 
     await import('../plant.js');
     await flushPromises();
@@ -142,7 +162,6 @@ describe('plant.js', () => {
           name: 'Plant1',
           speciesId: 'spec1',
           createdAt: { toDate: () => new Date('2020-01-02') },
-          photo: 'img-url',
           notes: 'note'
         })
       })
@@ -150,6 +169,9 @@ describe('plant.js', () => {
         exists: () => true,
         data: () => ({ name: 'SpeciesName' })
       });
+    mockGetDocs
+      .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} })
+      .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} });
     mockDeleteDoc.mockResolvedValue();
 
     await import('../plant.js');
@@ -159,5 +181,97 @@ describe('plant.js', () => {
     await flushPromises();
 
     expect(mockDeleteDoc).toHaveBeenCalled();
+  });
+
+  test('next and previous buttons navigate viewer', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          photo: 'img1',
+          notes: 'note',
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+
+    mockGetDocs.mockResolvedValueOnce({
+      empty: false,
+      docs: [
+        { data: () => ({ base64: 'img1', createdAt: { toDate: () => new Date('2020-01-01') } }) },
+        { data: () => ({ base64: 'img2', createdAt: { toDate: () => new Date('2020-01-02') } }) }
+      ]
+    });
+
+    await import('../plant.js');
+    await flushPromises();
+
+    const firstImg = document.querySelector('#photo-album img');
+    firstImg.click();
+
+    expect(document.getElementById('viewer-img').src).toContain('img2');
+
+    document.getElementById('next-photo').click();
+    expect(document.getElementById('viewer-img').src).toContain('img1');
+
+    document.getElementById('prev-photo').click();
+    expect(document.getElementById('viewer-img').src).toContain('img2');
+
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(document.getElementById('viewer-img').src).toContain('img1');
+
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    expect(document.getElementById('viewer-img').src).toContain('img2');
+
+  });
+
+  test('deleting photo removes it from viewer and album', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          notes: 'note'
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+    mockGetDocs
+      .mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'img1',
+            data: () => ({ base64: 'img1', createdAt: { toDate: () => new Date('2020-01-01') } })
+          },
+          {
+            id: 'img2',
+            data: () => ({ base64: 'img2', createdAt: { toDate: () => new Date('2020-01-02') } })
+          }
+        ]
+      })
+      .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} });
+    mockDeleteDoc.mockResolvedValue();
+
+    await import('../plant.js');
+    await flushPromises();
+
+    const firstImg = document.querySelector('#photo-album img');
+    firstImg.click();
+
+    document.getElementById('delete-photo').click();
+    await flushPromises();
+
+    expect(document.getElementById('photo-album').children.length).toBe(1);
+    expect(document.getElementById('viewer-img').src).toContain('img1');
   });
 });

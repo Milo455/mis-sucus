@@ -123,11 +123,18 @@ main {
   position: absolute;
   top: 10px;
   right: 15px;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   cursor: pointer;
-  color: var(--danger-color);
+  color: var(--white);
   background-color: var(--button-green);
   border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  margin: var(--button-margin);
+}
+
+.modal-content .close:hover {
+  background-color: var(--button-green-hover);
 }
 
 .hidden { display: none !important; }
@@ -187,6 +194,7 @@ button:hover {
   outline: 2px solid #f59e0b; /* marco naranja */
   outline-offset: -2px;
   border-radius: 6px;
+
 }
 
 #calendar-container button {
@@ -216,13 +224,18 @@ button:hover {
   margin-top: 0.5rem;
 }
 
-#add-event-form input,
+#add-event-form input:not([type="checkbox"]),
 #add-event-form select {
   width: 100%;
   padding: 0.5rem;
   margin-top: 0.25rem;
   border-radius: 5px;
   border: 1px solid #ccc;
+}
+
+#add-event-form input[type="checkbox"] {
+  width: auto;
+  margin-top: 0.25rem;
 }
 
 #plant-checkboxes {
@@ -240,7 +253,17 @@ button:hover {
 }
 
 .species-group label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+#add-event-form .species-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
   margin-left: 0.5rem;
 }
 
@@ -343,13 +366,13 @@ button:hover {
   }
 
   .acciones {
-    flex-direction: column;
+    flex-direction: row;
     width: 100%;
     margin-top: 0.5rem;
   }
 
   header button {
-    width: 100%;
+    width: auto;
   }
 
   .modal-content {
@@ -367,9 +390,12 @@ button:hover {
 .album {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  grid-auto-rows: 100px;
+
+  grid-auto-rows: minmax(120px, auto);
+
   gap: 10px;
   height: 70vh;
+  align-content: start;
   overflow-y: auto;
 
 }
@@ -388,7 +414,37 @@ button:hover {
   align-items: center;
 }
 
+.album-date {
+  margin: 4px 0 8px;
+  font-size: 0.8rem;
+}
+
 #viewer-modal img {
   max-width: 90vw;
   max-height: 90vh;
+}
+
+#viewer-date {
+  margin-top: 0.5rem;
+}
+
+#viewer-modal .viewer-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  font-size: 2rem;
+  padding: 0.5rem 1rem;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#prev-photo {
+  left: 10px;
+}
+
+#next-photo {
+  right: 10px;
 }

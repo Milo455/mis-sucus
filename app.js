@@ -9,7 +9,8 @@ import {
   query,
   orderBy,
   deleteDoc,
-  doc
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 
@@ -36,9 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const qrModal          = document.getElementById('qr-modal');
   const closeQrModal     = document.getElementById('close-qr-modal');
   let qrScanner;
-  // Asignar fecha actual al campo de evento
-const hoy = new Date().toISOString().split('T')[0];
-eventDateInput.value = hoy;
+
+  // Asignar fecha local actual al campo de evento
+  const now = new Date();
+  const hoy = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split('T')[0];
+  eventDateInput.value = hoy;
+
 let selectedDate = hoy;
 let selectedDayCell = null;
 
@@ -161,15 +167,32 @@ async function cargarPlantas() {
     if (!qrScanner) {
       qrScanner = new Html5Qrcode('qr-reader');
     }
-    qrScanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 250 },
-      (text) => {
-        qrScanner.stop().then(() => {
-          qrModal.classList.add('hidden');
-          window.location.href = `plant.html?id=${text}`;
-        }).catch(err => console.error('Error al detener scanner', err));
-      },
-      () => {}
-    ).catch(err => console.error('Error iniciando scanner', err));
+    qrScanner
+      .start(
+        { facingMode: 'environment' },
+        {
+          fps: 10,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+        },
+        async (text) => {
+          try {
+            const ref = doc(db, 'plants', text);
+            const snap = await getDoc(ref);
+            await qrScanner.stop();
+            qrModal.classList.add('hidden');
+            if (snap.exists()) {
+              window.location.href = `plant.html?id=${text}`;
+            } else {
+              alert('La planta no existe');
+            }
+          } catch (err) {
+            console.error('Error verificando planta', err);
+            alert('Error al verificar la planta');
+          }
+        },
+        () => {}
+      )
+      .catch((err) => console.error('Error iniciando scanner', err));
   });
 
   closeQrModal.addEventListener('click', () => {
@@ -281,8 +304,11 @@ try {
   renderCalendar();
 
 
-  // Resetear formulario
-  eventDateInput.value = new Date().toISOString().split('T')[0];
+  // Resetear formulario con la fecha local actual
+  const nowForm = new Date();
+  eventDateInput.value = new Date(nowForm.getTime() - nowForm.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split('T')[0];
   eventTypeSelect.value = 'Riego';
   
 
