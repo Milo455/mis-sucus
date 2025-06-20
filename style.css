@@ -372,7 +372,7 @@ button:hover {
 .album {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  grid-auto-rows: 100px;
+  grid-auto-rows: minmax(120px, auto);
   gap: 10px;
   height: 70vh;
   overflow-y: auto;
@@ -393,9 +393,18 @@ button:hover {
   align-items: center;
 }
 
+.album-date {
+  margin: 4px 0 8px;
+  font-size: 0.8rem;
+}
+
 #viewer-modal img {
   max-width: 90vw;
   max-height: 90vh;
+}
+
+#viewer-date {
+  margin-top: 0.5rem;
 }
 
 #viewer-modal .viewer-btn {

@@ -59,6 +59,7 @@ const albumModal = document.getElementById('album-modal');
 const closeAlbumBtn = document.getElementById('close-album');
 const viewerModal = document.getElementById('viewer-modal');
 const viewerImg = document.getElementById('viewer-img');
+const viewerDate = document.getElementById('viewer-date');
 const closeViewerBtn = document.getElementById('close-viewer');
 const prevPhotoBtn = document.getElementById('prev-photo');
 const nextPhotoBtn = document.getElementById('next-photo');
@@ -311,11 +312,12 @@ function showImage(idx) {
   if (!albumData.length) return;
   currentAlbumIndex = (idx + albumData.length) % albumData.length;
   viewerImg.src = albumData[currentAlbumIndex].photo;
+  if (viewerDate) viewerDate.textContent = albumData[currentAlbumIndex].date.toLocaleDateString();
 }
 
 function handleKey(e) {
-  if (e.key === 'ArrowRight') showImage(currentAlbumIndex + 1);
-  else if (e.key === 'ArrowLeft') showImage(currentAlbumIndex - 1);
+  if (e.key === 'ArrowRight') showImage(currentAlbumIndex - 1);
+  else if (e.key === 'ArrowLeft') showImage(currentAlbumIndex + 1);
 }
 
 if (albumEl && viewerModal && viewerImg) {
@@ -331,11 +333,11 @@ if (albumEl && viewerModal && viewerImg) {
 }
 
 if (prevPhotoBtn) {
-  prevPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex - 1));
+  prevPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex + 1));
 }
 
 if (nextPhotoBtn) {
-  nextPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex + 1));
+  nextPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex - 1));
 }
 
 if (closeViewerBtn && viewerModal) {
