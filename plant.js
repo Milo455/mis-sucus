@@ -63,6 +63,7 @@ const viewerDate = document.getElementById('viewer-date');
 const closeViewerBtn = document.getElementById('close-viewer');
 const prevPhotoBtn = document.getElementById('prev-photo');
 const nextPhotoBtn = document.getElementById('next-photo');
+const deletePhotoBtn = document.getElementById('delete-photo');
 
 let albumData = [];
 let currentAlbumIndex = 0;
@@ -126,6 +127,7 @@ async function cargarPlanta() {
     );
     const imgSnap = await getDocs(imgQ);
     albumData = imgSnap.docs.map(d => ({
+      id: d.id,
       photo: d.data().base64,
       date: d.data().createdAt.toDate ? d.data().createdAt.toDate() : new Date(d.data().createdAt)
     }));
@@ -215,15 +217,17 @@ formEdit.addEventListener('submit', async (e) => {
         }
         await updateDoc(doc(db, 'plants', plantId), updates);
         await ensureAuth();
-        await addDoc(collection(db, 'images'), {
+        const entry = { photo: resized, date: new Date() };
+        const refImg = await addDoc(collection(db, 'images'), {
           plantId,
           base64: resized,
-          createdAt: new Date()
+          createdAt: entry.date
         });
+        entry.id = refImg && refImg.id;
         nameEl.textContent = newName;
         notesEl.textContent = newNotes;
         photoEl.src = resized;
-        albumData.unshift({ photo: resized, date: new Date() });
+        albumData.unshift(entry);
         mostrarAlbum();
         inputPhoto.value = '';
         modalEdit.classList.add('hidden');
@@ -265,13 +269,14 @@ if (addPhotoBtn && newPhotoInput) {
         return;
       }
       const entry = { photo: resized, date: new Date() };
-      albumData.unshift(entry);
       await ensureAuth();
-      await addDoc(collection(db, 'images'), {
+      const refImg = await addDoc(collection(db, 'images'), {
         plantId,
         base64: resized,
         createdAt: entry.date
       });
+      entry.id = refImg && refImg.id;
+      albumData.unshift(entry);
       photoEl.src = resized;
       mostrarAlbum();
       newPhotoInput.value = '';
@@ -322,6 +327,28 @@ function showImage(idx) {
   if (viewerDate) viewerDate.textContent = albumData[currentAlbumIndex].date.toLocaleDateString();
 }
 
+async function deleteCurrentPhoto() {
+  if (!albumData.length) return;
+  const { id } = albumData[currentAlbumIndex];
+  if (id) {
+    try {
+      await deleteDoc(doc(db, 'images', id));
+    } catch (err) {
+      console.error('Error deleting image', err);
+    }
+  }
+  albumData.splice(currentAlbumIndex, 1);
+  mostrarAlbum();
+  if (!albumData.length) {
+    viewerModal.classList.add('hidden');
+    document.removeEventListener('keydown', handleKey);
+    photoEl.src = '';
+    return;
+  }
+  if (currentAlbumIndex >= albumData.length) currentAlbumIndex = albumData.length - 1;
+  showImage(currentAlbumIndex);
+}
+
 function handleKey(e) {
   if (e.key === 'ArrowRight') {
     // Move forward in the album
@@ -360,6 +387,9 @@ if (closeViewerBtn && viewerModal) {
     viewerModal.classList.add('hidden');
     document.removeEventListener('keydown', handleKey);
   });
+}
+if (deletePhotoBtn) {
+  deletePhotoBtn.addEventListener('click', deleteCurrentPhoto);
 }
 btnCancelEdit.addEventListener('click', () => {
   inputName.value = originalName;
