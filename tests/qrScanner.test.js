@@ -50,7 +50,7 @@ describe('QR scanner initialization', () => {
       static getCameras() {
         return Promise.resolve([
           { id: 'front1', label: 'Front Camera' },
-          { id: 'rear1', label: 'Back Camera' }
+          { id: 'rear1', label: 'Cámara trasera' }
         ]);
       }
     }
@@ -84,5 +84,15 @@ describe('QR scanner initialization', () => {
     expect(typeof successCb).toBe('function');
     expect(typeof errorCb).toBe('function');
     expect(configArg.qrbox).toBeUndefined();
+  });
+
+  test('falls back to environment facing mode when cameras unavailable', async () => {
+    startMock.mockClear();
+    delete global.Html5Qrcode.getCameras;
+    document.getElementById('scan-qr').click();
+    await flushPromises();
+
+    const [cameraArg] = startMock.mock.calls[0];
+    expect(cameraArg).toEqual({ facingMode: { exact: 'environment' } });
   });
 });

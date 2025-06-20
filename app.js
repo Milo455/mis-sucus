@@ -167,18 +167,19 @@ async function cargarPlantas() {
     if (!qrScanner) {
       qrScanner = new Html5Qrcode('qr-reader');
     }
-    let cameraConfig = { facingMode: 'environment' };
+    let cameraConfig = { facingMode: { exact: 'environment' } };
     try {
       if (Html5Qrcode.getCameras) {
         const cams = await Html5Qrcode.getCameras();
         if (Array.isArray(cams) && cams.length > 0) {
-          const preferred = cams.find(c => /back|rear|traser|environment/i.test(c.label));
-          const selected = preferred || cams[0];
-          cameraConfig = { deviceId: { exact: selected.id } };
+          const preferred = cams.find(c => /back|rear|trasera|environment/i.test(c.label));
+          if (preferred) {
+            cameraConfig = { deviceId: { exact: preferred.id } };
+          }
         }
       }
     } catch (e) {
-      console.warn('Falling back to default camera', e);
+      console.warn('Falling back to environment facingMode', e);
     }
 
     try {
