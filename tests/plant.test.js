@@ -75,6 +75,12 @@ describe('plant.js', () => {
       <button id="add-photo-record"></button>
       <input id="new-photo-input" type="file" />
       <div id="photo-album"></div>
+      <div id="viewer-modal" class="hidden">
+        <button id="prev-photo"></button>
+        <img id="viewer-img" />
+        <button id="next-photo"></button>
+        <span id="close-viewer"></span>
+      </div>
     `;
     window.history.pushState({}, '', '/plant.html?id=plant1');
     window.alert = jest.fn();
@@ -174,5 +180,41 @@ describe('plant.js', () => {
     await flushPromises();
 
     expect(mockDeleteDoc).toHaveBeenCalled();
+  });
+
+  test('next and previous buttons navigate viewer', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          name: 'Plant1',
+          speciesId: 'spec1',
+          createdAt: { toDate: () => new Date('2020-01-02') },
+          photo: 'img1',
+          notes: 'note',
+          album: [
+            { photo: 'img1', date: { toDate: () => new Date('2020-01-01') } },
+            { photo: 'img2', date: { toDate: () => new Date('2020-01-02') } }
+          ]
+        })
+      })
+      .mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ name: 'SpeciesName' })
+      });
+
+    await import('../plant.js');
+    await flushPromises();
+
+    const firstImg = document.querySelector('#photo-album img');
+    firstImg.click();
+
+    expect(document.getElementById('viewer-img').src).toContain('img2');
+
+    document.getElementById('next-photo').click();
+    expect(document.getElementById('viewer-img').src).toContain('img1');
+
+    document.getElementById('prev-photo').click();
+    expect(document.getElementById('viewer-img').src).toContain('img2');
   });
 });

@@ -60,8 +60,11 @@ const closeAlbumBtn = document.getElementById('close-album');
 const viewerModal = document.getElementById('viewer-modal');
 const viewerImg = document.getElementById('viewer-img');
 const closeViewerBtn = document.getElementById('close-viewer');
+const prevPhotoBtn = document.getElementById('prev-photo');
+const nextPhotoBtn = document.getElementById('next-photo');
 
 let albumData = [];
+let currentAlbumIndex = 0;
 
 function safeRedirect(url) {
   try {
@@ -74,11 +77,12 @@ function safeRedirect(url) {
 function mostrarAlbum() {
   if (!albumEl) return;
   albumEl.innerHTML = '';
-  albumData.forEach(item => {
+  albumData.forEach((item, idx) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'album-item';
     const img = document.createElement('img');
     img.src = item.photo;
+    img.dataset.index = idx;
     const span = document.createElement('span');
     span.className = 'album-date';
     span.textContent = item.date.toLocaleDateString();
@@ -303,19 +307,41 @@ if (closeAlbumBtn && albumModal) {
   });
 }
 
+function showImage(idx) {
+  if (!albumData.length) return;
+  currentAlbumIndex = (idx + albumData.length) % albumData.length;
+  viewerImg.src = albumData[currentAlbumIndex].photo;
+}
+
+function handleKey(e) {
+  if (e.key === 'ArrowRight') showImage(currentAlbumIndex + 1);
+  else if (e.key === 'ArrowLeft') showImage(currentAlbumIndex - 1);
+}
+
 if (albumEl && viewerModal && viewerImg) {
   albumEl.addEventListener('click', (e) => {
     const target = e.target;
     if (target.tagName === 'IMG') {
-      viewerImg.src = target.src;
+      const idx = parseInt(target.dataset.index, 10) || 0;
+      showImage(idx);
       viewerModal.classList.remove('hidden');
+      document.addEventListener('keydown', handleKey);
     }
   });
+}
+
+if (prevPhotoBtn) {
+  prevPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex - 1));
+}
+
+if (nextPhotoBtn) {
+  nextPhotoBtn.addEventListener('click', () => showImage(currentAlbumIndex + 1));
 }
 
 if (closeViewerBtn && viewerModal) {
   closeViewerBtn.addEventListener('click', () => {
     viewerModal.classList.add('hidden');
+    document.removeEventListener('keydown', handleKey);
   });
 }
 btnCancelEdit.addEventListener('click', () => {
