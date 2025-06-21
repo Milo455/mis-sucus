@@ -263,12 +263,12 @@ button:hover {
 }
 
 .species-group label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: flex-start;
   gap: 0.25rem;
   margin-left: 0;
   text-align: left;
+  width: auto;
 }
 
 .species-group input[type="checkbox"] {
@@ -287,12 +287,12 @@ button:hover {
 }
 
 #add-event-form .species-group label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: flex-start;
   gap: 0.25rem;
   margin-left: 0;
   text-align: left;
+  width: auto;
 }
 
 .add-event-btn {
