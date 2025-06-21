@@ -40,6 +40,7 @@ describe('QR scanner initialization', () => {
       <div id="add-event-modal" class="hidden"></div>
       <div id="eventos-dia"></div>
     `;
+    window.alert = jest.fn();
 
     startMock = jest.fn(() => Promise.resolve());
     class Html5QrcodeMock {
@@ -86,13 +87,13 @@ describe('QR scanner initialization', () => {
     expect(configArg.qrbox).toBeUndefined();
   });
 
-  test('falls back to environment facing mode when cameras unavailable', async () => {
+  test('shows alert when no rear camera is available', async () => {
     startMock.mockClear();
     delete global.Html5Qrcode.getCameras;
     document.getElementById('scan-qr').click();
     await flushPromises();
 
-    const [cameraArg] = startMock.mock.calls[0];
-    expect(cameraArg).toEqual({ facingMode: { exact: 'environment' } });
+    expect(startMock).not.toHaveBeenCalled();
+    expect(window.alert).toHaveBeenCalled();
   });
 });

@@ -167,20 +167,24 @@ async function cargarPlantas() {
     if (!qrScanner) {
       qrScanner = new Html5Qrcode('qr-reader');
     }
-    let cameraConfig = { facingMode: { exact: 'environment' } };
+    let cameraConfig = null;
     try {
       if (Html5Qrcode.getCameras) {
         const cams = await Html5Qrcode.getCameras();
         if (Array.isArray(cams) && cams.length > 0) {
           const preferred = cams.find(c => /back|rear|trasera|environment/i.test(c.label));
-
           if (preferred) {
             cameraConfig = { deviceId: { exact: preferred.id } };
           }
         }
       }
     } catch (e) {
-      console.warn('Falling back to environment facingMode', e);
+      console.error('Error obteniendo cámaras', e);
+    }
+
+    if (!cameraConfig) {
+      alert('No se encontró cámara trasera disponible');
+      return;
     }
 
     try {
@@ -189,7 +193,7 @@ async function cargarPlantas() {
         {
           fps: 30,
           aspectRatio: 1.7778,
-          rememberLastUsedCamera: true,
+          rememberLastUsedCamera: false,
           experimentalFeatures: { useBarCodeDetectorIfSupported: true },
           videoConstraints: {
             width: { ideal: 1920 },
