@@ -162,74 +162,65 @@ async function cargarPlantas() {
 }
 
   // Botones para abrir el calendario y escanear QR
-  btnScanQR.addEventListener('click', async () => {
-    qrModal.classList.remove('hidden');
-    if (!qrScanner) {
-      qrScanner = new Html5Qrcode('qr-reader');
-    }
-    let cameraConfig = null;
-    try {
-      if (Html5Qrcode.getCameras) {
-        const cams = await Html5Qrcode.getCameras();
-        if (Array.isArray(cams) && cams.length > 0) {
-          const preferred = cams.find(c => /back|rear|trasera|environment/i.test(c.label));
-          if (preferred) {
-            cameraConfig = { deviceId: { exact: preferred.id } };
-          }
-        }
-      }
-    } catch (e) {
-      console.error('Error obteniendo cámaras', e);
-    }
+btnScanQR.addEventListener('click', async () => {
+  qrModal.classList.remove('hidden');
 
-    if (!cameraConfig) {
-      alert('No se encontró cámara trasera disponible');
+  if (!qrScanner) {
+    qrScanner = new Html5Qrcode('qr-reader');
+  }
+
+  try {
+    const devices = await Html5Qrcode.getCameras();
+    if (!devices || devices.length === 0) {
+      alert('No se encontraron cámaras.');
       return;
     }
 
-    try {
-      await qrScanner.start(
-        cameraConfig,
-        {
-          fps: 30,
-          aspectRatio: 1.7778,
-          rememberLastUsedCamera: false,
-          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-          videoConstraints: {
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
-            advanced: [{ focusMode: 'continuous' }]
-          }
-        },
-        async (text) => {
-          try {
-            const ref = doc(db, 'plants', text);
-            const snap = await getDoc(ref);
-            await qrScanner.stop();
-            qrModal.classList.add('hidden');
-            if (snap.exists()) {
-              window.location.href = `plant.html?id=${text}`;
-            } else {
-              alert('La planta no existe');
-            }
-          } catch (err) {
-            console.error('Error verificando planta', err);
-            alert('Error al verificar la planta');
-          }
-        },
-          () => {}
-      );
-    } catch (err) {
-      console.error('Error iniciando scanner', err);
+    const backCam = devices.find(d => /back|rear|environment|traser/i.test(d.label));
+    if (!backCam) {
+      alert('No se encontró cámara trasera.');
+      return;
     }
-  });
 
-  closeQrModal.addEventListener('click', () => {
-    if (qrScanner) {
-      qrScanner.stop().catch(err => console.error('Error al detener scanner', err));
-    }
-    qrModal.classList.add('hidden');
-  });
+    await qrScanner.start(
+      { deviceId: { exact: backCam.id } },
+      {
+        fps: 25,
+        qrbox: { width: 300, height: 300 },
+        rememberLastUsedCamera: true,
+        experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+      },
+      async (text) => {
+        try {
+          const ref = doc(db, 'plants', text);
+          const snap = await getDoc(ref);
+          await qrScanner.stop();
+          qrModal.classList.add('hidden');
+          if (snap.exists()) {
+            window.location.href = `plant.html?id=${text}`;
+          } else {
+            alert('La planta no existe');
+          }
+        } catch (err) {
+          console.error('Error verificando planta', err);
+          alert('Error al verificar la planta');
+        }
+      },
+      () => {}
+    );
+  } catch (err) {
+    console.error('Error iniciando scanner', err);
+    alert('Error accediendo a la cámara. Intenta recargar la página.');
+  }
+});
+
+closeQrModal.addEventListener('click', () => {
+  if (qrScanner) {
+    qrScanner.stop().catch(err => console.error('Error al detener scanner', err));
+  }
+  qrModal.classList.add('hidden');
+});
+
 
   // — Modal Calendario —
   let eventsData = [];
