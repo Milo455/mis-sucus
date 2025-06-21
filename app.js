@@ -72,8 +72,8 @@ if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
     const name = document.getElementById('species-name').value.trim();
     const info = document.getElementById('species-info').value.trim();
     const photoInput = document.getElementById('species-photo');
-    if (!name || !info || photoInput.files.length === 0) {
-      alert('Completa todos los campos y selecciona una foto.');
+    if (!name || photoInput.files.length === 0) {
+      alert('Ingresa nombre y selecciona una foto.');
       return;
     }
     const reader = new FileReader();

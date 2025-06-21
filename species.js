@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const notas = plantNotesInput.value.trim();
 
     if (!nombre || plantPhotoInput.files.length === 0) {
-      alert('Completa todos los campos y selecciona una foto.');
+      alert('Ingresa nombre y selecciona una foto.');
       return;
     }
 
