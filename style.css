@@ -268,10 +268,7 @@ button:hover {
   justify-content: flex-start;
   gap: 0.25rem;
   margin-left: 0;
-  width: 100%;
-
   text-align: left;
-
 }
 
 .species-group input[type="checkbox"] {
@@ -284,10 +281,7 @@ button:hover {
   justify-content: flex-start;
   gap: 0.25rem;
   margin-left: 0;
-  width: 100%;
-
   text-align: left;
-
 }
 
 .add-event-btn {
