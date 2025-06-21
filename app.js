@@ -264,11 +264,17 @@ checkboxContainer.innerHTML = ''; // Limpiar antes
   Object.keys(grouped).forEach(specId => {
     const groupDiv = document.createElement('div');
     groupDiv.className = 'species-group';
+
     const title = document.createElement('div');
     title.className = 'species-group-title';
     title.textContent = speciesMap.get(specId) || 'Especie';
     groupDiv.appendChild(title);
+
+    const list = document.createElement('ul');
+    list.className = 'plant-list';
+
     grouped[specId].forEach(p => {
+      const li = document.createElement('li');
       const label = document.createElement('label');
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
@@ -276,8 +282,11 @@ checkboxContainer.innerHTML = ''; // Limpiar antes
       checkbox.name = 'plant-checkbox';
       label.appendChild(checkbox);
       label.appendChild(document.createTextNode(' ' + p.name));
-      groupDiv.appendChild(label);
+      li.appendChild(label);
+      list.appendChild(li);
     });
+
+    groupDiv.appendChild(list);
     checkboxContainer.appendChild(groupDiv);
   });
 
