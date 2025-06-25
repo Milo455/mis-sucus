@@ -302,7 +302,7 @@ button:hover {
 
 .plant-list li label input[type="checkbox"] {
   flex-shrink: 0;
-  margin-right: 0.5rem; /* espacio entre checkbox y texto */
+  margin-right: 0; /* espacio entre checkbox y texto */
 }
 
 
