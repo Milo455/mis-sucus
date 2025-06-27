@@ -5,7 +5,7 @@ This project is a simple PWA to manage succulent plants. It relies on Firebase f
 ## Requirements
 
 - **Node.js** v18 or later is required to run the tests and manage dependencies.
-- A Firebase project (update `firebase-init.js` with your own configuration).
+- A Firebase project. Firebase credentials are now loaded from environment variables.
 
 ## Installation
 
@@ -39,7 +39,18 @@ The built-in QR scanner requires the device's rear-facing camera to start scanni
 
 ## Firebase Setup
 
-Replace the placeholder values in `firebase-init.js` with the keys for your Firebase project. Ensure Firestore is enabled in the Firebase console.
+Create a `.env` file in the project root with the credentials for your Firebase project. Ensure Firestore is enabled in the Firebase console.
+
+Required variables:
+
+```
+FIREBASE_API_KEY=
+FIREBASE_AUTH_DOMAIN=
+FIREBASE_PROJECT_ID=
+FIREBASE_STORAGE_BUCKET=
+FIREBASE_MESSAGING_SENDER_ID=
+FIREBASE_APP_ID=
+```
 
 
 Anonymous sign-in must be enabled from the Firebase console (Authentication → Sign-in method). `ensureAuth()` will automatically handle signing in when the app loads.
