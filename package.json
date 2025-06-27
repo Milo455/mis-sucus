@@ -16,5 +16,9 @@
   },
   "jest": {
     "testEnvironment": "jsdom"
+  },
+  "dependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "html5-qrcode": "^2.3.8"
   }
 }

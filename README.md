@@ -39,7 +39,7 @@ The built-in QR scanner requires the device's rear-facing camera to start scanni
 
 ## Firebase Setup
 
-Create a `.env` file in the project root with the credentials for your Firebase project. Ensure Firestore is enabled in the Firebase console.
+Create a `.env` file in the project root with the credentials for your Firebase project. Ensure Firestore is enabled in the Firebase console. If you open the app directly in the browser, also copy `env.template.js` to `env.js`, fill in your credentials and include it before `firebase-init.js` in your HTML.
 
 Required variables:
 
