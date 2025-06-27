@@ -35,7 +35,7 @@ Then open `http://localhost:8080/index.html` in your browser. Alternatively, you
 
 ## QR Scanning
 
-The built-in QR scanner now uses a high-resolution stream and continuous autofocus, allowing codes to be detected from farther away and at different angles. It requires the device's rear-facing camera to start scanning. If a rear camera is not available, the app will display an error instead of using another camera.
+The built-in QR scanner requires the device's rear-facing camera to start scanning. If a rear camera is not available, the app will display an error instead of using another camera.
 
 ## Firebase Setup
 
