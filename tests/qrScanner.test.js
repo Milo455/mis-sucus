@@ -124,7 +124,7 @@ jest.mock("html5-qrcode", () => {
     Html5QrcodeFakeWindow: {},
     Html5QrcodeFakeWorker: {},
   };
-});
+}, { virtual: true });
 
 // Simulación de getCameras
 Html5Qrcode.getCameras = jest.fn().mockResolvedValue(mockCameras);
