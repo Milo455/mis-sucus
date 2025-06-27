@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 
+
 import { Html5Qrcode } from "html5-qrcode";
 import { fireEvent } from "@testing-library/dom";
 
@@ -153,4 +154,5 @@ describe("QR Scanner", () => {
       expect.any(Function)
     );
   });
+
 });
