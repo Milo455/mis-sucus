@@ -6,14 +6,12 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-
 
 // Configuración de Firebase para el proyecto "mis-sucus"
 const firebaseConfig = {
-  apiKey: "AIzaSyBFpO3mzD94Wa_oCywdzHUaWJONtHugTuE",
-  authDomain: "mis-sucus.firebaseapp.com",
-  projectId: "mis-sucus",
-
-  storageBucket: "mis-sucus.appspot.com",  // Corregido
-
-  messagingSenderId: "535386004336",
-  appId: "1:535386004336:web:4701b88dc0ed7f75164db5"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,  // Corregido
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID
 };
 
 // Inicializar Firebase
