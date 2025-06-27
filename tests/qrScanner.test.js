@@ -3,7 +3,7 @@
  */
 
 
-import { Html5Qrcode } from "html5-qrcode";
+import { jest } from '@jest/globals';
 import { fireEvent } from "@testing-library/dom";
 
 // Mock de cámaras
@@ -13,7 +13,7 @@ const mockCameras = [
 ];
 
 // Mock de funciones
-jest.mock("html5-qrcode", () => {
+jest.unstable_mockModule("html5-qrcode", () => {
   return {
     Html5Qrcode: jest.fn().mockImplementation(() => ({
       start: jest.fn(),
@@ -126,18 +126,33 @@ jest.mock("html5-qrcode", () => {
     Html5QrcodeFakeWorker: {},
   };
 }, { virtual: true });
+jest.unstable_mockModule("../firebase-init.js", () => ({ db: {} }));
+jest.unstable_mockModule("../firestore-web.js", () => ({
+  collection: jest.fn(),
+  addDoc: jest.fn(),
+  getDocs: jest.fn(),
+  query: jest.fn(),
+  orderBy: jest.fn(),
+  deleteDoc: jest.fn(),
+  doc: jest.fn(),
+  getDoc: jest.fn()
+}));
 
-// Simulación de getCameras
-Html5Qrcode.getCameras = jest.fn().mockResolvedValue(mockCameras);
+let Html5Qrcode;
+beforeAll(async () => {
+  ({ Html5Qrcode } = await import('html5-qrcode'));
+  Html5Qrcode.getCameras = jest.fn().mockResolvedValue(mockCameras);
+  await import('../firebase-init.js');
+});
 
 describe("QR Scanner", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     document.body.innerHTML = `
       <button id="btnScanQR">Escanear QR</button>
       <div id="qrModal" class="hidden"></div>
       <div id="qr-reader"></div>
     `;
-    require("./app.js"); // Requiere el archivo que contiene el código real
+    await import("../app.js");
   });
 
   it("debería seleccionar la cámara trasera si está disponible", async () => {
