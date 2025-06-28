@@ -238,7 +238,7 @@ button:hover {
   margin-top: 0.25rem;
 }
 
-#plant-checkboxes {
+#selected-plants {
   margin-top: 0.5rem;
   text-align: left;
   display: flex;

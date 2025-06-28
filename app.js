@@ -34,9 +34,63 @@ document.addEventListener('DOMContentLoaded', () => {
   const eventDateInput   = document.getElementById('event-date');
   const eventTypeSelect  = document.getElementById('event-type');
   const saveEventBtn     = document.getElementById('save-event');
+  const scanEventBtn     = document.getElementById('scan-event-qr');
+  const selectedPlantsEl = document.getElementById('selected-plants');
   const qrModal          = document.getElementById('qr-modal');
   const closeQrModal     = document.getElementById('close-qr-modal');
   let qrScanner;
+  const selectedPlants = [];
+
+  async function startScan(onDetect) {
+    qrModal.classList.remove('hidden');
+
+    if (!qrScanner) {
+      qrScanner = new Html5Qrcode('qr-reader');
+    }
+
+    try {
+      const devices = await Html5Qrcode.getCameras();
+      if (!devices || devices.length === 0) {
+        alert('No se encontraron cámaras.');
+        return;
+      }
+
+      const backCam = devices.find(d => /back|rear|environment|traser/i.test(d.label));
+      if (!backCam) {
+        alert('No se encontró cámara trasera.');
+        return;
+      }
+
+      await qrScanner.start(
+        { deviceId: { exact: backCam.id } },
+        {
+          fps: 25,
+          qrbox: { width: 300, height: 300 },
+          rememberLastUsedCamera: true,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+        },
+        async (text) => {
+          try {
+            await qrScanner.stop();
+          } catch (err) {
+            console.warn('Failed to stop scanner', err);
+          }
+          qrModal.classList.add('hidden');
+          onDetect(text);
+        },
+        () => {}
+      );
+
+      if (qrScanner.applyVideoConstraints) {
+        qrScanner
+          .applyVideoConstraints({ advanced: [{ focusMode: 'continuous' }] })
+          .catch(err => console.warn('Autofocus no soportado', err));
+      }
+    } catch (err) {
+      console.error('Error iniciando scanner', err);
+      alert('Error accediendo a la cámara. Intenta recargar la página.');
+    }
+  }
 
   // Asignar fecha local actual al campo de evento
   const now = new Date();
@@ -54,8 +108,8 @@ if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
     !btnSaveSpecies || !modalCalendar || !btnCloseCalendar ||
     !calendarContainer || !eventDateInput ||
     !eventTypeSelect || !saveEventBtn ||
-    !qrModal || !closeQrModal ||
-    !document.getElementById('plant-checkboxes')) {
+    !scanEventBtn || !selectedPlantsEl ||
+    !qrModal || !closeQrModal) {
   console.error('Faltan elementos en el DOM. Verifica tus IDs.');
   return;
 }
@@ -162,67 +216,46 @@ async function cargarPlantas() {
 }
 
   // Botones para abrir el calendario y escanear QR
-btnScanQR.addEventListener('click', async () => {
-  qrModal.classList.remove('hidden');
-
-  if (!qrScanner) {
-    qrScanner = new Html5Qrcode('qr-reader');
-  }
-
-  try {
-    const devices = await Html5Qrcode.getCameras();
-    if (!devices || devices.length === 0) {
-      alert('No se encontraron cámaras.');
-      return;
+btnScanQR.addEventListener('click', () => {
+  startScan(async (text) => {
+    try {
+      const ref = doc(db, 'plants', text);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        window.location.href = `plant.html?id=${text}`;
+      } else {
+        alert('La planta no existe');
+      }
+    } catch (err) {
+      console.error('Error verificando planta', err);
+      alert('Error al verificar la planta');
     }
+  });
+});
 
-    const backCam = devices.find(d => /back|rear|environment|traser/i.test(d.label));
-    if (!backCam) {
-      alert('No se encontró cámara trasera.');
-      return;
-    }
-
-    await qrScanner.start(
-      { deviceId: { exact: backCam.id } },
-      {
-        fps: 25,
-        qrbox: { width: 300, height: 300 },
-        rememberLastUsedCamera: true,
-        experimentalFeatures: { useBarCodeDetectorIfSupported: true }
-      },
-      async (text) => {
-        try {
-          await qrScanner.stop();
-        } catch (err) {
-          console.warn('Failed to stop scanner', err);
+scanEventBtn.addEventListener('click', () => {
+  startScan(async (id) => {
+    try {
+      const ref = doc(db, 'plants', id);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        if (!selectedPlants.includes(id)) {
+          selectedPlants.push(id);
+          const plantData = snap.data();
+          const speciesName =
+            speciesMap.get(plantData.speciesId) || '(Especie no encontrada)';
+          const div = document.createElement('div');
+          div.textContent = `${speciesName} - ${plantData.name}`;
+          selectedPlantsEl.appendChild(div);
         }
-
-        try {
-          const ref = doc(db, 'plants', text);
-          const snap = await getDoc(ref);
-          qrModal.classList.add('hidden');
-          if (snap.exists()) {
-            window.location.href = `plant.html?id=${text}`;
-          } else {
-            alert('La planta no existe');
-          }
-        } catch (err) {
-          console.error('Error verificando planta', err);
-          alert('Error al verificar la planta');
-        }
-      },
-      () => {}
-    );
-
-    if (qrScanner.applyVideoConstraints) {
-      qrScanner
-        .applyVideoConstraints({ advanced: [{ focusMode: 'continuous' }] })
-        .catch(err => console.warn('Autofocus no soportado', err));
+      } else {
+        alert('La planta no existe');
+      }
+    } catch (err) {
+      console.error('Error verificando planta', err);
+      alert('Error al verificar la planta');
     }
-  } catch (err) {
-    console.error('Error iniciando scanner', err);
-    alert('Error accediendo a la cámara. Intenta recargar la página.');
-  }
+  });
 });
 
 closeQrModal.addEventListener('click', () => {
@@ -257,45 +290,10 @@ btnCalendar.addEventListener('click', async () => {
     mostrarEventosPorDia(selectedDate);
 
 
-    // Poblar selector de plantas en el formulario de eventos
-const checkboxContainer = document.getElementById('plant-checkboxes');
-checkboxContainer.innerHTML = ''; // Limpiar antes
-
-  const grouped = {};
-  plantsMap.forEach((data, id) => {
-    if (!grouped[data.speciesId]) grouped[data.speciesId] = [];
-    grouped[data.speciesId].push({ id, name: data.name });
-  });
-
-  Object.keys(grouped).forEach(specId => {
-    const groupDiv = document.createElement('div');
-    groupDiv.className = 'species-group';
-
-    const title = document.createElement('div');
-    title.className = 'species-group-title';
-    title.textContent = speciesMap.get(specId) || 'Especie';
-    groupDiv.appendChild(title);
-
-    const list = document.createElement('ul');
-    list.className = 'plant-list';
-
-    grouped[specId].forEach(p => {
-      const li = document.createElement('li');
-      const label = document.createElement('label');
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.value = p.id;
-      checkbox.name = 'plant-checkbox';
-      label.appendChild(checkbox);
-      label.appendChild(document.createTextNode(' ' + p.name));
-      li.appendChild(label);
-      list.appendChild(li);
-    });
-
-    groupDiv.appendChild(list);
-    checkboxContainer.appendChild(groupDiv);
-  });
-
+    // Resetear lista de plantas seleccionadas
+    selectedPlants.length = 0;
+    selectedPlantsEl.innerHTML = '';
+  
 
   } catch (err) {
     console.error('Error al guardar el evento:', err);
@@ -324,47 +322,46 @@ document.getElementById('close-add-event').addEventListener('click', () => {
     document.getElementById('eventos-dia').innerHTML = '';
   });
 // Guardar evento (solo una vez)
+
 saveEventBtn.addEventListener('click', async () => {
   const date = eventDateInput.value;
-const type = eventTypeSelect.value;
-const selectedCheckboxes = [...document.querySelectorAll('input[name="plant-checkbox"]:checked')];
+  const type = eventTypeSelect.value;
 
-if (!date || !type || selectedCheckboxes.length === 0) {
-  alert('Completa todos los campos y selecciona al menos una planta.');
-  return;
-}
+  if (!date || !type || selectedPlants.length === 0) {
+    alert('Completa todos los campos y agrega al menos una planta.');
+    return;
+  }
 
-try {
-  for (const chk of selectedCheckboxes) {
-  await addDoc(collection(db, 'events'), {
-    date,
-    type,
-    plantId: chk.value,
-    createdAt: new Date()
-  });
-}
-
-
-  // Recargar eventos y calendario
-  const snapEv = await getDocs(collection(db, 'events'));
-  eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
-  renderCalendar();
+  try {
+    for (const id of selectedPlants) {
+      await addDoc(collection(db, 'events'), {
+        date,
+        type,
+        plantId: id,
+        createdAt: new Date()
+      });
+    }
 
 
-  // Resetear formulario con la fecha local actual
-  const nowForm = new Date();
-  eventDateInput.value = new Date(nowForm.getTime() - nowForm.getTimezoneOffset() * 60000)
-    .toISOString()
-    .split('T')[0];
-  eventTypeSelect.value = 'Riego';
+    // Recargar eventos y calendario
+    const snapEv = await getDocs(collection(db, 'events'));
+    eventsData = snapEv.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCalendar();
+
+    // Resetear formulario con la fecha local actual
+    const nowForm = new Date();
+    eventDateInput.value = new Date(nowForm.getTime() - nowForm.getTimezoneOffset() * 60000)
+      .toISOString()
+      .split('T')[0];
+    eventTypeSelect.value = 'Riego';
+
+    // Cerrar modal
+    document.getElementById('add-event-modal').classList.add('hidden');
+
+    // Limpiar plantas seleccionadas
+    selectedPlants.length = 0;
+    selectedPlantsEl.innerHTML = '';
   
-
-  // Cerrar modal
-document.getElementById('add-event-modal').classList.add('hidden');
-
-// Limpiar los checkboxes seleccionados
-selectedCheckboxes.forEach(cb => cb.checked = false);
-
 } catch (err) {
   console.error('Error al guardar los eventos:', err);
   alert('Error al guardar los eventos.');
