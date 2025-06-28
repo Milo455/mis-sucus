@@ -25,6 +25,13 @@ const firebaseConfig = {
   appId: getEnv('FIREBASE_APP_ID')
 };
 
+// Lanzar un error descriptivo si faltan variables de entorno
+if (Object.values(firebaseConfig).some((v) => !v)) {
+  throw new Error(
+    'Missing Firebase configuration. Copy env.template.js to env.js and fill in your credentials or set the variables in a .env file.'
+  );
+}
+
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
