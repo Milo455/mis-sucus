@@ -188,12 +188,7 @@ btnScanQR.addEventListener('click', async () => {
         fps: 25,
         qrbox: { width: 300, height: 300 },
         rememberLastUsedCamera: true,
-        experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-        videoConstraints: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          advanced: [{ focusMode: 'continuous' }]
-        }
+        experimentalFeatures: { useBarCodeDetectorIfSupported: true }
       },
       async (text) => {
         try {
