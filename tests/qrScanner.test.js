@@ -176,7 +176,8 @@ describe("QR Scanner", () => {
       <button id="save-event"></button>
       <div id="qr-modal" class="hidden"></div>
       <button id="close-qr-modal"></button>
-      <div id="plant-checkboxes"></div>
+      <button id="scan-event-qr"></button>
+      <div id="selected-plants"></div>
       <div id="eventos-dia"></div>
       <div id="add-event-modal"></div>
       <button id="open-event-modal"></button>
