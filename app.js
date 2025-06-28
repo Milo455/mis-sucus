@@ -197,9 +197,14 @@ btnScanQR.addEventListener('click', async () => {
       },
       async (text) => {
         try {
+          await qrScanner.stop();
+        } catch (err) {
+          console.warn('Failed to stop scanner', err);
+        }
+
+        try {
           const ref = doc(db, 'plants', text);
           const snap = await getDoc(ref);
-          await qrScanner.stop();
           qrModal.classList.add('hidden');
           if (snap.exists()) {
             window.location.href = `plant.html?id=${text}`;

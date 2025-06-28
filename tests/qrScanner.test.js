@@ -200,4 +200,25 @@ describe("QR Scanner", () => {
     });
   });
 
+  it("continúa verificando planta aunque falle al detener el scanner", async () => {
+    const button = document.getElementById("scan-qr");
+    fireEvent.click(button);
+
+    await flushPromises();
+    const instance = Html5Qrcode.mock.results[0].value;
+
+    const successCb = instance.start.mock.calls[0][2];
+    instance.stop.mockRejectedValueOnce(new Error('fail'));
+    console.warn = jest.fn();
+    mockGetDoc.mockResolvedValueOnce({ exists: () => true });
+
+    await successCb('plant1');
+    await flushPromises();
+
+    expect(instance.stop).toHaveBeenCalled();
+    expect(mockDoc).toHaveBeenCalledWith({}, 'plants', 'plant1');
+    expect(mockGetDoc).toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith('Failed to stop scanner', expect.any(Error));
+  });
+
 });
