@@ -17,12 +17,12 @@ const getEnv = (key) => {
 
 // Configuración de Firebase para el proyecto "mis-sucus"
 const firebaseConfig = {
-  apiKey: "AIzaSyBFpO3mzD94Wa_oCywdzHUaWJONtHugTuE",
-  authDomain: "mis-sucus.firebaseapp.com",
-  projectId: "mis-sucus",
-  storageBucket: "mis-sucus.firebasestorage.app",
-  messagingSenderId: "535386004336",
-  appId: "1:535386004336:web:4701b88dc0ed7f75164db5"
+  apiKey: getEnv('FIREBASE_API_KEY'),
+  authDomain: getEnv('FIREBASE_AUTH_DOMAIN'),
+  projectId: getEnv('FIREBASE_PROJECT_ID'),
+  storageBucket: getEnv('FIREBASE_STORAGE_BUCKET'),
+  messagingSenderId: getEnv('FIREBASE_MESSAGING_SENDER_ID'),
+  appId: getEnv('FIREBASE_APP_ID')
 };
 
 // Lanzar un error descriptivo si faltan variables de entorno
