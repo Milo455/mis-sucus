@@ -176,7 +176,7 @@ btnScanQR.addEventListener('click', async () => {
       return;
     }
 
-    const backCam = devices.find(d => /back|rear|environment|traser/i.test(d.label));
+    const backCam = devices.find(d => /back|rear|environment|traser[ao]?/i.test(d.label));
     if (!backCam) {
       alert('No se encontró cámara trasera.');
       return;
@@ -187,19 +187,22 @@ btnScanQR.addEventListener('click', async () => {
       {
         fps: 25,
         qrbox: { width: 300, height: 300 },
-        rememberLastUsedCamera: true,
+        rememberLastUsedCamera: false,
         experimentalFeatures: { useBarCodeDetectorIfSupported: true },
         videoConstraints: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
-          advanced: [{ focusMode: 'continuous' }]
+          advanced: [
+            { focusMode: 'continuous' },
+            { facingMode: 'environment' }
+          ]
         }
       },
       async (text) => {
         try {
+          await qrScanner.stop();
           const ref = doc(db, 'plants', text);
           const snap = await getDoc(ref);
-          await qrScanner.stop();
           qrModal.classList.add('hidden');
           if (snap.exists()) {
             window.location.href = `plant.html?id=${text}`;

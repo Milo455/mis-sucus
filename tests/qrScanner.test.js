@@ -195,6 +195,12 @@ describe("QR Scanner", () => {
     expect(Html5Qrcode.getCameras).toHaveBeenCalled();
     expect(Html5Qrcode).toHaveBeenCalledWith('qr-reader');
     const instance = Html5Qrcode.mock.results[0].value;
+    expect(instance.start).toHaveBeenCalledWith(
+      { deviceId: { exact: 'cam2' } },
+      expect.any(Object),
+      expect.any(Function),
+      expect.any(Function)
+    );
     expect(instance.applyVideoConstraints).toHaveBeenCalledWith({
       advanced: [{ focusMode: 'continuous' }]
     });
