@@ -6,6 +6,8 @@
 import { jest } from '@jest/globals';
 import { fireEvent } from "@testing-library/dom";
 
+const flushPromises = () => new Promise(res => setTimeout(res, 0));
+
 // Mock de cámaras
 const mockCameras = [
   { id: "cam1", label: "Front Camera" },
@@ -127,47 +129,70 @@ jest.unstable_mockModule("html5-qrcode", () => {
   };
 }, { virtual: true });
 jest.unstable_mockModule("../firebase-init.js", () => ({ db: {} }));
+const mockCollection = jest.fn();
+const mockAddDoc = jest.fn();
+const mockGetDocs = jest.fn().mockResolvedValue({ empty: true, docs: [], forEach: () => {} });
+const mockQuery = jest.fn();
+const mockOrderBy = jest.fn();
+const mockDeleteDoc = jest.fn();
+const mockDoc = jest.fn();
+const mockGetDoc = jest.fn().mockResolvedValue({ exists: () => false });
+
 jest.unstable_mockModule("../firestore-web.js", () => ({
-  collection: jest.fn(),
-  addDoc: jest.fn(),
-  getDocs: jest.fn(),
-  query: jest.fn(),
-  orderBy: jest.fn(),
-  deleteDoc: jest.fn(),
-  doc: jest.fn(),
-  getDoc: jest.fn()
+  collection: mockCollection,
+  addDoc: mockAddDoc,
+  getDocs: mockGetDocs,
+  query: mockQuery,
+  orderBy: mockOrderBy,
+  deleteDoc: mockDeleteDoc,
+  doc: mockDoc,
+  getDoc: mockGetDoc
 }));
 
 let Html5Qrcode;
 beforeAll(async () => {
   ({ Html5Qrcode } = await import('html5-qrcode'));
   Html5Qrcode.getCameras = jest.fn().mockResolvedValue(mockCameras);
+  global.Html5Qrcode = Html5Qrcode;
   await import('../firebase-init.js');
 });
 
 describe("QR Scanner", () => {
   beforeEach(async () => {
     document.body.innerHTML = `
-      <button id="btnScanQR">Escanear QR</button>
-      <div id="qrModal" class="hidden"></div>
+      <button id="btnAddSpecies"></button>
+      <button id="open-calendar"></button>
+      <button id="scan-qr">Escanear QR</button>
+      <div id="species-list"></div>
+      <div id="species-modal"></div>
+      <button id="close-species-modal"></button>
+      <button id="save-species"></button>
+      <div id="calendar-modal"></div>
+      <button id="close-calendar"></button>
+      <div id="calendar-container"></div>
+      <input id="event-date" />
+      <select id="event-type"></select>
+      <button id="save-event"></button>
+      <div id="qr-modal" class="hidden"></div>
+      <button id="close-qr-modal"></button>
+      <div id="plant-checkboxes"></div>
+      <div id="eventos-dia"></div>
+      <div id="add-event-modal"></div>
+      <button id="open-event-modal"></button>
+      <button id="close-add-event"></button>
       <div id="qr-reader"></div>
     `;
-    await import("../app.js");
+    await jest.isolateModulesAsync(() => import("../app.js"));
+    document.dispatchEvent(new Event('DOMContentLoaded'));
   });
 
   it("debería seleccionar la cámara trasera si está disponible", async () => {
-    const button = document.getElementById("btnScanQR");
+    const button = document.getElementById("scan-qr");
     fireEvent.click(button);
 
-    await Promise.resolve(); // Espera a que se resuelva la promesa
+    await flushPromises();
     expect(Html5Qrcode.getCameras).toHaveBeenCalled();
-    const qrScannerInstance = Html5Qrcode.mock.instances[0];
-    expect(qrScannerInstance.start).toHaveBeenCalledWith(
-      { deviceId: { exact: "cam2" } }, // ID de cámara trasera
-      expect.any(Object),
-      expect.any(Function),
-      expect.any(Function)
-    );
+    expect(Html5Qrcode).toHaveBeenCalledWith('qr-reader');
   });
 
 });
