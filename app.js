@@ -188,7 +188,12 @@ btnScanQR.addEventListener('click', async () => {
         fps: 25,
         qrbox: { width: 300, height: 300 },
         rememberLastUsedCamera: true,
-        experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+        experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+        videoConstraints: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          advanced: [{ focusMode: 'continuous' }]
+        }
       },
       async (text) => {
         try {
@@ -208,6 +213,12 @@ btnScanQR.addEventListener('click', async () => {
       },
       () => {}
     );
+
+    if (qrScanner.applyVideoConstraints) {
+      qrScanner
+        .applyVideoConstraints({ advanced: [{ focusMode: 'continuous' }] })
+        .catch(err => console.warn('Autofocus no soportado', err));
+    }
   } catch (err) {
     console.error('Error iniciando scanner', err);
     alert('Error accediendo a la cámara. Intenta recargar la página.');

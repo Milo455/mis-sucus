@@ -20,6 +20,7 @@ jest.unstable_mockModule("html5-qrcode", () => {
     Html5Qrcode: jest.fn().mockImplementation(() => ({
       start: jest.fn(),
       stop: jest.fn(),
+      applyVideoConstraints: jest.fn(),
     })),
     Html5QrcodeSupportedFormats: {},
     Html5QrcodeScanner: jest.fn(),
@@ -193,6 +194,10 @@ describe("QR Scanner", () => {
     await flushPromises();
     expect(Html5Qrcode.getCameras).toHaveBeenCalled();
     expect(Html5Qrcode).toHaveBeenCalledWith('qr-reader');
+    const instance = Html5Qrcode.mock.results[0].value;
+    expect(instance.applyVideoConstraints).toHaveBeenCalledWith({
+      advanced: [{ focusMode: 'continuous' }]
+    });
   });
 
 });
