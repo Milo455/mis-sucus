@@ -81,7 +81,24 @@ document.addEventListener('DOMContentLoaded', () => {
         () => {}
       );
 
-      if (qrScanner.applyVideoConstraints) {
+      const supportsContinuous = (() => {
+        if (qrScanner.getRunningTrackCapabilities) {
+          try {
+            const caps = qrScanner.getRunningTrackCapabilities();
+            const modes = caps.focusMode;
+            if (modes) {
+              return Array.isArray(modes)
+                ? modes.includes('continuous')
+                : modes === 'continuous';
+            }
+          } catch (err) {
+            console.warn('No se pudieron obtener capacidades de la cámara', err);
+          }
+        }
+        return true; // Asumir soporte si no se puede determinar
+      })();
+
+      if (supportsContinuous && qrScanner.applyVideoConstraints) {
         qrScanner
           .applyVideoConstraints({ advanced: [{ focusMode: 'continuous' }] })
           .catch(err => console.warn('Autofocus no soportado', err));
