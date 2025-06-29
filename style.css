@@ -247,6 +247,21 @@ button:hover {
   width: 100%;
 }
 
+.selected-plant {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.selected-plant .remove-plant-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #e00;
+  cursor: pointer;
+}
+
 .species-group {
   margin-bottom: 0.75rem;
   display: flex;

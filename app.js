@@ -242,7 +242,18 @@ scanEventBtn.addEventListener('click', () => {
         if (!selectedPlants.includes(id)) {
           selectedPlants.push(id);
           const div = document.createElement('div');
+          div.className = 'selected-plant';
+          div.dataset.id = id;
           div.textContent = snap.data().name;
+          const removeBtn = document.createElement('button');
+          removeBtn.textContent = '✖';
+          removeBtn.className = 'remove-plant-btn';
+          removeBtn.addEventListener('click', () => {
+            const idx = selectedPlants.indexOf(id);
+            if (idx !== -1) selectedPlants.splice(idx, 1);
+            div.remove();
+          });
+          div.appendChild(removeBtn);
           selectedPlantsEl.appendChild(div);
         }
       } else {
