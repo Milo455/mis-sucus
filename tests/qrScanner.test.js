@@ -21,6 +21,7 @@ jest.unstable_mockModule("html5-qrcode", () => {
       start: jest.fn(),
       stop: jest.fn(),
       applyVideoConstraints: jest.fn(),
+      getRunningTrackCapabilities: jest.fn(() => ({ focusMode: ['continuous'] })),
     })),
     Html5QrcodeSupportedFormats: {},
     Html5QrcodeScanner: jest.fn(),
