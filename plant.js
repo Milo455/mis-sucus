@@ -404,6 +404,8 @@ btnCancelEdit.addEventListener('click', () => {
 btnDeleteInside.addEventListener('click', async () => {
   if (confirm('¿Eliminar esta planta?')) {
     await deleteDoc(doc(db, 'plants', plantId));
+    alert('Planta eliminada');
+    safeRedirect(`species.html?id=${currentSpeciesId}`);
   }
 });
 
