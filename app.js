@@ -147,6 +147,12 @@ if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
       alert('Ingresa nombre y selecciona una foto.');
       return;
     }
+    for (const existing of speciesMap.values()) {
+      if (existing.trim().toLowerCase() === name.toLowerCase()) {
+        alert('Ya existe una especie con ese nombre.');
+        return;
+      }
+    }
     const reader = new FileReader();
     reader.onload = async e => {
       try {
