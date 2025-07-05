@@ -63,6 +63,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const plantNotesInput = document.getElementById('plant-notes');
   const plantPhotoInput = document.getElementById('plant-photo');
 
+  const plantNamesSet = new Set();
+
   let speciesData = null;
 
   // Cargar datos
@@ -133,6 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Cargar plantas
   async function cargarPlantas() {
     plantList.innerHTML = '';
+    plantNamesSet.clear();
     const q = query(collection(db, 'plants'), where('speciesId', '==', speciesId));
     const snap = await getDocs(q);
     if (snap.empty) {
@@ -142,6 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     for (const docSnap of snap.docs) {
       const data = docSnap.data();
+      plantNamesSet.add((data.name || '').trim().toLowerCase());
       const li = document.createElement('li');
       li.className = 'plant-item';
 
@@ -215,6 +219,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('Ingresa nombre y selecciona una foto.');
       return;
     }
+    if (plantNamesSet.has(nombre.toLowerCase())) {
+      alert('Ya existe una planta con ese nombre.');
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = async e => {
@@ -232,6 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         speciesId,
         createdAt
       });
+      plantNamesSet.add(nombre.toLowerCase());
       await ensureAuth();
       await addDoc(collection(db, 'images'), {
         plantId: docRef.id,
