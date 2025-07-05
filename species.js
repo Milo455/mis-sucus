@@ -66,6 +66,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const infoModal = document.getElementById('species-info-modal');
   const closeInfoModal = document.getElementById('close-species-info');
   const infoText = document.getElementById('species-info-text');
+  const editInfoBtn = document.getElementById('edit-species-info-btn');
+  const infoTextarea = document.getElementById('edit-species-info');
+  const saveInfoBtn = document.getElementById('save-species-info');
 
   if (infoBtn && infoModal && closeInfoModal) {
     infoBtn.addEventListener('click', () => {
@@ -73,6 +76,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     closeInfoModal.addEventListener('click', () => {
       infoModal.classList.add('hidden');
+    });
+  }
+
+  if (editInfoBtn && infoTextarea && saveInfoBtn) {
+    editInfoBtn.addEventListener('click', () => {
+      infoTextarea.classList.toggle('hidden');
+      saveInfoBtn.classList.toggle('hidden');
+      if (!infoTextarea.classList.contains('hidden')) {
+        infoTextarea.value = speciesData ? speciesData.info || '' : '';
+      }
+    });
+
+    saveInfoBtn.addEventListener('click', async () => {
+      const newInfo = infoTextarea.value.trim();
+      await updateDoc(doc(db, 'species', speciesId), { info: newInfo });
+      if (infoText) {
+        infoText.textContent = newInfo;
+      }
+      infoTextarea.classList.add('hidden');
+      saveInfoBtn.classList.add('hidden');
     });
   }
 
@@ -94,6 +117,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     inputName.value = speciesData.name;
     if (infoText) {
       infoText.textContent = speciesData.info || '';
+    }
+    if (infoTextarea) {
+      infoTextarea.value = speciesData.info || '';
     }
   }
 
