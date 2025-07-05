@@ -20,6 +20,7 @@
       <div style="display: flex; align-items: flex-end; gap: 0.5rem;">
         <img id="species-photo-display" src="" alt="Foto especie" style="max-width: 300px; height: auto; border-radius: 10px;" />
         <button id="edit-species-btn" class="small-button">✏️</button>
+        <button id="show-species-info-btn" class="small-button">Características</button>
       </div>
 
   <div id="edit-species-form" class="hidden">
@@ -47,6 +48,15 @@
       <textarea id="plant-notes" placeholder="Notas y características"></textarea>
       <input type="file" id="plant-photo" accept="image/*" />
         <button id="save-plant" type="button" class="small-button">Guardar</button>
+    </div>
+  </div>
+
+  <!-- Modal Características de Especie -->
+  <div id="species-info-modal" class="modal hidden">
+    <div class="modal-content">
+      <button id="close-species-info" class="close small-button">&times;</button>
+      <h2>Características</h2>
+      <p id="species-info-text"></p>
     </div>
   </div>
 
