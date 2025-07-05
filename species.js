@@ -62,6 +62,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   const plantNameInput = document.getElementById('plant-name');
   const plantNotesInput = document.getElementById('plant-notes');
   const plantPhotoInput = document.getElementById('plant-photo');
+  const infoBtn = document.getElementById('show-species-info-btn');
+  const infoModal = document.getElementById('species-info-modal');
+  const closeInfoModal = document.getElementById('close-species-info');
+  const infoText = document.getElementById('species-info-text');
+
+  if (infoBtn && infoModal && closeInfoModal) {
+    infoBtn.addEventListener('click', () => {
+      infoModal.classList.remove('hidden');
+    });
+    closeInfoModal.addEventListener('click', () => {
+      infoModal.classList.add('hidden');
+    });
+  }
 
   const plantNamesSet = new Set();
 
@@ -79,6 +92,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     photoDisplay.src = speciesData.photo;
     nameDisplay.textContent = speciesData.name;
     inputName.value = speciesData.name;
+    if (infoText) {
+      infoText.textContent = speciesData.info || '';
+    }
   }
 
   // Mostrar formulario de edición
