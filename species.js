@@ -174,22 +174,81 @@ document.addEventListener('DOMContentLoaded', async () => {
     safeRedirect('index.html');
   });
 
-  // Cargar plantas
+  const CACHE_TIMEOUT = 3600000; // 1 hora
+
+  function renderPlantItem({ id, name, img }) {
+    const li = document.createElement('li');
+    li.className = 'plant-item';
+
+    const image = document.createElement('img');
+    image.src = img || '';
+    image.alt = name;
+
+    const imgLink = document.createElement('a');
+    imgLink.href = `plant.html?id=${id}`;
+    imgLink.appendChild(image);
+
+    const link = document.createElement('a');
+    link.href = `plant.html?id=${id}`;
+    link.className = 'plant-name';
+    link.textContent = name;
+
+    const delBtn = document.createElement('button');
+    delBtn.dataset.id = id;
+    delBtn.className = 'delete-plant-btn small-button';
+    delBtn.style.display = 'none';
+    delBtn.style.marginLeft = '8px';
+    delBtn.textContent = '❌';
+
+    li.append(imgLink, link, delBtn);
+    plantList.appendChild(li);
+  }
+
+  function attachDeleteHandlers() {
+    document.querySelectorAll('.delete-plant-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        if (confirm('¿Eliminar esta planta?')) {
+          await deleteDoc(doc(db, 'plants', id));
+          await cargarPlantas();
+        }
+      });
+    });
+  }
+
+  // Cargar plantas con caché sencillo
   async function cargarPlantas() {
     plantList.innerHTML = '';
     plantNamesSet.clear();
+    const cacheKey = `plants_${speciesId}`;
+    let cached = null;
+    try {
+      cached = JSON.parse(localStorage.getItem(cacheKey));
+    } catch (_) {
+      cached = null;
+    }
+    if (cached && Date.now() - cached.timestamp < CACHE_TIMEOUT) {
+      cached.data.forEach(p => {
+        plantNamesSet.add((p.name || '').trim().toLowerCase());
+        renderPlantItem(p);
+      });
+      attachDeleteHandlers();
+      mostrarOcultarBotonesEliminar();
+    }
+
     const q = query(collection(db, 'plants'), where('speciesId', '==', speciesId));
     const snap = await getDocs(q);
     if (snap.empty) {
       plantList.innerHTML = '<li>No hay plantas registradas.</li>';
+      localStorage.removeItem(cacheKey);
       return;
     }
 
+    const fresh = [];
+    plantList.innerHTML = '';
     for (const docSnap of snap.docs) {
       const data = docSnap.data();
       plantNamesSet.add((data.name || '').trim().toLowerCase());
-      const li = document.createElement('li');
-      li.className = 'plant-item';
 
       let imgSrc = '';
       try {
@@ -207,40 +266,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         imgSrc = '';
       }
 
-      const img = document.createElement('img');
-      img.src = imgSrc;
-      img.alt = data.name;
-
-      const imgLink = document.createElement('a');
-      imgLink.href = `plant.html?id=${docSnap.id}`;
-      imgLink.appendChild(img);
-
-      const link = document.createElement('a');
-      link.href = `plant.html?id=${docSnap.id}`;
-      link.className = 'plant-name';
-      link.textContent = data.name;
-
-      const delBtn = document.createElement('button');
-      delBtn.dataset.id = docSnap.id;
-      delBtn.className = 'delete-plant-btn small-button';
-      delBtn.style.display = 'none';
-      delBtn.style.marginLeft = '8px';
-      delBtn.textContent = '❌';
-
-      li.append(imgLink, link, delBtn);
-      plantList.appendChild(li);
+      const entry = { id: docSnap.id, name: data.name, img: imgSrc };
+      fresh.push(entry);
+      renderPlantItem(entry);
     }
 
-    document.querySelectorAll('.delete-plant-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.getAttribute('data-id');
-        if (confirm('¿Eliminar esta planta?')) {
-          await deleteDoc(doc(db, 'plants', id));
-          await cargarPlantas();
-        }
-      });
-    });
+    localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: fresh }));
 
+    attachDeleteHandlers();
     mostrarOcultarBotonesEliminar();
   }
 
