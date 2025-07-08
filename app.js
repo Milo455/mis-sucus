@@ -175,54 +175,69 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
     reader.readAsDataURL(photoInput.files[0]);
   });
 
-  // — Carga lista de Especies —
- async function cargarEspecies() {
-  speciesList.innerHTML = '';
-  speciesMap.clear();
-  const q = query(collection(db, 'species'), orderBy('name', 'asc'));
-  try {
-    const snap = await getDocs(q);
-    if (snap.empty) {
-      speciesList.innerHTML = '<li>No hay especies registradas.</li>';
-      return;
+  // — Carga lista de Especies con caché sencillo —
+  const CACHE_TIMEOUT = 3600000; // 1 hora
+
+  function renderSpeciesCard({ id, name, photo }) {
+    const card = document.createElement('div');
+    card.className = 'species-card';
+    card.innerHTML = `
+      <img src="${photo}" alt="${name}">
+      <div class="species-card-name">${name}</div>
+    `;
+    card.addEventListener('click', () => {
+      window.location.href = `species.html?id=${id}`;
+    });
+    speciesList.appendChild(card);
+  }
+
+  async function cargarEspecies() {
+    speciesList.innerHTML = '';
+    speciesMap.clear();
+    const cacheKey = 'species_list';
+    let cached = null;
+    try {
+      cached = JSON.parse(localStorage.getItem(cacheKey));
+    } catch (_) {
+      cached = null;
     }
-  snap.forEach(doc => {
-  const data = doc.data();
-  speciesMap.set(doc.id, data.name);
 
-  const card = document.createElement('div');
-  card.className = 'species-card';
-  card.innerHTML = `
-    <img src="${data.photo}" alt="${data.name}">
-    <div class="species-card-name">${data.name}</div>
-  `;
-  card.addEventListener('click', () => {
-    window.location.href = `species.html?id=${doc.id}`;
-  });
+    if (cached) {
+      cached.data.forEach(sp => {
+        speciesMap.set(sp.id, sp.name);
+        renderSpeciesCard(sp);
+      });
+    }
 
-  speciesList.appendChild(card);
-});
+    if (cached && Date.now() - cached.timestamp < CACHE_TIMEOUT) {
+      return; // datos recientes
+    }
 
-    document.querySelectorAll('.delete-species-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const id = btn.getAttribute('data-id');
-    if (confirm('¿Seguro que quieres eliminar esta especie?')) {
-      try {
-        await deleteDoc(doc(db, 'species', id));
-        cargarEspecies(); // Recarga la lista de especies después de eliminar
-      } catch (err) {
-        console.error('Error al eliminar especie:', err);
-        alert('No se pudo eliminar la especie.');
+    const q = query(collection(db, 'species'), orderBy('name', 'asc'));
+    try {
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        speciesList.innerHTML = '<li>No hay especies registradas.</li>';
+        localStorage.removeItem(cacheKey);
+        return;
+      }
+      const fresh = [];
+      speciesList.innerHTML = '';
+      snap.forEach(doc => {
+        const data = doc.data();
+        const entry = { id: doc.id, name: data.name, photo: data.photo };
+        speciesMap.set(entry.id, entry.name);
+        fresh.push(entry);
+        renderSpeciesCard(entry);
+      });
+      localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: fresh }));
+    } catch (err) {
+      console.error('Error cargando especies:', err);
+      if (!cached) {
+        speciesList.innerHTML = '<li>Error al cargar especies.</li>';
       }
     }
-  });
-});
-
-  } catch (err) {
-    console.error('Error cargando especies:', err);
-  speciesList.innerHTML = '<li>Error al cargar especies.</li>';
   }
-}
 
 // Cargar todas las plantas y mapear por especie
 async function cargarPlantas() {
