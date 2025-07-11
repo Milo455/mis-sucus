@@ -200,6 +200,7 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
       cached = JSON.parse(localStorage.getItem(cacheKey));
     } catch (_) {
       cached = null;
+
     }
 
     if (cached) {
@@ -237,6 +238,7 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
         speciesList.innerHTML = '<li>Error al cargar especies.</li>';
       }
     }
+
   }
 
 // Cargar todas las plantas y mapear por especie
