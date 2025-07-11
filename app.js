@@ -200,13 +200,18 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
       cached = JSON.parse(localStorage.getItem(cacheKey));
     } catch (_) {
       cached = null;
+
     }
-    if (cached && Date.now() - cached.timestamp < CACHE_TIMEOUT) {
+
+    if (cached) {
       cached.data.forEach(sp => {
         speciesMap.set(sp.id, sp.name);
         renderSpeciesCard(sp);
       });
-      return;
+    }
+
+    if (cached && Date.now() - cached.timestamp < CACHE_TIMEOUT) {
+      return; // datos recientes
     }
 
     const q = query(collection(db, 'species'), orderBy('name', 'asc'));
@@ -218,6 +223,7 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
         return;
       }
       const fresh = [];
+      speciesList.innerHTML = '';
       snap.forEach(doc => {
         const data = doc.data();
         const entry = { id: doc.id, name: data.name, photo: data.photo };
@@ -228,8 +234,11 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
       localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: fresh }));
     } catch (err) {
       console.error('Error cargando especies:', err);
-      speciesList.innerHTML = '<li>Error al cargar especies.</li>';
+      if (!cached) {
+        speciesList.innerHTML = '<li>Error al cargar especies.</li>';
+      }
     }
+
   }
 
 // Cargar todas las plantas y mapear por especie
