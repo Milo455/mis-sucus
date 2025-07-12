@@ -271,7 +271,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderPlantItem(entry);
     }
 
-    localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: fresh }));
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: fresh }));
+    } catch (err) {
+      if (err instanceof DOMException) {
+        console.warn('Failed to cache plants', err);
+      } else {
+        throw err;
+      }
+    }
 
     attachDeleteHandlers();
     mostrarOcultarBotonesEliminar();

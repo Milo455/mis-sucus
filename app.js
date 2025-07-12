@@ -231,7 +231,15 @@ photo: await resizeImage(e.target.result, 800), // 800px de ancho máximo
         fresh.push(entry);
         renderSpeciesCard(entry);
       });
-      localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: fresh }));
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: fresh }));
+      } catch (err) {
+        if (err instanceof DOMException) {
+          console.warn('Failed to cache species', err);
+        } else {
+          throw err;
+        }
+      }
     } catch (err) {
       console.error('Error cargando especies:', err);
       if (!cached) {

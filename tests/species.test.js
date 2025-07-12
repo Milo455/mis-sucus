@@ -82,7 +82,7 @@ describe('species.js', () => {
   });
 
   test('loads species data on DOMContentLoaded', async () => {
-    mockGetDoc.mockResolvedValueOnce({
+    mockGetDoc.mockResolvedValue({
       exists: () => true,
       data: () => ({ name: 'Aloe', photo: 'photo-url' })
     });
@@ -120,5 +120,28 @@ describe('species.js', () => {
     await flushPromises();
 
     expect(mockDeleteDoc.mock.calls.length).toBeGreaterThan(0);
+  });
+
+  test('renders plants even if caching fails', async () => {
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ name: 'Aloe', photo: 'photo-url' })
+    });
+    const plantDocs = [{ id: 'p1', data: () => ({ name: 'Planta1' }) }];
+    mockGetDocs
+      .mockResolvedValueOnce({
+        empty: false,
+        docs: plantDocs,
+        forEach: cb => plantDocs.forEach(cb)
+      })
+      .mockResolvedValueOnce({ empty: true, docs: [], forEach: () => {} });
+
+    window.localStorage.getItem = jest.fn(() => null);
+    window.localStorage.setItem = jest.fn(() => { throw new DOMException('fail'); });
+
+    await jest.isolateModulesAsync(() => import('../species.js'));
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await flushPromises();
+    expect(document.querySelectorAll('.plant-item').length).toBe(1);
   });
 });
