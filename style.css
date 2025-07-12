@@ -306,9 +306,8 @@ button:hover {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
   width: 100%;
   font-size: 1rem;
   color: #4a2c20;
