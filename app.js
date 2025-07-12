@@ -35,11 +35,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const eventTypeSelect  = document.getElementById('event-type');
   const saveEventBtn     = document.getElementById('save-event');
   const scanEventBtn     = document.getElementById('scan-event-qr');
+  const openSelectPlantBtn = document.getElementById('open-select-plant');
+  const selectPlantModal = document.getElementById('select-plant-modal');
+  const closeSelectPlantBtn = document.getElementById('close-select-plant');
+  const plantSelectionList = document.getElementById('plant-selection-list');
+  const addSelectedPlantsBtn = document.getElementById('add-selected-plants');
   const selectedPlantsEl = document.getElementById('selected-plants');
   const qrModal          = document.getElementById('qr-modal');
   const closeQrModal     = document.getElementById('close-qr-modal');
   let qrScanner;
   const selectedPlants = [];
+
+  function addPlantToSelected(id, name) {
+    if (selectedPlants.includes(id)) return;
+    selectedPlants.push(id);
+    const div = document.createElement('div');
+    div.className = 'selected-plant';
+    div.dataset.id = id;
+    div.textContent = name;
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = '✖';
+    removeBtn.className = 'remove-plant-btn';
+    removeBtn.addEventListener('click', () => {
+      const idx = selectedPlants.indexOf(id);
+      if (idx !== -1) selectedPlants.splice(idx, 1);
+      div.remove();
+    });
+    div.appendChild(removeBtn);
+    selectedPlantsEl.appendChild(div);
+  }
 
   async function startScan(onDetect) {
     qrModal.classList.remove('hidden');
@@ -125,7 +149,9 @@ if (!btnAddSpecies || !btnCalendar || !btnScanQR ||
     !btnSaveSpecies || !modalCalendar || !btnCloseCalendar ||
     !calendarContainer || !eventDateInput ||
     !eventTypeSelect || !saveEventBtn ||
-    !scanEventBtn || !selectedPlantsEl ||
+    !scanEventBtn || !openSelectPlantBtn || !selectPlantModal ||
+    !closeSelectPlantBtn || !plantSelectionList ||
+    !addSelectedPlantsBtn || !selectedPlantsEl ||
     !qrModal || !closeQrModal) {
   console.error('Faltan elementos en el DOM. Verifica tus IDs.');
   return;
@@ -263,6 +289,38 @@ async function cargarPlantas() {
   });
 }
 
+function renderPlantSelectionList() {
+  plantSelectionList.innerHTML = '';
+  const speciesArr = Array.from(speciesMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  speciesArr.forEach(([spId, spName]) => {
+    const group = document.createElement('div');
+    group.className = 'species-group';
+    const title = document.createElement('div');
+    title.className = 'species-group-title';
+    title.textContent = spName;
+    group.appendChild(title);
+
+    const ul = document.createElement('ul');
+    ul.className = 'plant-list';
+    for (const [pId, plant] of plantsMap.entries()) {
+      if (plant.speciesId !== spId) continue;
+      const li = document.createElement('li');
+      const label = document.createElement('label');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = pId;
+      cb.className = 'plant-checkbox';
+      if (selectedPlants.includes(pId)) cb.checked = true;
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(plant.name));
+      li.appendChild(label);
+      ul.appendChild(li);
+    }
+    group.appendChild(ul);
+    plantSelectionList.appendChild(group);
+  });
+}
+
   // Botones para abrir el calendario y escanear QR
 btnScanQR.addEventListener('click', () => {
   startScan(async (text) => {
@@ -287,23 +345,7 @@ scanEventBtn.addEventListener('click', () => {
       const ref = doc(db, 'plants', id);
       const snap = await getDoc(ref);
       if (snap.exists()) {
-        if (!selectedPlants.includes(id)) {
-          selectedPlants.push(id);
-          const div = document.createElement('div');
-          div.className = 'selected-plant';
-          div.dataset.id = id;
-          div.textContent = snap.data().name;
-          const removeBtn = document.createElement('button');
-          removeBtn.textContent = '✖';
-          removeBtn.className = 'remove-plant-btn';
-          removeBtn.addEventListener('click', () => {
-            const idx = selectedPlants.indexOf(id);
-            if (idx !== -1) selectedPlants.splice(idx, 1);
-            div.remove();
-          });
-          div.appendChild(removeBtn);
-          selectedPlantsEl.appendChild(div);
-        }
+        addPlantToSelected(id, snap.data().name);
       } else {
         alert('La planta no existe');
       }
@@ -312,6 +354,28 @@ scanEventBtn.addEventListener('click', () => {
       alert('Error al verificar la planta');
     }
   });
+});
+
+openSelectPlantBtn.addEventListener('click', async () => {
+  if (plantsMap.size === 0) {
+    await cargarPlantas();
+  }
+  renderPlantSelectionList();
+  selectPlantModal.classList.remove('hidden');
+});
+
+closeSelectPlantBtn.addEventListener('click', () => {
+  selectPlantModal.classList.add('hidden');
+});
+
+addSelectedPlantsBtn.addEventListener('click', () => {
+  const checks = selectPlantModal.querySelectorAll('.plant-checkbox:checked');
+  checks.forEach(cb => {
+    const id = cb.value;
+    const plant = plantsMap.get(id);
+    if (plant) addPlantToSelected(id, plant.name);
+  });
+  selectPlantModal.classList.add('hidden');
 });
 
 closeQrModal.addEventListener('click', () => {
