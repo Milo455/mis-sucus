@@ -66,6 +66,7 @@
 
 
 <button id="scan-event-qr" class="mt-2">Agregar planta por QR</button>
+<button id="open-select-plant" class="mt-2">Agregar planta por nombre</button>
 <div id="selected-plants" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 0.5rem; border-radius: 5px; margin-top: 0.5rem;">
   <!-- Plantas añadidas aparecerán aquí -->
 </div>
@@ -74,6 +75,17 @@
     <button id="save-event" class="mt-2">Guardar evento</button>
   </div>
 </div>
+
+<!-- Modal Seleccionar Plantas -->
+<div id="select-plant-modal" class="modal hidden">
+  <div class="modal-content">
+    <button id="close-select-plant" class="close small-button">&times;</button>
+    <h2>Seleccionar Plantas</h2>
+    <div id="plant-selection-list"></div>
+    <button id="add-selected-plants" class="mt-2">Agregar seleccionadas</button>
+  </div>
+</div>
+
 <!-- Modal Escanear QR -->
 <div id="qr-modal" class="modal hidden">
   <div class="modal-content">
