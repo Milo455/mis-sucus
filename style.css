@@ -303,15 +303,12 @@ button:hover {
 
 /* Corrige la visualización de los checkboxes y nombres de planta en la lista */
 .plant-list li label {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  white-space: normal;
-  overflow-wrap: anywhere;
-5whrtq-codex/add-button-to-add-plants-by-name
-
+  white-space: nowrap;        /* evita que cada letra salte de línea */
+  overflow-wrap: break-word;  /* permite dividir solo en palabras largas */
   width: 100%;
-
   font-size: 1rem;
   color: #4a2c20;
   padding: 0.25rem 0;
